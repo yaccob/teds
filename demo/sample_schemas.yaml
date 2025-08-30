@@ -1,0 +1,165 @@
+asyncapi: "3.0.0"
+info:
+  title: Sample Schemas for Validator
+  version: "1.0.0"
+
+components:
+  schemas:
+    Email:
+      type: string
+      format: email
+      examples:
+        - alice@example.com
+        - not-an-email
+
+    User:
+      type: object
+      additionalProperties: false
+      required: [id, name, email]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 1
+          pattern: '^[A-Z][a-zA-Z]+(?: [A-Z][a-zA-Z]+)*$'
+        email:
+          $ref: '#/components/schemas/Email'
+      examples:
+        - id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          name: "Alice Example"
+          email: "alice@example.com"
+        # intentionally bad example to exercise failing example handling
+        - id: "not-a-uuid"
+          name: "bob"
+          email: "x"
+
+    Tag:
+      type: object
+      additionalProperties: true
+      required: [key]
+      properties:
+        key: { type: string }
+        value: { type: string }
+      examples:
+        - { key: "env", value: "prod" }
+
+    Identifier:
+      oneOf:
+        - type: string
+          pattern: '^[A-Z]{2}-\d+$'
+        - type: integer
+          minimum: 1
+      examples:
+        - "AB-123"
+        - 99
+
+    Color:
+      type: string
+      enum: [red, green, blue]
+      examples:
+        - green
+
+    Regexy:
+      type: string
+      pattern: '^[a-z]{3}\d{2}$'
+      examples:
+        - abc12
+
+    Product:
+      type: object
+      additionalProperties: false
+      required: [sku, price]
+      properties:
+        sku:
+          type: string
+          pattern: '^[A-Z0-9]{4,}$'
+        price:
+          type: number
+          minimum: 0
+        tags:
+          type: array
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/Tag'
+        color:
+          $ref: '#/components/schemas/Color'
+      examples:
+        - sku: "SKU1234"
+          price: 12.5
+          tags:
+            - { key: "env", value: "prod" }
+          color: "red"
+
+    # --- Tagless polymorphism (disjoint object variants) ---
+
+    Phone:
+      type: string
+      pattern: '^\+?[0-9 ]{7,}$'
+
+    Contact:
+      oneOf:
+        - type: object
+          additionalProperties: false
+          required: [email]
+          properties:
+            email:
+              $ref: "#/components/schemas/Email"
+        - type: object
+          additionalProperties: false
+          required: [phone]
+          properties:
+            phone: { "$ref": "#/components/schemas/Phone" }
+      examples:
+        - { email: "someone@example.com" }
+        - { phone: "+49 621 1234567" }
+        # mixed variant (invalid for both branches)
+        - { email: "someone@example.com", phone: "+49 621 1234567" }
+
+    OrderLine:
+      oneOf:
+        # Variant A: priced item
+        - type: object
+          additionalProperties: false
+          required: [sku, unitPrice, quantity]
+          properties:
+            sku: { type: string, pattern: '^[A-Z0-9]{4,}$' }
+            unitPrice: { type: number, minimum: 0 }
+            quantity: { type: integer, minimum: 1 }
+        # Variant B: bundled item
+        - type: object
+          additionalProperties: false
+          required: [bundleId, items]
+          properties:
+            bundleId: { type: string, minLength: 1 }
+            items:
+              type: array
+              minItems: 1
+              items:
+                type: object
+                additionalProperties: false
+                required: [sku, quantity]
+                properties:
+                  sku: { type: string, pattern: '^[A-Z0-9]{4,}$' }
+                  quantity: { type: integer, minimum: 1 }
+      examples:
+        - { sku: "SKU1234", unitPrice: 19.99, quantity: 2 }
+        - { bundleId: "B-42", items: [ { sku: "SKU9", quantity: 1 } ] }
+        # mixed properties (invalid for both branches)
+        - { sku: "SKU1", unitPrice: 10, quantity: 1, items: [ { sku: "SKU2", quantity: 1 } ] }
+
+
+    URI:
+      type: string
+      format: uri
+      description: "Simple URI using JSON Schema 'format: uri'"
+      examples:
+        - "https://example.com"
+
+    DateISO:
+      type: string
+      format: date
+      description: ISO-8601 calendar date (YYYY-MM-DD)
+      examples:
+        - "2025-08-31"

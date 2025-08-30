@@ -1,0 +1,195 @@
+tests:
+
+  sample_schemas.yaml#/components/schemas/Email:
+    valid:
+      good email:
+        description: simple valid email
+        payload: alice@example.com
+    invalid:
+      "not an email":
+        description: not a valid email address
+        payload: "not-an-email"
+
+  sample_schemas.yaml#/components/schemas/User:
+    valid:
+      minimal valid user:
+        description: strict object with required fields
+        payload:
+          id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          name: "Alice Example"
+          email: "alice@example.com"
+      parse as JSON string:
+        description: payload provided as JSON string (parsed before validation)
+        parse_payload: true
+        payload: "{\"id\":\"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\"name\":\"Bob Builder\",\"email\":\"bob@example.com\"}" 
+    invalid:
+      missing required prop:
+        description: missing required property 'email'
+        payload:
+          id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          name: "Alice Example"
+      additional property:
+        description: contains unexpected property 'extra'
+        payload:
+          id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          name: "Alice Example"
+          email: "alice@example.com"
+          extra: "nope"
+      bad uuid:
+        description: id is not a valid UUID
+        payload:
+          id: "not-a-uuid"
+          name: "Alice Example"
+          email: "alice@example.com"
+      bad name pattern:
+        description: name starts with lowercase
+        payload:
+          id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          name: "alice example"
+          email: "alice@example.com"
+
+  sample_schemas.yaml#/components/schemas/Identifier:
+    valid:
+      "AB-777":
+        description: key-as-payload (parsed from key; string branch of oneOf)
+      forty-two:
+        description: explicit integer branch of oneOf
+        payload: 42
+    invalid:
+      zero not allowed:
+        description: value 0 is below minimum 1
+        payload: 0
+      wrong string pattern:
+        description: string 'A-1' does not match pattern '^[A-Z]{2}-\d+$'
+        payload: "A-1"
+
+  sample_schemas.yaml#/components/schemas/Color:
+    valid:
+      simple enum ok:
+        payload: red
+    invalid:
+      not in enum:
+        description: value 'yellow' not in [red, green, blue]
+        payload: yellow
+
+  sample_schemas.yaml#/components/schemas/Regexy:
+    valid:
+      regex ok:
+        payload: abc12
+    invalid:
+      uppercase not allowed:
+        description: contains uppercase letters; violates '^[a-z]{3}\d{2}$'
+        payload: AB123
+
+  sample_schemas.yaml#/components/schemas/Product:
+    valid:
+      full product:
+        payload:
+          sku: "SKU1234"
+          price: 12.5
+          tags:
+            - { key: "env", value: "prod" }
+          color: "blue"
+      json string:
+        description: parse_payload=true allows quick copy-paste from logs
+        parse_payload: true
+        payload: "{\"sku\":\"SKU9999\",\"price\":0,\"tags\":[{\"key\":\"env\",\"value\":\"prod\"}],\"color\":\"green\"}"
+    invalid:
+      negative price:
+        description: price is negative (-1)
+        payload:
+          sku: "SKU1234"
+          price: -1
+      duplicate tags:
+        description: duplicate tag objects
+        payload:
+          sku: "SKU1234"
+          price: 10
+          tags:
+            - { key: "env", value: "prod" }
+            - { key: "env", value: "prod" }
+        warnings:
+          - "Hyphenated SKUs are common in some systems; consider relaxing the pattern to allow '-' if business rules permit."
+
+  # --- Tagless polymorphism (disjoint object variants) ---
+
+  sample_schemas.yaml#/components/schemas/Contact:
+    valid:
+      email contact:
+        description: variant A with email only
+        payload:
+          email: someone@example.com
+        warnings:
+          - "If E.164-only is desired, tighten the schema (e.g., require '+' and country code) and normalize producers."
+      parse json string:
+        description: parse_payload=true for phone variant
+        parse_payload: true
+        payload: "{\"phone\":\"+4369912345678\"}"
+    invalid:
+      mixed variants:
+        description: both 'email' and 'phone' provided
+        payload:
+          email: someone@example.com
+          phone: "+49 621 1234567"
+  sample_schemas.yaml#/components/schemas/OrderLine:
+    valid:
+      priced ok:
+        description: variant A (priced item)
+        payload:
+          sku: "SKU1234"
+          unitPrice: 19.99
+          quantity: 2
+      bundled ok:
+        description: variant B (bundle)
+        payload:
+          bundleId: "B-42"
+          items:
+            - { sku: "SKU9", quantity: 1 }
+      priced via json string:
+        description: parse_payload=true for priced item
+        parse_payload: true
+        payload: "{\"sku\":\"SKU7777\",\"unitPrice\":0,\"quantity\":1}"
+    invalid:
+      mixed properties:
+        description: priced and bundle fields combined
+        payload:
+          sku: "SKU1"
+          unitPrice: 10
+          quantity: 1
+          items:
+            - { sku: "SKU2", quantity: 1 }
+      missing required priced:
+        description: missing 'unitPrice' and 'quantity'
+        payload:
+          sku: "SKU9999"
+      wrong types:
+        description: quantity 0 is below minimum 1
+        payload:
+          sku: "SKU1234"
+          unitPrice: 10
+          quantity: 0
+
+
+  # --- Additional format-based divergence (not only email) ---
+
+  sample_schemas.yaml#/components/schemas/URI:
+    valid:
+      good uri:
+        description: simple valid URI
+        payload: "https://example.com"
+    invalid:
+      not a uri:
+        description: non-URI string triggers format divergence (strict fails, base accepts)
+        payload: "not a uri"
+
+  sample_schemas.yaml#/components/schemas/DateISO:
+    valid:
+      good date:
+        description: ISO 8601 date
+        payload: "2025-08-31"
+    invalid:
+      not a date:
+        description: non-date string triggers format divergence (strict fails, base accepts)
+        payload: "31-12-2025"
+
+

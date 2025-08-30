@@ -1,0 +1,12 @@
+tests:
+  schema.yaml#/components/schemas/Email:
+    invalid:
+      explicit invalid:
+        payload: not-an-email
+        result: ERROR
+        message: |
+          UNEXPECTEDLY VALID
+          A validator that *ignores* 'format' accepted this instance, while a strict validator (enforcing 'format') might reject it as desired (format: email).
+          Consider enforcing the expected format by adding an explicit 'pattern' property to the schema.
+          
+

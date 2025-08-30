@@ -1,0 +1,25 @@
+version: "1.0.0"
+tests:
+  schema.yaml#/components/schemas/Color:
+    valid:
+      .components.schemas.Color.examples[0]:
+        payload: green
+        result: SUCCESS
+        from_examples: true
+      explicit valid:
+        payload: red
+        result: SUCCESS
+      parse json:
+        description: parse a JSON string payload
+        payload: '"green"'
+        parse_payload: true
+        result: SUCCESS
+        payload_parsed: green
+      red:
+        result: SUCCESS
+        payload_parsed: red
+    invalid:
+      bad:
+        payload: yellow
+        result: SUCCESS
+        validation_message: "'yellow' is not one of ['red', 'green', 'blue']"

@@ -1,0 +1,61 @@
+components:
+  schemas:
+    EmailContact:
+      type: object
+      additionalProperties: false
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+          examples:
+            - alice@example.com
+
+    ISODateTime:
+      type: string
+      format: date-time
+      examples:
+        - "2024-08-01T12:34:56Z"
+
+    PhoneE164:
+      type: string
+      # E.164: '+' then up to 15 digits, no spaces or separators
+      pattern: "^\\+[1-9]\\d{1,14}$"
+      examples:
+        - "+14155552671"
+
+    CurrencyAmount:
+      type: object
+      additionalProperties: false
+      required: [currency, amount]
+      properties:
+        currency:
+          type: string
+          enum: [USD, EUR, GBP, JPY]
+        amount:
+          type: integer
+          minimum: 0
+      examples:
+        - currency: USD
+          amount: 42
+
+    ArrayMinItems:
+      type: array
+      items:
+        type: integer
+      minItems: 1
+      maxItems: 3
+      examples:
+        - [1]
+        - [1,2,3]
+
+    UserStrict:
+      type: object
+      additionalProperties: false
+      required: [name, email]
+      properties:
+        name: { type: string, minLength: 1 }
+        email: { type: string, format: email }
+      examples:
+        - name: Alice
+          email: alice@example.com
