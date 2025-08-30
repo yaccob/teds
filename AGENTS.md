@@ -45,16 +45,35 @@
 - Golden tests: see `tests/cases/*` — case directories are behavior-focused (e.g., `format_divergence`, `output_filtering_and_inplace`). Each case has `schema.yaml`, `spec.yaml`, and `expected*.yaml`; tests compare parsed YAML structures and verify exit codes.
 - Demos remain under `demo/` for illustrative data and manual runs.
 - Test style: small, focused tests; tmp paths for I/O; import helpers directly (`validate_doc`, `validate_file`, `generate_from`).
+- Tests-first principle:
+  - For bug fixes and new features, write a failing test first that exposes the behavior, confirm it fails, then implement the fix/feature until the test passes.
+  - Do not rewrite history to reorder fix/test after the fact; keep the timeline truthful for easier analysis.
 
 ## Developer Hygiene (Agents)
 - Do not create temporary files or directories in the project root during manual reproduction or debugging.
 - Use `pytest`'s `tmp_path` fixture or `tempfile.TemporaryDirectory()` for ad‑hoc experiments.
 - If you need a scratch workspace, keep it under a temporary directory outside the repo, not as `sandbox_*` in the root.
 
+### Session continuity
+- Persist active plans, decisions, and in‑progress feature notes in `DEV_NOTES.md` (not in AGENTS.md).
+- Treat `DEV_NOTES.md` as the living log for ongoing work so ending a session does not lose context.
+- Keep AGENTS.md for stable, repo‑wide conventions and long‑lived guidance only.
+
 ## Commit & Pull Request Guidelines
 - Git history is minimal; adopt Conventional Commits (`feat:`, `fix:`, `docs:`, etc.).
 - PRs should include: clear description, linked issues, sample commands you ran, and before/after behavior when applicable.
 - Keep changes focused; update or add tests in `tests/` and demos in `demo/` to demonstrate behavior.
+
+## Branching & PR Workflow (Agents)
+- Default branch is `master`. Do not push directly to `master`.
+- Create short‑lived branches per change:
+  - `feat/<scope>-<summary>`, `fix/<scope>`, `docs/<scope>`, `chore/<scope>`.
+- Open a PR and wait for CI to pass before merging.
+- Prefer Squash‑Merge to keep history minimal and aligned with Conventional Commits.
+- Ensure:
+  - Tests pass locally (`pytest -q`) before opening/merging PRs.
+  - Docs updated when behavior/CLI changes.
+  - SemVer impact considered (breaking → major, feature → minor, fix → patch).
 
 ## Security & Configuration Tips
 - The tool resolves only `file://` URIs; keep schemas local. Do not embed secrets in YAML.

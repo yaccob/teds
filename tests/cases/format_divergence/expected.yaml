@@ -1,3 +1,4 @@
+version: "1.0.0"
 tests:
   schema.yaml#/components/schemas/Email:
     valid:
@@ -9,7 +10,7 @@ tests:
               Relies on JSON Schema 'format' assertion (format: email).
               Validators that *enforce* 'format' will reject this instance.
               Consider enforcing the expected format by adding an explicit 'pattern' property to the schema.
-              
+
             code: format-divergence
         from_examples: true
     invalid:
@@ -20,5 +21,3 @@ tests:
           UNEXPECTEDLY VALID
           A validator that *ignores* 'format' accepted this instance, while a strict validator (enforcing 'format') might reject it as desired (format: email).
           Consider enforcing the expected format by adding an explicit 'pattern' property to the schema.
-          
-

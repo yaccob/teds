@@ -1,3 +1,4 @@
+version: "1.0.0"
 tests:
   public_schemas.yaml#/components/schemas/EmailContact:
     valid:

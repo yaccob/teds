@@ -1,0 +1,7 @@
+templates:
+  - id: summary.md
+    path: templates/summary.md.j2
+    description: Compact per-spec Markdown summary with refs and case counts
+  - id: summary.html
+    path: templates/summary.html.j2
+    description: Simple HTML summary per spec with refs and counts
