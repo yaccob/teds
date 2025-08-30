@@ -1,0 +1,106 @@
+= TeDS Project Review
+:revdate: 2025-09-08 17:34 UTC
+:toc:
+
+== Summary
+
+Overall health is good. Packaging and release are now stable again after removing `dist/` from VCS and simplifying the release workflow. Validation output has been made schema‑compliant by always including a top‑level `version`. Demos were aligned to include `version`. Tests are green and cover the CLI and core flows; an additional CI E2E job validates demo assets.
+
+== Scope and Context
+
+Reviewed components:
+
+- Code: `teds_core/*`, `teds.py`
+- Packaging: `pyproject.toml`
+- CI: `.github/workflows/release.yml`, `.github/workflows/demo.yml`
+- Demos: `demo/*.yaml`
+- Tests: `tests/*`
+
+This review reflects the repository state at the time indicated above.
+
+== Code Review
+
+- Structure matches guidelines; clear module split: YAML IO, refs, validation, generation, CLI, versioning.
+- Typing used consistently; functions are small and side effects are limited to I/O and `stderr` diagnostics as intended.
+- Validation (`teds_core/validate.py`):
+  * Now always emits a valid testspec: adds `version: "1.0.0"` to the output document.
+  * In in‑place mode, preserves existing `version`, sets it only if missing.
+  * Loads `spec_schema.yaml` from repository root; paired with packaging include to ensure presence in wheels.
+- Versioning (`teds_core/version.py`):
+  * CLI version derives from package metadata or last Git tag; fallback `0.0.0+dev` is reasonable.
+  * Testspec version constants and compatibility checks are straightforward and covered by tests.
+- CLI shim (`teds.py`) simply re‑exports; ok.
+
+Observations / minor nits:
+
+- `validate.py` uses `Path(__file__).resolve().parents[1]` to locate repo root; this is fine in the repo and wheels given `spec_schema.yaml` is included at root. Consider a small helper to centralize resource location if more assets are added later.
+- Error messages and warnings are clear and actionable, especially the format divergence guidance.
+
+== Packaging and Build
+
+- `pyproject.toml`:
+  * Build backend: `hatchling` with `hatch-vcs` (dynamic project version).
+  * Wheel target includes `spec_schema.yaml` at repo root; ensures runtime availability.
+  * Scripts: `teds = teds_core.cli:main`.
+- Good: Python `>=3.10`, relevant classifiers, minimal dependencies.
+- Suggestion: Add `project.optional-dependencies` for dev (`pytest`) so editable installs can rely on extras (`pip install -e .[dev]`) if desired. Current `requirements-dev.txt` also works.
+
+== CI / Release
+
+- Release workflow (`release.yml`):
+  * Trigger: push tags `v*`.
+  * Jobs: test → build-and-publish.
+  * Test job installs via pip, runs `pytest -q`.
+  * Build job checks out exact tag, installs `hatch`, cleans `dist/`, builds both sdist and wheel, publishes via `pypa/gh-action-pypi-publish` (trusted publishing).
+  * Simplicity restored (no pyproject rewriting; no extra guards).
+- Demo workflow (`demo.yml`):
+  * E2E verification of demo assets with expected non‑zero exit codes and golden comparison for public specs (warning level). Good complement to unit tests.
+
+Fix that unlocked publishing again:
+
+- Removing `dist/` from VCS and ignoring it in `.gitignore` prevented stale dev artifacts from being uploaded; this was the primary root cause of earlier failures.
+
+== Demos
+
+- All demo YAMLs now include `version: "1.0.0"`:
+  * `demo/sample_tests.yaml`
+  * `demo/public_specs.yaml` (already had it)
+  * `demo/public_specs.verified.warning.yaml`
+- The demos illustrate both successful and failing validations; E2E job asserts exit codes and output.
+
+== Tests
+
+- 24 tests pass locally.
+- Coverage:
+  * CLI version print and basic CLI flows (verify/generate).
+  * Golden tests for validation outputs at different filtering levels.
+  * Error handling and testspec version gating (major/minor checks).
+  * Demo‑boundary tests that stay independent from `demo/` (as per guidelines).
+- New behavior (always include `version` in outputs) is reflected in golden expectations.
+
+Gaps / Opportunities:
+
+- Add a focused unit test asserting non‑in‑place `validate_file`/`validate_doc` always emit a top‑level `version` alongside `tests` (we adapted goldens indirectly; a direct assertion would be resilient to future changes).
+- Consider a small test around packaging ensuring `spec_schema.yaml` is discoverable at runtime (smoke import and resolve path) — optional given current coverage and E2E.
+
+== Documentation
+
+- README is consistent: it already states the schema is in `spec_schema.yaml` and that testspecs are validated against it.
+- No `CHANGELOG` present; changes are summarized here and in Git history. Consider adding a simple `CHANGELOG.md` for user‑facing releases.
+
+== Security & Config
+
+- No network resolution for schemas (file‑only). No secrets in YAML. Good.
+- Trusted Publishing is configured; requires PyPI project trust (already working).
+
+== Recommendations (Actionable)
+
+1. Keep `dist/` ignored; avoid committing artifacts.
+2. Maintain the simplified release workflow; only enhance if user needs arise (e.g., provenance, SBOM).
+3. Optionally add a unit test that asserts presence of `version` in all `validate_doc` outputs.
+4. Consider a minimal `CHANGELOG.md` to document user‑visible changes (e.g., 0.1.23: restore simple release; validate output includes `version`).
+5. Keep demo E2E checks; they catch drift in demo assets without coupling unit tests to `demo/`.
+
+== Conclusion
+
+The project is in a good state after the recent cleanup. Publishing is reliable again, validation output is schema‑compliant, demos and CI reflect intended behavior, and the codebase adheres to the stated guidelines. The suggested minor additions (optional tests and changelog) would further tighten maintainability without adding complexity.

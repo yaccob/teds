@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from pathlib import Path
+import sys
+import subprocess
 import shutil
 from typing import Any, Dict
 
@@ -26,3 +28,19 @@ def place_schema(work: Path, parent_rel: str) -> None:
     dest = work / parent_rel
     dest.mkdir(parents=True, exist_ok=True)
     shutil.copy2(work / "schema.yaml", dest / "schema.yaml")
+
+
+# CLI runner (used by CLI tests)
+_SCRIPT = Path(__file__).resolve().parents[1] / "teds.py"
+
+
+def run_cli(args: list[str], cwd: Path | None = None) -> tuple[int, str, str]:
+    proc = subprocess.run(
+        [sys.executable, str(_SCRIPT), *args],
+        cwd=str(cwd) if cwd else None,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        check=False,
+    )
+    return proc.returncode, proc.stdout, proc.stderr

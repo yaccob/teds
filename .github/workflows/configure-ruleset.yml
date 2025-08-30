@@ -1,0 +1,76 @@
+name: configure-ruleset
+
+on:
+  workflow_dispatch:
+
+jobs:
+  upsert:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare
+        run: |
+          if [ -z "${{ secrets.RULESET_ADMIN_TOKEN }}" ]; then
+            echo "Missing secret RULESET_ADMIN_TOKEN. Add a fine-grained PAT with Repository administration: Read & write for this repo." >&2
+            exit 1
+          fi
+      - name: Create or update default-branch ruleset
+        env:
+          GH_TOKEN: ${{ secrets.RULESET_ADMIN_TOKEN }}
+          REPO: ${{ github.repository }}
+          API: https://api.github.com
+          RS_NAME: Default branch protections
+        run: |
+          set -euo pipefail
+          echo "Fetching existing rulesets..."
+          existing=$(curl -fsSL -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "$API/repos/$REPO/rulesets?target=branch")
+          rs_id=$(echo "$existing" | jq -r ".[] | select(.name == \"$RS_NAME\") | .id" || true)
+
+          # Build payload (protect main and master; require PRs; required status checks; block force pushes and deletions)
+          cat > payload.json << 'JSON'
+          {
+            "name": "Default branch protections",
+            "target": "branch",
+            "enforcement": "active",
+            "conditions": {
+              "ref_name": {
+                "include": ["refs/heads/main", "refs/heads/master"],
+                "exclude": []
+              }
+            },
+            "rules": [
+              { "type": "pull_request" },
+              { "type": "required_status_checks", "parameters": {
+                  "strict_required_status_checks_policy": true,
+                  "required_status_checks": [
+                    { "context": "windows-smoke / smoke" },
+                    { "context": "demo-checks / demo-e2e" },
+                    { "context": "package-smoke / smoke" }
+                  ]
+                }
+              },
+              { "type": "non_fast_forward" },
+              { "type": "deletion" }
+            ],
+            "bypass_actors": []
+          }
+          JSON
+
+          if [ -n "$rs_id" ] && [ "$rs_id" != "null" ]; then
+            echo "Updating ruleset $rs_id..."
+            curl -fsSL -X PATCH \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "$API/repos/$REPO/rulesets/$rs_id" \
+              -d @payload.json >/dev/null
+            echo "Ruleset updated."
+          else
+            echo "Creating ruleset..."
+            curl -fsSL -X POST \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "$API/repos/$REPO/rulesets" \
+              -d @payload.json >/dev/null
+            echo "Ruleset created."
+          fi
+
+          echo "Done. Review Settings → Rules to confirm."
