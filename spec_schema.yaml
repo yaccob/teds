@@ -1,0 +1,60 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$title: "Schema for schema-test specification"
+type: object
+required: [version, tests]
+properties:
+  version:
+    type: string
+    description: SemVer version of the testspec format
+    pattern: "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?$"
+  tests:
+    type: object
+    additionalProperties: { $ref: "#/$defs/SchemaToTest" }
+
+$defs:
+  SchemaToTest:
+    type: object
+    additionalProperties: false
+    properties:
+      valid: { $ref: "#/$defs/CaseSet" }
+      invalid: { $ref: "#/$defs/CaseSet" }
+
+  CaseSet:
+    type: [ object, "null" ]
+    additionalProperties: { $ref: "#/$defs/CaseObject" }
+
+  CaseObject:
+    type: [ object, "null" ]
+    additionalProperties: false
+    properties:
+      description: { type: string }
+      payload: {}
+      parse_payload:
+        type: boolean
+        default: false
+      result: { type: string }
+      message: { type: string }
+      validation_message: { type: string }
+      payload_parsed: {}
+      from_examples: { type: boolean }
+      warnings:
+        type: array
+        additionalItems: false
+        items:
+          oneOf:
+            - { type: string }
+            - type: object
+              additionalProperties: false
+              required: [generated, code]
+              properties: 
+                generated: { type: string }
+                code: 
+                  type: string
+                  enum: [format-divergence]
+    if:
+      properties:
+        parse_payload: { const: true }
+      required: [parse_payload]
+    then:
+      properties:
+        payload: { type: string }

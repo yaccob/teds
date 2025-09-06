@@ -1,0 +1,99 @@
+version: "1.0.0"
+tests:
+  public_schemas.yaml#/components/schemas/EmailContact:
+    valid:
+      example ok:
+        payload:
+          email: alice@example.com
+      format divergence (warn):
+        # strict 'email' rejects; base (without format) accepts → WARNING
+        payload:
+          email: not-an-email
+    invalid:
+      display name not allowed:
+        payload:
+          email: "John <john@example.com>"
+
+  public_schemas.yaml#/components/schemas/ISODateTime:
+    valid:
+      with Z offset:
+        payload: "2024-08-01T12:34:56Z"
+    invalid:
+      missing timezone:
+        payload: "2024-08-01T12:34:56"
+      impossible date:
+        payload: "2024-02-30T12:00:00Z"
+
+  public_schemas.yaml#/components/schemas/PhoneE164:
+    valid:
+      canonical e164:
+        payload: "+14155552671"
+    invalid:
+      spaces not allowed:
+        payload: "+1 415 555 2671"
+      international prefix '00' not allowed:
+        payload: "00491555552671"
+      too short:
+        payload: "+1"
+
+  public_schemas.yaml#/components/schemas/CurrencyAmount:
+    valid:
+      ok sample:
+        payload:
+          currency: USD
+          amount: 42
+      zero boundary ok:
+        payload:
+          currency: USD
+          amount: 0
+      one boundary ok:
+        payload:
+          currency: USD
+          amount: 1
+    invalid:
+      lowercase currency rejected:
+        payload:
+          currency: usd
+          amount: 10
+      non-iso code rejected:
+        payload:
+          currency: BTC
+          amount: 10
+      decimal amount rejected:
+        payload:
+          currency: USD
+          # parse a JSON number with decimal places → expected invalid
+          parse_payload: true
+          payload: "10.50"
+      negative amount rejected:
+        payload:
+          currency: USD
+          amount: -1
+
+  public_schemas.yaml#/components/schemas/ArrayMinItems:
+    valid:
+      minItems satisfied (1):
+        payload: [1]
+      within maxItems (3):
+        payload: [1,2,3]
+    invalid:
+      empty not allowed (minItems=1):
+        payload: []
+      exceeds maxItems (4):
+        payload: [1,2,3,4]
+
+  public_schemas.yaml#/components/schemas/UserStrict:
+    valid:
+      minimal ok:
+        payload:
+          name: Alice
+          email: alice@example.com
+    invalid:
+      unknown property rejected:
+        payload:
+          name: Alice
+          email: alice@example.com
+          role: admin
+      missing required:
+        payload:
+          name: Alice

@@ -1,0 +1,57 @@
+[build-system]
+requires = ["hatchling>=1.18.0", "hatch-vcs>=0.4.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "teds"
+description = "Verify YAML testspecs against JSON Schemas and generate tests from schema refs"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "TeDS Authors" }
+]
+keywords = ["jsonschema", "yaml", "testing", "cli"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "License :: OSI Approved :: MIT License",
+  "Environment :: Console",
+  "Topic :: Software Development :: Testing",
+]
+dependencies = [
+  "semver>=3.0.0",
+  "jsonschema[format-nongpl]>=4.22.0",
+  "referencing>=0.35.0",
+  "ruamel.yaml>=0.18.6",
+]
+dynamic = ["version"]
+
+[project.scripts]
+teds = "teds_core.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/yaccob/teds"
+Repository = "https://github.com/yaccob/teds.git"
+Issues = "https://github.com/yaccob/teds/issues"
+Changelog = "https://github.com/yaccob/teds/releases"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.targets.wheel]
+packages = ["teds_core"]
+
+[tool.hatch.envs.test]
+dependencies = [
+  "pytest>=7.0",
+]
+pre-install-commands = [
+  "python -m pip install -r requirements.txt",
+]
+
+[tool.hatch.envs.test.scripts]
+test = "pytest -q"

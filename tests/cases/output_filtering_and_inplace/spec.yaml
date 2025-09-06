@@ -1,0 +1,14 @@
+version: "1.0.0"
+tests:
+  schema.yaml#/components/schemas/Color:
+    valid:
+      explicit valid:
+        payload: red
+      parse json:
+        description: parse a JSON string payload
+        parse_payload: true
+        payload: '"green"'
+      red:
+    invalid:
+      bad:
+        payload: yellow
