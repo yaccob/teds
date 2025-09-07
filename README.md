@@ -89,9 +89,13 @@ Exit codes: 0 (success), 1 (validation produced ERROR cases), 2 (hard failures: 
 
 ## CLI Tutorial
 
-The CLI offers two subcommands: `verify` and `generate`.
+### Overview
 
-- `teds verify <SPEC>... [--output-level all|warning|error] [-i|--in-place] [--allow-network]`
+The TeDS CLI centers around two commands: `verify` and `generate`. Paths are relative to the current working directory. By default, only local schemas are resolved; enable network access explicitly (see Network Access).
+
+### Verify
+
+`teds verify <SPEC>... [--output-level all|warning|error] [-i|--in-place] [--allow-network]`
   - Verifies testspec file(s) and prints normalized results to stdout unless `-i` is used (then writes back to the file).
   - Examples:
     - Verify a single file (default output level = warning):
@@ -104,7 +108,9 @@ The CLI offers two subcommands: `verify` and `generate`.
   - Version gate: testspec `version` must match the supported MAJOR and not exceed the supported MINOR; otherwise RC=2 and no write.
   - Network: add `--allow-network` to enable HTTP/HTTPS `$ref` resolution (see Network notes below).
 
-- `teds generate REF[=TARGET] ... [--allow-network]`
+### Generate
+
+`teds generate REF[=TARGET] ... [--allow-network]`
   - Generates testspec(s) for direct child schemas under a JSON Pointer.
   - Mapping syntax: each argument is `REF[=TARGET]`.
     - `REF`: `path/to/schema.yaml#/<json-pointer>`
@@ -139,10 +145,81 @@ The CLI offers two subcommands: `verify` and `generate`.
     - This avoids long `{pointer}` tokens in filenames while still being deterministic.
   - Network: add `--allow-network` to enable HTTP/HTTPS `$ref` resolution (see Network notes below).
 
-- `teds --version`
+### Network Access
+
+By default, TeDS resolves only local `file://` schemas. Enable remote `$ref`s with `--allow-network`.
+  - Limits: global timeout and size cap (defaults: 5s, 5MiB per resource).
+  - Overrides: CLI `--network-timeout`, `--network-max-bytes` or env `TEDS_NETWORK_TIMEOUT`, `TEDS_NETWORK_MAX_BYTES`.
+  - Recommended for CI: keep default (local-only). If enabling network, ensure stability (pin URLs/versions) and mind SSRF/DoS considerations.
+
+### Output Filtering & Exit Codes
+
+- Output levels:
+  - `all`: show everything
+  - `warning`: show WARNING/ERROR
+  - `error`: show only ERROR
+- Exit codes:
+  - 0: success
+  - 1: verification produced cases with `result: ERROR`
+  - 2: hard failures (I/O, YAML parse, invalid testspec schema, schema/ref resolution, version mismatch, unexpected)
+
+### In-Place Behavior
+
+With `-i/--in-place`, TeDS writes only the `tests` section back to the file; all top-level metadata (e.g., `version`) remain as is. On version mismatch (unsupported MAJOR/MINOR), TeDS does not write and returns RC=2 with a clear message.
+
+### Warnings (user-defined and generated)
   - Prints tool version (SemVer from Git tag) and the supported testspec major.
 
-## Writing good negative tests
+## Warnings (user-defined and generated)
+
+TeDS distinguishes between user-defined warnings and tool-generated warnings. In both cases a successful case (`result: SUCCESS`) is elevated to `result: WARNING` if any warnings are present — this helps you surface “it works, but be careful” situations in CI and reviews.
+
+- User-defined warnings
+  - Purpose: Let authors call out policy or integration caveats that should be visible in output without failing the case.
+  - How: add a `warnings` array to a case with free‑form strings.
+  - Example:
+    ```yaml
+    tests:
+      schema.yaml#/components/schemas/Email:
+        valid:
+          "policy note":
+            payload: alice@example.com
+            warnings:
+              - "Accepts plus-addressing, downstream system strips tags"
+    ```
+  - Effect: the case is marked with `result: WARNING` in the output; it shows up with `--output-level warning|all`.
+
+- Generated warnings
+  - Purpose: TeDS can attach structured warnings when it detects situations that are valid but fragile. Currently implemented for JSON Schema `format`:
+    - Code: `format-divergence` — strict validators (that enforce `format`) reject an instance, while non‑strict validators accept it.
+    - Output structure under the case:
+      ```yaml
+      warnings:
+        - generated: |
+            Relies on JSON Schema 'format' assertion (format: email).
+            Validators that *enforce* 'format' will reject this instance.
+            Consider enforcing the expected format by adding an explicit 'pattern' property to the schema.
+          code: format-divergence
+      ```
+  - How to act on generated warnings
+    - Prefer explicitness: tighten the schema with a `pattern` that encodes your acceptance criteria (e.g., for `email`).
+    - Re‑run TeDS — if the schema covers your intent, the warning disappears.
+    - If the divergence is acceptable by design (e.g., non‑strict runtime), keep the warning as living documentation; it will remain visible at `--output-level warning|all`.
+
+Notes
+- Warnings do not cause `result: ERROR` and therefore do not turn the overall exit code to 2. They do, however, change a case’s `result` from SUCCESS → WARNING; with `--output-level error` they are filtered out.
+- “Generated” warning entries are added by TeDS; reserve that shape (`{generated, code}`) for tool output. For user-authored warnings prefer plain strings.
+
+### Versioning & Compatibility
+
+- `teds --version` prints tool version and the supported testspec major.
+- Testspecs require `version` (SemVer). The tool enforces:
+  - MAJOR must match the tool’s supported major.
+  - MINOR must be less than or equal to the tool’s supported minor.
+  - PATCH is ignored for compatibility checks.
+- On mismatch: RC=2, nothing is written. The error explains what to upgrade.
+
+### Writing good negative tests
 
 Negative tests document your intent and prevent regressions. A practical checklist:
 

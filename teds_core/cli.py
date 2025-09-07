@@ -112,8 +112,6 @@ def _build_parser() -> argparse.ArgumentParser:
             "  By default, external $ref resolution is disabled (local-only).\n"
             "  Use --allow-network to enable HTTP/HTTPS with a global timeout and size cap.\n"
             "  Env overrides: TEDS_NETWORK_TIMEOUT (seconds), TEDS_NETWORK_MAX_BYTES (bytes).\n\n"
-            "Error handling:\n"
-            "  emits concise, user-facing messages with context; no stack traces for expected failures."
         ),
         formatter_class=argparse.RawTextHelpFormatter,
     )
