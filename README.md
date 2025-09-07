@@ -108,6 +108,50 @@ The TeDS CLI centers around two commands: `verify` and `generate`. Paths are rel
   - Version gate: testspec `version` must match the supported MAJOR and not exceed the supported MINOR; otherwise RC=2 and no write.
   - Network: add `--allow-network` to enable HTTP/HTTPS `$ref` resolution (see Network notes below).
 
+#### Warnings (user-defined and generated)
+
+TeDS distinguishes between user-defined warnings and tool-generated warnings. In both cases a successful case (`result: SUCCESS`) is elevated to `result: WARNING` if any warnings are present — this helps you surface “it works, but be careful” situations in CI and reviews.
+
+- User-defined warnings
+  - Purpose: Let authors call out policy or integration caveats that should be visible in output without failing the case.
+  - How: add a `warnings` array to a case with free‑form strings.
+  - Example:
+    ```yaml
+    tests:
+      schema.yaml#/components/schemas/Email:
+        valid:
+          "policy note":
+            payload: alice@example.com
+            warnings:
+              - "Accepts plus-addressing, downstream system strips tags"
+    ```
+  - Effect: the case is marked with `result: WARNING` in the output; it shows up with `--output-level warning|all`.
+
+- Generated warnings
+  - Purpose: TeDS can attach structured warnings when it detects situations that are valid but fragile. Currently implemented for JSON Schema `format`:
+    - Code: `format-divergence` — strict validators (that enforce `format`) reject an instance, while non‑strict validators accept it.
+    - Output structure under the case:
+      ```yaml
+      warnings:
+        - generated: |
+            Relies on JSON Schema 'format' assertion (format: email).
+            Validators that *enforce* 'format' will reject this instance.
+            Consider enforcing the expected format by adding an explicit 'pattern' property to the schema.
+          code: format-divergence
+      ```
+  - How to act on generated warnings
+    - Prefer explicitness: tighten the schema with a `pattern` that encodes your acceptance criteria (e.g., for `email`).
+    - Re‑run TeDS — if the schema covers your intent, the warning disappears.
+    - If the divergence is acceptable by design (e.g., non‑strict runtime), keep the warning as living documentation; it will remain visible at `--output-level warning|all`.
+
+Notes
+- Warnings do not cause `result: ERROR` and therefore do not turn the overall exit code to 2. They do, however, change a case’s `result` from SUCCESS → WARNING; with `--output-level error` they are filtered out.
+- “Generated” warning entries are added by TeDS; reserve that shape (`{generated, code}`) for tool output. For user-authored warnings prefer plain strings.
+
+#### In-Place Behavior
+
+With `-i/--in-place`, TeDS writes only the `tests` section back to the file; all top-level metadata (e.g., `version`) remain as is. On version mismatch (unsupported MAJOR/MINOR), TeDS does not write and returns RC=2 with a clear message.
+
 ### Generate
 
 `teds generate REF[=TARGET] ... [--allow-network]`
@@ -152,7 +196,7 @@ By default, TeDS resolves only local `file://` schemas. Enable remote `$ref`s wi
   - Overrides: CLI `--network-timeout`, `--network-max-bytes` or env `TEDS_NETWORK_TIMEOUT`, `TEDS_NETWORK_MAX_BYTES`.
   - Recommended for CI: keep default (local-only). If enabling network, ensure stability (pin URLs/versions) and mind SSRF/DoS considerations.
 
-### Output Filtering & Exit Codes
+### Versioning & Compatibility
 
 - Output levels:
   - `all`: show everything
@@ -163,103 +207,18 @@ By default, TeDS resolves only local `file://` schemas. Enable remote `$ref`s wi
   - 1: verification produced cases with `result: ERROR`
   - 2: hard failures (I/O, YAML parse, invalid testspec schema, schema/ref resolution, version mismatch, unexpected)
 
-### In-Place Behavior
+ - `teds --version` prints tool version and the supported testspec major.
+ - Testspecs require `version` (SemVer). The tool enforces:
+   - MAJOR must match the tool’s supported major.
+   - MINOR must be less than or equal to the tool’s supported minor.
+   - PATCH is ignored for compatibility checks.
+ - On mismatch: RC=2, nothing is written. The error explains what to upgrade.
 
-With `-i/--in-place`, TeDS writes only the `tests` section back to the file; all top-level metadata (e.g., `version`) remain as is. On version mismatch (unsupported MAJOR/MINOR), TeDS does not write and returns RC=2 with a clear message.
-
-### Warnings (user-defined and generated)
-  - Prints tool version (SemVer from Git tag) and the supported testspec major.
-
-## Warnings (user-defined and generated)
-
-TeDS distinguishes between user-defined warnings and tool-generated warnings. In both cases a successful case (`result: SUCCESS`) is elevated to `result: WARNING` if any warnings are present — this helps you surface “it works, but be careful” situations in CI and reviews.
-
-- User-defined warnings
-  - Purpose: Let authors call out policy or integration caveats that should be visible in output without failing the case.
-  - How: add a `warnings` array to a case with free‑form strings.
-  - Example:
-    ```yaml
-    tests:
-      schema.yaml#/components/schemas/Email:
-        valid:
-          "policy note":
-            payload: alice@example.com
-            warnings:
-              - "Accepts plus-addressing, downstream system strips tags"
-    ```
-  - Effect: the case is marked with `result: WARNING` in the output; it shows up with `--output-level warning|all`.
-
-- Generated warnings
-  - Purpose: TeDS can attach structured warnings when it detects situations that are valid but fragile. Currently implemented for JSON Schema `format`:
-    - Code: `format-divergence` — strict validators (that enforce `format`) reject an instance, while non‑strict validators accept it.
-    - Output structure under the case:
-      ```yaml
-      warnings:
-        - generated: |
-            Relies on JSON Schema 'format' assertion (format: email).
-            Validators that *enforce* 'format' will reject this instance.
-            Consider enforcing the expected format by adding an explicit 'pattern' property to the schema.
-          code: format-divergence
-      ```
-  - How to act on generated warnings
-    - Prefer explicitness: tighten the schema with a `pattern` that encodes your acceptance criteria (e.g., for `email`).
-    - Re‑run TeDS — if the schema covers your intent, the warning disappears.
-    - If the divergence is acceptable by design (e.g., non‑strict runtime), keep the warning as living documentation; it will remain visible at `--output-level warning|all`.
-
-Notes
-- Warnings do not cause `result: ERROR` and therefore do not turn the overall exit code to 2. They do, however, change a case’s `result` from SUCCESS → WARNING; with `--output-level error` they are filtered out.
-- “Generated” warning entries are added by TeDS; reserve that shape (`{generated, code}`) for tool output. For user-authored warnings prefer plain strings.
-
-### Versioning & Compatibility
-
-- `teds --version` prints tool version and the supported testspec major.
-- Testspecs require `version` (SemVer). The tool enforces:
-  - MAJOR must match the tool’s supported major.
-  - MINOR must be less than or equal to the tool’s supported minor.
-  - PATCH is ignored for compatibility checks.
-- On mismatch: RC=2, nothing is written. The error explains what to upgrade.
-
-### Writing good negative tests
-
-Negative tests document your intent and prevent regressions. A practical checklist:
-
-- Formats: add values that must be rejected (e.g., email with display name `John <john@example.com>`, `date-time` without time-offset, malformed URIs).
-- Boundaries: test `minimum`/`maximum`, `minLength`/`maxLength`, `minItems`/`maxItems` at −1, 0, exact, and +1.
-- Enums: include a known-bad value and a casing variant (e.g., `usd` for `USD`).
-- Additional properties: include an unknown field when `additionalProperties: false`.
-- Composition: for `oneOf`/`anyOf`, craft an instance that matches no branch and one that ambiguously matches multiple branches.
-- Parsing: when instances are strings containing JSON/YAML, use `parse_payload: true` to verify parser edge cases.
-
-References and prior art:
+### References and prior art
 - Python jsonschema `format` validation and `FormatChecker` (official docs): https://python-jsonschema.readthedocs.io/en/stable/validate/#validating-formats
 - RFC 3339 `date-time` profile (official spec): https://www.rfc-editor.org/rfc/rfc3339
 - E.164 phone number guidance (Stack Overflow): https://stackoverflow.com/questions/6478875/regular-expression-matching-e-164-formatted-phone-numbers
 - JSON Schema additionalProperties (official guide): https://json-schema.org/understanding-json-schema/reference/object.html#additional-properties
-
-## Testspec Format
-
-Top‑level YAML document:
-
-```
-version: "1.0.0"   # required SemVer; must match tool’s supported MAJOR and not exceed supported MINOR
-tests:
-  <ref>:            # e.g. schema.yaml#/components/schemas/Foo
-    valid:   { <cases> }
-    invalid: { <cases> }
-```
-
-Case objects may contain:
-- `description`: string
-- `payload`: any
-- `parse_payload`: boolean (if true, `payload` is parsed as YAML/JSON)
-- `result`: SUCCESS|WARNING|ERROR
-- `message`: string (error message)
-- `validation_message`: string (validator message)
-- `payload_parsed`: any (emitted when parse_payload is true)
-- `from_examples`: boolean (derived by generator)
-- `warnings`: [string | {generated, code}]
-
-The schema is in `spec_schema.yaml`. The tool validates your testspec against this schema before processing.
 
 ## Versioning & Compatibility
 
@@ -269,16 +228,7 @@ The schema is in `spec_schema.yaml`. The tool validates your testspec against th
   - MINOR must be less than or equal to the tool’s supported minor.
   - PATCH is ignored for compatibility checks.
 - On mismatch: RC=2, nothing is written. The error explains what to upgrade.
-- In-place writes preserve the entire top-level metadata (e.g., `version`) and only update the `tests` section.
 
-## Error Handling
-
-The tool emits concise, user-facing error messages (no stack traces for expected failures):
-- YAML/spec parsing errors (invalid structure)
-- Schema/ref resolution failures
-- Case evaluation failures (e.g., unsupported `$ref` schemes)
-
-Exit code is 2 for these hard failures.
 
 ## Development
 
