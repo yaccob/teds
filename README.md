@@ -93,6 +93,31 @@ Exit codes: 0 (success), 1 (validation produced ERROR cases), 2 (hard failures: 
 
 The TeDS CLI centers around two commands: `verify` and `generate`. Paths are relative to the current working directory. By default, only local schemas are resolved; enable network access explicitly (see Network Access).
 
+### Testspec Format
+
+Top‑level YAML document:
+
+```
+version: "1.0.0"   # required SemVer; must match tool’s supported MAJOR and not exceed supported MINOR
+tests:
+  <ref>:            # e.g. schema.yaml#/components/schemas/Foo
+    valid:   { <cases> }
+    invalid: { <cases> }
+```
+
+Case objects may contain:
+- `description`: string
+- `payload`: any
+- `parse_payload`: boolean (if true, `payload` is parsed as YAML/JSON)
+- `result`: SUCCESS|WARNING|ERROR
+- `message`: string (error message)
+- `validation_message`: string (validator message)
+- `payload_parsed`: any (emitted when parse_payload is true)
+- `from_examples`: boolean (derived by generator)
+- `warnings`: [string | {generated, code}]
+
+The schema is in `spec_schema.yaml`. TeDS validates your testspec against this schema.
+
 ### Verify
 
 `teds verify [--output-level all|warning|error] [-i|--in-place] [--allow-network] <SPEC>...`
