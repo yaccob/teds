@@ -95,7 +95,7 @@ The TeDS CLI centers around two commands: `verify` and `generate`. Paths are rel
 
 ### Verify
 
-`teds verify <SPEC>... [--output-level all|warning|error] [-i|--in-place] [--allow-network]`
+`teds verify [--output-level all|warning|error] [-i|--in-place] [--allow-network] <SPEC>...`
   - Verifies testspec file(s) and prints normalized results to stdout unless `-i` is used (then writes back to the file).
   - Examples:
     - Verify a single file (default output level = warning):
@@ -104,9 +104,22 @@ The TeDS CLI centers around two commands: `verify` and `generate`. Paths are rel
       - `teds verify a.yaml b.yaml --output-level error`
     - Write results back in place (in-place preserves all top-level metadata like `version` and only updates `tests`):
       - `teds verify demo/sample_tests.yaml -i`
-  - Exit codes: 0 (success), 1 (ERROR cases produced), 2 (hard failures).
-  - Version gate: testspec `version` must match the supported MAJOR and not exceed the supported MINOR; otherwise RC=2 and no write.
-  - Network: add `--allow-network` to enable HTTP/HTTPS `$ref` resolution (see Network notes below).
+
+Exit codes:
+- 0: success
+- 1: verification produced cases with `result: ERROR`
+- 2: hard failures (I/O, YAML parse, invalid testspec schema, schema/ref resolution, version mismatch, unexpected)
+
+Version gate:
+- testspec `version` must match the supported MAJOR and not exceed the supported MINOR; otherwise RC=2 and no write.
+
+Output levels:
+- `all`: show everything
+- `warning`: show WARNING/ERROR
+- `error`: show only ERROR
+
+Network:
+- add `--allow-network` to enable HTTP/HTTPS `$ref` resolution (see Network notes below).
 
 #### Warnings (user-defined and generated)
 
@@ -154,7 +167,7 @@ With `-i/--in-place`, TeDS writes only the `tests` section back to the file; all
 
 ### Generate
 
-`teds generate REF[=TARGET] ... [--allow-network]`
+`teds generate [--allow-network] REF[=TARGET] ...`
   - Generates testspec(s) for direct child schemas under a JSON Pointer.
   - Mapping syntax: each argument is `REF[=TARGET]`.
     - `REF`: `path/to/schema.yaml#/<json-pointer>`
@@ -197,15 +210,6 @@ By default, TeDS resolves only local `file://` schemas. Enable remote `$ref`s wi
   - Recommended for CI: keep default (local-only). If enabling network, ensure stability (pin URLs/versions) and mind SSRF/DoS considerations.
 
 ### Versioning & Compatibility
-
-- Output levels:
-  - `all`: show everything
-  - `warning`: show WARNING/ERROR
-  - `error`: show only ERROR
-- Exit codes:
-  - 0: success
-  - 1: verification produced cases with `result: ERROR`
-  - 2: hard failures (I/O, YAML parse, invalid testspec schema, schema/ref resolution, version mismatch, unexpected)
 
  - `teds --version` prints tool version and the supported testspec major.
  - Testspecs require `version` (SemVer). The tool enforces:
