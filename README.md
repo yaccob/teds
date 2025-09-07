@@ -73,34 +73,14 @@ Installation from PyPI can be added later once releases are tagged.
 
 ## Quickstart
 
-- Verify a testspec:
-  - `teds verify demo/sample_tests.yaml`
-- Generate testspec(s) from schema refs:
-  - `teds generate demo/sample_schemas.yaml#/components/schemas`
-    → writes `demo/sample_schemas.components+schemas.tests.yaml`
-
-Public API–inspired demos:
-- Verify negative and positive contract cases:
-  - `teds verify demo/public_specs.yaml`
-  - Schemas: `demo/public_schemas.yaml` (email contact, ISO date-time, phone E.164, currency+amount, strict user object)
-  - Specs:   `demo/public_specs.yaml` (explicit invalid/valid cases highlighting typical pitfalls)
-
-Exit codes: 0 (success), 1 (validation produced ERROR cases), 2 (hard failures: I/O, YAML parse, invalid testspec schema, schema/ref resolution, unexpected).
-
-## CLI Tutorial
-
-### Overview
-
-The TeDS CLI centers around two commands: `verify` and `generate`. Paths are relative to the current working directory. By default, only local schemas are resolved; enable network access explicitly (see Network Access).
-
 ### Testspec Format
 
 Top‑level YAML document:
 
-```
+```yaml
 version: "1.0.0"   # required SemVer; must match tool’s supported MAJOR and not exceed supported MINOR
 tests:
-  <ref>:            # e.g. schema.yaml#/components/schemas/Foo
+  <ref>:            # e.g. schema.yaml#/Foo
     valid:   { <cases> }
     invalid: { <cases> }
 ```
@@ -118,6 +98,33 @@ Case objects may contain:
 
 The schema is in `spec_schema.yaml`. TeDS validates your testspec against this schema.
 
+#### Strict YAML parsing:
+- duplicate keys are rejected to avoid ambiguity.
+
+### Verify a testspec:
+- `teds verify demo/sample_tests.yaml`
+
+### Generate testspec(s) from schema refs:
+- `teds generate demo/sample_schemas.yaml#/components/schemas`
+  → writes `demo/sample_schemas.components+schemas.tests.yaml`
+
+### Public API–inspired demos:
+Verify negative and positive contract cases:
+- `teds verify demo/public_specs.yaml`
+- Schemas: `demo/public_schemas.yaml` (email contact, ISO date-time, phone E.164, currency+amount, strict user object)
+- Specs:   `demo/public_specs.yaml` (explicit invalid/valid cases highlighting typical pitfalls)
+
+### Exit codes:
+- 0: success
+- 1: verification produced cases with `result: ERROR`
+- 2: hard failures (I/O, YAML parse, invalid testspec schema, schema/ref resolution, version mismatch, unexpected)
+
+## CLI Tutorial
+
+### Overview
+
+The TeDS CLI centers around two commands: `verify` and `generate`. Paths are relative to the current working directory. By default, only local schemas are resolved; enable network access explicitly (see Network Access).
+
 ### Verify
 
 `teds verify [--output-level all|warning|error] [-i|--in-place] [--allow-network] <SPEC>...`
@@ -130,20 +137,15 @@ The schema is in `spec_schema.yaml`. TeDS validates your testspec against this s
     - Write results back in place (in-place preserves all top-level metadata like `version` and only updates `tests`):
       - `teds verify demo/sample_tests.yaml -i`
 
-Exit codes:
-- 0: success
-- 1: verification produced cases with `result: ERROR`
-- 2: hard failures (I/O, YAML parse, invalid testspec schema, schema/ref resolution, version mismatch, unexpected)
-
-Version gate:
+#### Version gate:
 - testspec `version` must match the supported MAJOR and not exceed the supported MINOR; otherwise RC=2 and no write.
 
-Output levels:
+#### Output levels:
 - `all`: show everything
 - `warning`: show WARNING/ERROR
 - `error`: show only ERROR
 
-Network:
+#### Network:
 - add `--allow-network` to enable HTTP/HTTPS `$ref` resolution (see Network notes below).
 
 #### Warnings (user-defined and generated)
@@ -156,7 +158,7 @@ TeDS distinguishes between user-defined warnings and tool-generated warnings. In
   - Example:
     ```yaml
     tests:
-      schema.yaml#/components/schemas/Email:
+      schema.yaml#/Email:
         valid:
           "policy note":
             payload: alice@example.com
@@ -182,7 +184,7 @@ TeDS distinguishes between user-defined warnings and tool-generated warnings. In
     - Re‑run TeDS — if the schema covers your intent, the warning disappears.
     - If the divergence is acceptable by design (e.g., non‑strict runtime), keep the warning as living documentation; it will remain visible at `--output-level warning|all`.
 
-Notes
+##### Notes
 - Warnings do not cause `result: ERROR` and therefore do not turn the overall exit code to 2. They do, however, change a case’s `result` from SUCCESS → WARNING; with `--output-level error` they are filtered out.
 - “Generated” warning entries are added by TeDS; reserve that shape (`{generated, code}`) for tool output. For user-authored warnings prefer plain strings.
 
@@ -202,7 +204,7 @@ With `-i/--in-place`, TeDS writes only the `tests` section back to the file; all
   - Default filename rules:
     - Pointer `#/` (root) → `{base}.tests.yaml`
     - Any other pointer → `{base}.{pointer}.tests.yaml` (pointer without leading `/`, sanitized)
-    - "sanitized" uses `+` as segment separator and escapes `+` inside segments by doubling it (`++`). Example: `components/schemas/Email` → `components+schemas+Email`.
+    - "sanitized" uses `+` as segment separator and escapes `+` inside segments by doubling it (`++`). Example: `Email` → `components+schemas+Email`.
   - Template tokens (usable in TARGET): `{file}`, `{base}`, `{ext}`, `{dir}`, `{pointer}`, `{pointer_raw}`, `{pointer_strict}`, `{index}`
   - Examples (assume schema at `demo/sample_schemas.yaml`):
     - Omit TARGET (default filename next to schema):
@@ -236,28 +238,20 @@ By default, TeDS resolves only local `file://` schemas. Enable remote `$ref`s wi
 
 ### Versioning & Compatibility
 
- - `teds --version` prints tool version and the supported testspec major.
- - Testspecs require `version` (SemVer). The tool enforces:
-   - MAJOR must match the tool’s supported major.
-   - MINOR must be less than or equal to the tool’s supported minor.
-   - PATCH is ignored for compatibility checks.
- - On mismatch: RC=2, nothing is written. The error explains what to upgrade.
+Tool uses Semantic Versioning and derives its version from Git tags (`vX.Y.Z`).
+- `teds --version` prints tool version and the supported testspec major.
+
+Testspecs require `version` (SemVer). The tool enforces:
+  - MAJOR must match the tool’s supported major.
+  - MINOR must be less than or equal to the tool’s supported minor.
+  - PATCH is ignored for compatibility checks.
+- On mismatch: RC=2, nothing is written. The error explains what to upgrade.
 
 ### References and prior art
 - Python jsonschema `format` validation and `FormatChecker` (official docs): https://python-jsonschema.readthedocs.io/en/stable/validate/#validating-formats
 - RFC 3339 `date-time` profile (official spec): https://www.rfc-editor.org/rfc/rfc3339
 - E.164 phone number guidance (Stack Overflow): https://stackoverflow.com/questions/6478875/regular-expression-matching-e-164-formatted-phone-numbers
 - JSON Schema additionalProperties (official guide): https://json-schema.org/understanding-json-schema/reference/object.html#additional-properties
-
-## Versioning & Compatibility
-
-- Tool uses Semantic Versioning and derives its version from Git tags (`vX.Y.Z`).
-- Testspecs require `version` (SemVer). The tool enforces:
-  - MAJOR must match the tool’s supported major.
-  - MINOR must be less than or equal to the tool’s supported minor.
-  - PATCH is ignored for compatibility checks.
-- On mismatch: RC=2, nothing is written. The error explains what to upgrade.
-
 
 ## Development
 
@@ -271,9 +265,8 @@ By default, TeDS resolves only local `file://` schemas. Enable remote `$ref`s wi
 - Conventional Commits (feat, fix, docs, etc.).
 - Keep changes focused; update or add tests under `tests/`.
 
-## Parsing & Security Notes
+## Security Notes
 
-- Strict YAML parsing: duplicate keys are rejected to avoid ambiguity.
 - External refs (HTTP/HTTPS): disabled by default for reproducibility and safety.
   - Opt-in with `--allow-network` to resolve remote `$ref`s.
   - Limits: global timeout and size cap (defaults: 5s, 5MiB per resource).
