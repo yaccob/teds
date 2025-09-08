@@ -49,8 +49,8 @@ jobs:
       - name: Pin version in pyproject from tag
         run: |
           V="${GITHUB_REF_NAME#v}"
-          # Patch pyproject.toml in-place (avoid heredoc to keep YAML valid)
-          python - "$V" -c "import re,sys; p='pyproject.toml'; s=open(p,'r',encoding='utf-8').read(); s=re.sub(r'(?m)^dynamic\\s*=\\s*\\[\\s*\"version\"\\s*\\]\\s*$', 'version = \"'+sys.argv[1]+'\"', s); s=re.sub(r'(?ms)^\\[tool\\.hatch\\.version\\].*?(?=^\\[|\\Z)', '', s); open(p,'w',encoding='utf-8').write(s)"
+          # Patch pyproject.toml in-place using python -c and pass $V as argv[1]
+          python -c 'import re,sys,io; p="pyproject.toml"; s=io.open(p,"r",encoding="utf-8").read(); s=re.sub(r"(?m)^dynamic\\s*=\\s*\\[\\s*\"version\"\\s*\\]\\s*$", "version = \""+sys.argv[1]+"\"", s); s=re.sub(r"(?ms)^\\[tool\\.hatch\\.version\\].*?(?=^\\[|\\Z)", "", s); io.open(p,"w",encoding="utf-8").write(s)' "$V"
       - name: Build
         run: |
           python -m pip install -U pip hatch
