@@ -6,7 +6,6 @@ All notable user-facing changes for released versions.
 
 - Validation: output always includes a complete testspec with a top-level `version` matching the supported testspec version.
 - Demos: updated to include `version` so they are valid testspecs.
-- Packaging/CI hygiene: cleaned and ignored `dist/`; simplified release workflow (trusted publishing). No CLI changes required.
 
 ## 0.1.17
 
