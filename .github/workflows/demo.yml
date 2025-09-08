@@ -1,0 +1,57 @@
+name: demo-checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  demo-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install
+        run: |
+          python -m pip install -U pip
+          python -m pip install -r requirements.txt -r requirements-dev.txt
+          python -m pip install -e .
+      - name: Verify demo/sample_tests.yaml (expect rc=1)
+        run: |
+          set +e
+          teds verify demo/sample_tests.yaml --output-level warning > /tmp/demo_sample_out.yaml
+          rc=$?
+          echo "exit code: $rc"
+          test "$rc" -eq 1
+      - name: Verify demo/public_specs.yaml (expect rc=1) and compare to verified output
+        run: |
+          set -e
+          set +o pipefail
+          teds verify demo/public_specs.yaml --output-level warning > /tmp/demo_public_out.yaml || code=$?
+          : "${code:=0}"
+          echo "exit code: $code"
+          if [ "$code" -ne 1 ]; then
+            echo "Unexpected exit code for public_specs: $code" >&2
+            exit 1
+          fi
+          python - << 'PY'
+          import sys, pathlib
+          from ruamel.yaml import YAML
+          yaml=YAML(typ='safe')
+          def load(p):
+              return yaml.load(pathlib.Path(p).read_text(encoding='utf-8'))
+          a=load('/tmp/demo_public_out.yaml')
+          b=load('demo/public_specs.verified.warning.yaml')
+          if a != b:
+              import difflib
+              sa=pathlib.Path('/tmp/demo_public_out.yaml').read_text(encoding='utf-8').splitlines()
+              sb=pathlib.Path('demo/public_specs.verified.warning.yaml').read_text(encoding='utf-8').splitlines()
+              print('\n'.join(difflib.unified_diff(sb, sa, fromfile='expected', tofile='actual')), file=sys.stderr)
+              sys.exit(1)
+          print('demo public_specs output matches expected verified YAML')
+          PY
