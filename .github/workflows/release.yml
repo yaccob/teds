@@ -46,8 +46,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Set build version from tag
-        run: echo "HATCH_BUILD_VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
       - name: Build
         run: |
           python -m pip install -U pip hatch
