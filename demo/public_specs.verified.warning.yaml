@@ -1,0 +1,35 @@
+tests:
+  public_schemas.yaml#/components/schemas/EmailContact:
+    valid:
+      format divergence (warn):
+        payload:
+          email: not-an-email
+        result: WARNING
+        warnings:
+        - generated: |
+            Relies on JSON Schema 'format' assertion (format: email).
+            Validators that *enforce* 'format' will reject this instance.
+            Consider enforcing the expected format by adding an explicit 'pattern' property to the schema.
+          code: format-divergence
+    invalid:
+      display name not allowed:
+        payload:
+          email: John <john@example.com>
+        result: ERROR
+        message: UNEXPECTEDLY VALID
+  public_schemas.yaml#/components/schemas/ISODateTime:
+    invalid:
+      missing timezone:
+        payload: '2024-08-01T12:34:56'
+        result: ERROR
+        message: |
+          UNEXPECTEDLY VALID
+          A validator that *ignores* 'format' accepted this instance, while a strict validator (enforcing 'format') might reject it as desired (format: date-time).
+          Consider enforcing the expected format by adding an explicit 'pattern' property to the schema.
+      impossible date:
+        payload: '2024-02-30T12:00:00Z'
+        result: ERROR
+        message: |
+          UNEXPECTEDLY VALID
+          A validator that *ignores* 'format' accepted this instance, while a strict validator (enforcing 'format') might reject it as desired (format: date-time).
+          Consider enforcing the expected format by adding an explicit 'pattern' property to the schema.

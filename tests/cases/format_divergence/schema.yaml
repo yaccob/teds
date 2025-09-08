@@ -1,0 +1,9 @@
+components:
+  schemas:
+    Email:
+      type: string
+      format: email
+      examples:
+        - alice@example.com
+        - not-an-email
+

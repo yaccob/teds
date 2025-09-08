@@ -1,0 +1,8 @@
+components:
+  schemas:
+    Color:
+      type: string
+      enum: [red, green, blue]
+      examples:
+        - green
+

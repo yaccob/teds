@@ -1,0 +1,29 @@
+version: "1.0.0"
+tests:
+  schema.yaml#/components/schemas/Email:
+    valid:
+      .components.schemas.Email.examples[0]:
+        payload: alice@example.com
+        result: SUCCESS
+        from_examples: true
+      .components.schemas.Email.examples[1]:
+        payload: not-an-email
+        result: WARNING
+        from_examples: true
+        warnings:
+        - generated: |
+            Relies on JSON Schema 'format' assertion (format: email).
+            Validators that *enforce* 'format' will reject this instance.
+            Consider enforcing the expected format by adding an explicit 'pattern' property to the schema.
+          code: format-divergence
+      explicit valid:
+        payload: alice@example.com
+        result: SUCCESS
+    invalid:
+      explicit invalid:
+        payload: not-an-email
+        result: ERROR
+        message: |
+          UNEXPECTEDLY VALID
+          A validator that *ignores* 'format' accepted this instance, while a strict validator (enforcing 'format') might reject it as desired (format: email).
+          Consider enforcing the expected format by adding an explicit 'pattern' property to the schema.

@@ -1,0 +1,4 @@
+jsonschema[format-nongpl]>=4.22.0
+referencing>=0.35.0
+ruamel.yaml>=0.18.6
+semver>=3.0.0
