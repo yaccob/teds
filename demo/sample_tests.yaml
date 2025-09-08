@@ -1,3 +1,4 @@
+version: "1.0.0"
 tests:
 
   sample_schemas.yaml#/components/schemas/Email:
@@ -191,5 +192,4 @@ tests:
       not a date:
         description: non-date string triggers format divergence (strict fails, base accepts)
         payload: "31-12-2025"
-
 

@@ -323,9 +323,10 @@ def validate_file(testspec_path: Path, output_level: str, in_place: bool) -> int
         in_place=in_place,
     )
 
-    result_doc = {"tests": out_tests}
+    result_doc = {"version": SUPPORTED_TESTSPEC_VERSION, "tests": out_tests}
     if in_place:
         preserved = dict(doc) if isinstance(doc, dict) else {}
+        preserved.setdefault("version", SUPPORTED_TESTSPEC_VERSION)
         preserved["tests"] = out_tests
         with testspec_path.open("w", encoding="utf-8") as fh:
             yaml_dumper.dump(preserved, fh)

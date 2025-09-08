@@ -1,3 +1,4 @@
+version: "1.0.0"
 tests:
   schema.yaml#/components/schemas/Email:
     invalid:
@@ -9,4 +10,3 @@ tests:
           A validator that *ignores* 'format' accepted this instance, while a strict validator (enforcing 'format') might reject it as desired (format: email).
           Consider enforcing the expected format by adding an explicit 'pattern' property to the schema.
           
-
