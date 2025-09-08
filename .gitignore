@@ -12,6 +12,7 @@ __pycache__/
 .coverage
 htmlcov/
 dist/
+reviews/
 
 # OS / Editor files
 .DS_Store
