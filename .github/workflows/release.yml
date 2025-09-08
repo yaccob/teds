@@ -49,8 +49,16 @@ jobs:
       - name: Pin version in pyproject from tag
         run: |
           V="${GITHUB_REF_NAME#v}"
-          # Patch pyproject.toml in-place using python -c and pass $V as argv[1]
-          python -c 'import re,sys,io; p="pyproject.toml"; s=io.open(p,"r",encoding="utf-8").read(); s=re.sub(r"(?m)^dynamic\\s*=\\s*\\[\\s*\"version\"\\s*\\]\\s*$", "version = \""+sys.argv[1]+"\"", s); s=re.sub(r"(?ms)^\\[tool\\.hatch\\.version\\].*?(?=^\\[|\\Z)", "", s); io.open(p,"w",encoding="utf-8").write(s)' "$V"
+          # 1) Drop [tool.hatch.version] section
+          awk '
+            BEGIN{in_ver=0}
+            /^\[tool\.hatch\.version\]/{in_ver=1; next}
+            /^\[/{if(in_ver){in_ver=0}}
+            {if(!in_ver) print}
+          ' pyproject.toml > pyproject.toml.tmp && mv pyproject.toml.tmp pyproject.toml
+          # 2) Replace exact dynamic version line with pinned version
+          sed -E -i "s/^dynamic = \[\"version\"\]$/version = \"${V}\"/" pyproject.toml
+          echo "Pinned version to ${V}" && grep -nE '^(version|dynamic)\s*=' pyproject.toml || true
       - name: Build
         run: |
           python -m pip install -U pip hatch
