@@ -9,7 +9,7 @@ from typing import List, Tuple
 from .generate import generate_from
 from .validate import validate_file
 from .errors import TedsError
-from .version import get_version, SUPPORTED_TESTSPEC_MAJOR
+from .version import get_version, SUPPORTED_TESTSPEC_MAJOR, supported_spec_range_str, recommended_minor_str
 
 
 def _sanitize(s: str) -> str:
@@ -183,7 +183,9 @@ def main() -> None:
         sys.exit(0)
 
     if argv[0] in {"--version", "-V"}:
-        print(f"teds {get_version()} (testspec major: {SUPPORTED_TESTSPEC_MAJOR})")
+        print(
+            f"teds {get_version()} (spec supported: {supported_spec_range_str()}; recommended: {recommended_minor_str()})"
+        )
         sys.exit(0)
 
     if argv[0] in {"verify", "generate"}:

@@ -9,10 +9,10 @@ from jsonschema import Draft202012Validator, ValidationError
 from .yamlio import yaml_loader, yaml_dumper
 from .refs import build_validator_for_ref, collect_examples
 from .version import (
-    SUPPORTED_TESTSPEC_VERSION,
+    RECOMMENDED_TESTSPEC_VERSION,
     SUPPORTED_TESTSPEC_MAJOR,
-    SUPPORTED_TESTSPEC_MINOR,
     supported_spec_range_str,
+    recommended_minor_str,
     check_spec_compat,
 )
 
@@ -308,7 +308,7 @@ def validate_file(testspec_path: Path, output_level: str, in_place: bool) -> int
             print(
                 (
                     f"Newer testspec minor not supported: {ver}\n"
-                    f"  supported up to: {supported_spec_range_str()}"
+                    f"  supported: {supported_spec_range_str()} (recommended: {recommended_minor_str()})"
                 ),
                 file=sys.stderr,
             )
@@ -323,10 +323,10 @@ def validate_file(testspec_path: Path, output_level: str, in_place: bool) -> int
         in_place=in_place,
     )
 
-    result_doc = {"version": SUPPORTED_TESTSPEC_VERSION, "tests": out_tests}
+    result_doc = {"version": RECOMMENDED_TESTSPEC_VERSION, "tests": out_tests}
     if in_place:
         preserved = dict(doc) if isinstance(doc, dict) else {}
-        preserved.setdefault("version", SUPPORTED_TESTSPEC_VERSION)
+        preserved.setdefault("version", RECOMMENDED_TESTSPEC_VERSION)
         preserved["tests"] = out_tests
         with testspec_path.open("w", encoding="utf-8") as fh:
             yaml_dumper.dump(preserved, fh)
