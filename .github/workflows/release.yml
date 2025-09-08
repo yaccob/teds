@@ -49,18 +49,8 @@ jobs:
       - name: Pin version in pyproject from tag
         run: |
           V="${GITHUB_REF_NAME#v}"
-          # Patch pyproject.toml in-place to pin the version from the tag.
-          # We pass the version as argv[1] to the inline Python script via stdin ("-").
-          python - "$V" << 'PY'
-import re, sys
-p='pyproject.toml'
-s=open(p,'r',encoding='utf-8').read()
-# replace dynamic version with fixed version
-s=re.sub(r'(?m)^dynamic\s*=\s*\[\s*"version"\s*\]\s*$', 'version = "' + sys.argv[1] + '"', s)
-# remove [tool.hatch.version] table entirely
-s=re.sub(r'(?ms)^\[tool\.hatch\.version\].*?(?=^\[|\Z)', '', s)
-open(p,'w',encoding='utf-8').write(s)
-PY
+          # Patch pyproject.toml in-place (avoid heredoc to keep YAML valid)
+          python - "$V" -c "import re,sys; p='pyproject.toml'; s=open(p,'r',encoding='utf-8').read(); s=re.sub(r'(?m)^dynamic\\s*=\\s*\\[\\s*\"version\"\\s*\\]\\s*$', 'version = \"'+sys.argv[1]+'\"', s); s=re.sub(r'(?ms)^\\[tool\\.hatch\\.version\\].*?(?=^\\[|\\Z)', '', s); open(p,'w',encoding='utf-8').write(s)"
       - name: Build
         run: |
           python -m pip install -U pip hatch
