@@ -129,6 +129,16 @@ Looking for a step‑by‑step introduction? Read the full tutorial:
 
 - Tutorial: [docs/tutorial.md](docs/tutorial.md)
 
+## Versioning & Compatibility
+
+- Testspec versioning is independent of the app’s SemVer. The app declares a supported testspec range via a bundled manifest (`teds_compat.yaml`).
+- `teds --version` prints: `teds <app> (spec supported: 1.0–1.N; recommended: 1.N)`
+- Gate rules when verifying or writing specs:
+  - Major must match the supported major.
+  - Minor must be less than or equal to the supported max minor; otherwise exit code 2.
+  - The testspec is strictly validated against `spec_schema.yaml`; unknown fields/structures fail fast.
+- Generation stamps the recommended testspec version (from the manifest) at `version:` to reduce churn while remaining forward‑compatible.
+
 ## Development
 
 - Create env: `python3 -m venv .venv && . .venv/bin/activate`
