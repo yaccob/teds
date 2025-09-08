@@ -7,6 +7,7 @@ from typing import Any, Optional, Generator
 from jsonschema import Draft202012Validator, ValidationError
 
 from .yamlio import yaml_loader, yaml_dumper
+from importlib import resources as _res
 from .refs import build_validator_for_ref, collect_examples
 from .version import (
     SUPPORTED_TESTSPEC_VERSION,
@@ -170,8 +171,9 @@ def _evaluate_case(
 
 
 def _validate_testspec_against_schema(doc: dict[str, Any], repo_root: Path) -> None:
-    schema_path = (repo_root / "spec_schema.yaml").resolve()
-    schema = yaml_loader.load(schema_path.read_text(encoding="utf-8")) or {}
+    # Load bundled schema from package resources
+    schema_text = _res.files("teds_core").joinpath("spec_schema.yaml").read_text(encoding="utf-8")
+    schema = yaml_loader.load(schema_text) or {}
     Draft202012Validator(schema).validate(doc)
 
 
@@ -331,4 +333,3 @@ def validate_file(testspec_path: Path, output_level: str, in_place: bool) -> int
     else:
         yaml_dumper.dump(result_doc, sys.stdout)
     return rc
-
