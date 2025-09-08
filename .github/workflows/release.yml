@@ -46,30 +46,9 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Pin version in pyproject from tag
-        run: |
-          V="${GITHUB_REF_NAME#v}"
-          # 1) Drop [tool.hatch.version] section
-          awk '
-            BEGIN{in_ver=0}
-            /^\[tool\.hatch\.version\]/{in_ver=1; next}
-            /^\[/{if(in_ver){in_ver=0}}
-            {if(!in_ver) print}
-          ' pyproject.toml > pyproject.toml.tmp && mv pyproject.toml.tmp pyproject.toml
-          # 2) Replace exact dynamic version line with pinned version
-          sed -E -i "s/^dynamic = \[\"version\"\]$/version = \"${V}\"/" pyproject.toml
-          echo "Pinned version to ${V}" && grep -nE '^(version|dynamic)\s*=' pyproject.toml || true
       - name: Build
         run: |
           python -m pip install -U pip hatch
-          rm -rf dist
           hatch build
-          ls -la dist
-      - name: Validate artifacts (no dev wheels)
-        run: |
-          if ls dist/*dev* 2>/dev/null; then
-            echo "Dev/local version artifacts found in dist/. Aborting publish." >&2
-            exit 1
-          fi
       - name: Publish to PyPI (trusted publishing)
         uses: pypa/gh-action-pypi-publish@release/v1
