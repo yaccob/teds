@@ -54,5 +54,11 @@ jobs:
           rm -rf dist
           hatch build
           ls -la dist
+      - name: Validate artifacts (no dev wheels)
+        run: |
+          if ls dist/*dev* 2>/dev/null; then
+            echo "Dev/local version artifacts found in dist/. Aborting publish." >&2
+            exit 1
+          fi
       - name: Publish to PyPI (trusted publishing)
         uses: pypa/gh-action-pypi-publish@release/v1
