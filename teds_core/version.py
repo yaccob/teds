@@ -3,13 +3,29 @@ from __future__ import annotations
 from importlib import metadata
 from subprocess import run, PIPE
 from enum import Enum
+from pathlib import Path
 import semver  # type: ignore
 
-SUPPORTED_TESTSPEC_VERSION = "1.0.0"
-_SUPPORTED_VI = semver.VersionInfo.parse(SUPPORTED_TESTSPEC_VERSION)
-SUPPORTED_TESTSPEC_MAJOR = _SUPPORTED_VI.major
-SUPPORTED_TESTSPEC_MINOR = _SUPPORTED_VI.minor
-SUPPORTED_TESTSPEC_PATCH = _SUPPORTED_VI.patch
+from .yamlio import yaml_loader
+
+# Load compatibility manifest from repository root (bundled with the wheel)
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+_COMPAT_PATH = (_REPO_ROOT / "teds_compat.yaml").resolve()
+
+def _load_compat() -> tuple[int, int, int]:
+    try:
+        compat = yaml_loader.load(_COMPAT_PATH.read_text(encoding="utf-8")) or {}
+        spec = compat.get("spec") or {}
+        major = int(spec.get("major"))
+        max_minor = int(spec.get("max_minor"))
+        rec_minor = int(spec.get("recommended_minor", max_minor))
+        return major, max_minor, rec_minor
+    except Exception:
+        # Fallback to 1.0 if manifest missing or malformed
+        return 1, 0, 0
+
+SUPPORTED_TESTSPEC_MAJOR, _SUPPORTED_MAX_MINOR, _RECOMMENDED_MINOR = _load_compat()
+RECOMMENDED_TESTSPEC_VERSION = f"{SUPPORTED_TESTSPEC_MAJOR}.{_RECOMMENDED_MINOR}.0"
 
 
 def _from_pkg() -> str | None:
@@ -34,7 +50,11 @@ def get_version() -> str:
 
 
 def supported_spec_range_str() -> str:
-    return f"{SUPPORTED_TESTSPEC_MAJOR}.{SUPPORTED_TESTSPEC_MINOR}.x"
+    # Display as 1.0–1.N
+    return f"{SUPPORTED_TESTSPEC_MAJOR}.0–{SUPPORTED_TESTSPEC_MAJOR}.{_SUPPORTED_MAX_MINOR}"
+
+def recommended_minor_str() -> str:
+    return f"{SUPPORTED_TESTSPEC_MAJOR}.{_RECOMMENDED_MINOR}"
 
 
 class SpecVersionIssue(Enum):
@@ -50,7 +70,6 @@ def check_spec_compat(ver: str) -> tuple[bool, SpecVersionIssue | None]:
         return False, SpecVersionIssue.INVALID
     if vi.major != SUPPORTED_TESTSPEC_MAJOR:
         return False, SpecVersionIssue.MAJOR_MISMATCH
-    if vi.minor > SUPPORTED_TESTSPEC_MINOR:
+    if vi.minor > _SUPPORTED_MAX_MINOR:
         return False, SpecVersionIssue.MINOR_TOO_NEW
     return True, None
-

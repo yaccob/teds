@@ -46,6 +46,7 @@ source = "vcs"
 packages = ["teds_core"]
 include = [
   "spec_schema.yaml",
+  "teds_compat.yaml",
 ]
 
 [tool.hatch.envs.test]

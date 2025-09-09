@@ -56,6 +56,17 @@
 - PRs should include: clear description, linked issues, sample commands you ran, and before/after behavior when applicable.
 - Keep changes focused; update or add tests in `tests/` and demos in `demo/` to demonstrate behavior.
 
+## Branching & PR Workflow (Agents)
+- Default branch is `master`. Do not push directly to `master`.
+- Create short‑lived branches per change:
+  - `feat/<scope>-<summary>`, `fix/<scope>`, `docs/<scope>`, `chore/<scope>`.
+- Open a PR and wait for CI to pass before merging.
+- Prefer Squash‑Merge to keep history minimal and aligned with Conventional Commits.
+- Ensure:
+  - Tests pass locally (`pytest -q`) before opening/merging PRs.
+  - Docs updated when behavior/CLI changes.
+  - SemVer impact considered (breaking → major, feature → minor, fix → patch).
+
 ## Security & Configuration Tips
 - The tool resolves only `file://` URIs; keep schemas local. Do not embed secrets in YAML.
 - YAML loader rejects duplicate keys; prefer explicit patterns (e.g., add `pattern` for strict formats).
