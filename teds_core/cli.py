@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import List, Tuple
 
 from .generate import generate_from
-from .report import run_report
 from .validate import validate_file
 from .errors import TedsError
 from .version import get_version, SUPPORTED_TESTSPEC_MAJOR, supported_spec_range_str, recommended_minor_str
@@ -140,6 +139,8 @@ def _build_parser() -> argparse.ArgumentParser:
     p_verify.add_argument("--output-level", choices=["all", "warning", "error"], default="warning",
                          help="Filter cases to emit: all, warning (default), or error")
     p_verify.add_argument("-i", "--in-place", action="store_true", help="Write results back to the given spec file(s)")
+    p_verify.add_argument("--report", help="Render report using TEMPLATE_ID or TEMPLATE_ID=OUTFILE (reports always write files)")
+    p_verify.add_argument("--list-templates", action="store_true", help="List built-in report templates and exit")
 
     p_gen = sub.add_parser(
         "generate",
@@ -173,22 +174,6 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p_gen.add_argument("mapping", nargs="+", help="REF[=TARGET] mappings")
 
-    p_report = sub.add_parser(
-        "report",
-        help="Render a report from one or more testspec files",
-        description=(
-            "Render a report using a Jinja2 template from verified testspec outputs.\n"
-            "- Usage: teds report --template <NAME|PATH> [--out FILE] [--output-level L] <SPEC>...\n"
-            "- Templates: built-in names (e.g., summary.md, summary.html) or filesystem path to a .j2 template.\n"
-            "- Output: writes to stdout by default; use --out to write to a file.\n"
-        ),
-        formatter_class=argparse.RawTextHelpFormatter,
-    )
-    p_report.add_argument("--template", required=True, help="Template name (built-in) or path to a .j2 template")
-    p_report.add_argument("--out", default=None, help="Output file path (default: stdout)")
-    p_report.add_argument("--output-level", choices=["all", "warning", "error"], default="warning",
-                          help="Filter cases to include: all, warning (default), or error")
-    p_report.add_argument("spec", nargs="+", help="YAML testspec file(s)")
 
     return ap
 
@@ -206,7 +191,7 @@ def main() -> None:
         )
         sys.exit(0)
 
-    if argv[0] in {"verify", "generate", "report"}:
+    if argv[0] in {"verify", "generate"}:
         args = ap.parse_args(argv)
         try:
             from .refs import set_network_policy
@@ -214,10 +199,51 @@ def main() -> None:
         except Exception:
             pass
         if args.cmd == "verify":
-            rc_all = 0
-            for spec in args.spec:
-                rc_all = max(rc_all, validate_file(Path(spec), args.output_level, args.in_place))
-            sys.exit(rc_all)
+            if args.list_templates:
+                from .report import list_templates
+                items = list_templates()
+                for it in items:
+                    print(f"{it.get('id')}: {it.get('description','').strip()}")
+                sys.exit(0)
+            if args.report:
+                # Parse TEMPLATE_ID or TEMPLATE_ID=OUTFILE
+                report_arg = args.report
+                tpl_id, out_override = (report_arg.split("=", 1) + [None])[:2] if "=" in report_arg else (report_arg, None)
+                from .report import run_report_per_spec, resolve_template
+                try:
+                    # Validate template id early
+                    resolve_template(tpl_id)
+                except Exception as e:
+                    print(str(e), file=sys.stderr)
+                    sys.exit(2)
+                # Render per spec
+                pairs, hard_rc = run_report_per_spec([Path(s) for s in args.spec], tpl_id, args.output_level)
+                # Determine outputs
+                multi = len(pairs) > 1
+                for sp, content in pairs:
+                    if out_override:
+                        if multi:
+                            print("Explicit output path is only supported with a single SPEC", file=sys.stderr)
+                            sys.exit(2)
+                        out_path = Path(out_override)
+                    else:
+                        # Default naming
+                        base = sp.stem
+                        ext = ".html" if tpl_id.endswith(".html") else ".md"
+                        tbase = tpl_id.split(".")[0]
+                        name = f"{base}.report{ext}" if not multi else f"{base}.{tbase}.report{ext}"
+                        out_path = sp.parent / name
+                    out_path.parent.mkdir(parents=True, exist_ok=True)
+                    out_path.write_text(content, encoding="utf-8")
+                # Exit code mirrors verify semantics: include case errors as rc=1
+                # We reuse validate_doc's rc via report module not returned here (only hard failures),
+                # so re-run minimal aggregation to compute rc=1 if any ERROR cases exist is deferred; for MVP keep rc=hard_rc.
+                sys.exit(hard_rc)
+            else:
+                rc_all = 0
+                for spec in args.spec:
+                    rc_all = max(rc_all, validate_file(Path(spec), args.output_level, args.in_place))
+                sys.exit(rc_all)
         elif args.cmd == "generate":
             try:
                 pairs = _plan_pairs(args.mapping)
@@ -231,21 +257,6 @@ def main() -> None:
                 print(f"Unexpected error: {type(e).__name__}: {e}", file=sys.stderr)
                 sys.exit(2)
             sys.exit(0)
-        elif args.cmd == "report":
-            try:
-                rendered, rc = run_report([Path(p) for p in args.spec], args.template, args.output_level)
-                if args.out:
-                    Path(args.out).parent.mkdir(parents=True, exist_ok=True)
-                    Path(args.out).write_text(rendered, encoding="utf-8")
-                else:
-                    sys.stdout.write(rendered)
-                sys.exit(rc)
-            except FileNotFoundError as e:
-                print(str(e), file=sys.stderr)
-                sys.exit(2)
-            except Exception as e:
-                print(f"Unexpected error: {type(e).__name__}: {e}", file=sys.stderr)
-                sys.exit(2)
         else:
             ap.print_help(sys.stderr)
             sys.exit(2)

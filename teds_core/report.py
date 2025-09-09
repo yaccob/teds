@@ -13,6 +13,7 @@ from .version import (
     supported_spec_range_str,
     get_version,
 )
+from .resources import read_text_resource
 
 
 @dataclass
@@ -41,48 +42,34 @@ def _compute_counts(doc: dict[str, Any]) -> dict[str, int]:
     return {"success": success, "warning": warning, "error": error}
 
 
-def _render_jinja(template_name_or_path: str, context: dict[str, Any]) -> str:
-    from importlib.resources import files as res_files
-    from jinja2 import Environment, FileSystemLoader, BaseLoader, select_autoescape
-
-    # Resolve template path: explicit path or bundled name under teds_core/templates
-    tpath = Path(template_name_or_path)
-    template_source: str | None = None
-    loader: BaseLoader
-    template_name: str
-
-    if tpath.exists():
-        loader = FileSystemLoader(str(tpath.parent))
-        template_name = tpath.name
-    else:
-        # allow names like "summary", "summary.md", "summary.html"
-        base = template_name_or_path
-        if not any(base.endswith(ext) for ext in (".j2", ".md", ".html", ".htm")):
-            # default to markdown template
-            candidates = [f"{base}.md.j2", f"{base}.html.j2"]
-        elif base.endswith((".md", ".html", ".htm")):
-            candidates = [f"{base}.j2"]
-        else:
-            candidates = [base]
-
-        bundle_dir = res_files("teds_core").joinpath("templates")
-        for cand in candidates:
-            try:
-                p = bundle_dir.joinpath(cand)
-                # Using loader instead of read_text to allow template inheritance later
-                loader = FileSystemLoader(str(bundle_dir))
-                template_name = cand
-                break
-            except Exception:
-                continue
-        else:
-            raise FileNotFoundError(f"Template not found: {template_name_or_path}")
-
+def _render_jinja_str(template_key: str, template_text: str, context: dict[str, Any]) -> str:
+    from jinja2 import Environment, DictLoader, select_autoescape
+    ext = Path(template_key).suffix.lstrip(".")
     autoescape = select_autoescape(enabled_extensions=("html", "htm"))
-    env = Environment(loader=loader, autoescape=autoescape)
-    # Minimal, safe filters could be added here if needed
-    tmpl = env.get_template(template_name)
+    env = Environment(loader=DictLoader({template_key: template_text}), autoescape=autoescape)
+    tmpl = env.get_template(template_key)
     return tmpl.render(**context)
+
+
+def _load_template_map() -> list[dict[str, str]]:
+    txt = read_text_resource("template_map.yaml")
+    data = yaml_loader.load(txt) or {}
+    items = data.get("templates") or []
+    return [i for i in items if isinstance(i, dict) and i.get("id") and i.get("path")]
+
+
+def list_templates() -> list[dict[str, str]]:
+    return _load_template_map()
+
+
+def resolve_template(template_id: str) -> tuple[str, str, str]:
+    for it in _load_template_map():
+        if it.get("id") == template_id:
+            path = str(it.get("path"))
+            desc = str(it.get("description", ""))
+            text = read_text_resource(path)
+            return path, text, desc
+    raise FileNotFoundError(f"Unknown template id: {template_id}")
 
 
 def build_context(inputs: Iterable[ReportInput]) -> dict[str, Any]:
@@ -102,10 +89,10 @@ def build_context(inputs: Iterable[ReportInput]) -> dict[str, Any]:
     }
 
 
-def run_report(spec_paths: list[Path], template: str, output_level: str) -> tuple[str, int]:
-    """Render a report for the given spec files.
+def run_report_per_spec(spec_paths: list[Path], template_id: str, output_level: str) -> tuple[list[tuple[Path, str]], int]:
+    """Render a report per spec file using the given template id.
 
-    Returns rendered text and an exit code (0 or 2 on hard failure).
+    Returns list of (spec_path, rendered_text) and an exit code (0 or 2 on hard failure).
     """
     repo_root = Path(__file__).resolve().parents[1]
     hard_rc = 0
@@ -143,7 +130,14 @@ def run_report(spec_paths: list[Path], template: str, output_level: str) -> tupl
         counts = _compute_counts(doc)
         report_inputs.append(ReportInput(path=sp, doc=doc, counts=counts, rc=rc))
 
-    context = build_context(report_inputs)
-    rendered = _render_jinja(template, context)
-    return rendered, (2 if hard_rc == 2 else 0)
+    # load template text
+    tpl_path, tpl_text, _ = resolve_template(template_id)
 
+    outputs: list[tuple[Path, str]] = []
+    rc_cases = 0
+    for ri in report_inputs:
+        ctx = build_context([ri])
+        rendered = _render_jinja_str(tpl_path, tpl_text, ctx)
+        outputs.append((ri.path, rendered))
+        rc_cases = max(rc_cases, ri.rc)
+    return outputs, (2 if hard_rc == 2 else rc_cases)

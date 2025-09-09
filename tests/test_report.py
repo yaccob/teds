@@ -8,13 +8,17 @@ from tests.test_cli import run_cli
 def test_report_markdown(tmp_path: Path):
     # Use existing case directory
     case = Path(__file__).parent / "cases" / "format_divergence"
+    spec = case / "spec.yaml"
     rc, out, err = run_cli([
-        "report",
-        "--template",
+        "verify",
+        "--report",
         "summary.md",
-        str(case / "spec.yaml"),
+        str(spec),
     ])
-    assert rc == 0
-    assert "TeDS Report" in out
-    assert str(case / "spec.yaml") in out or "format_divergence" in out
-
+    # verify semantics: rc=1 for cases with ERROR
+    assert rc == 1
+    # output file exists next to spec
+    out_file = spec.parent / f"{spec.stem}.report.md"
+    assert out_file.exists()
+    txt = out_file.read_text(encoding="utf-8")
+    assert "TeDS Report" in txt
