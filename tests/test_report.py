@@ -10,8 +10,7 @@ def test_report_markdown(tmp_path: Path):
     case = Path(__file__).parent / "cases" / "format_divergence"
     spec = case / "spec.yaml"
     rc, out, err = run_cli([
-        "verify",
-        "--report",
+        "report",
         "summary.md",
         str(spec),
     ])
