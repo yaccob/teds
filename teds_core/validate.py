@@ -170,9 +170,21 @@ def _evaluate_case(
 
 
 def _validate_testspec_against_schema(doc: dict[str, Any], repo_root: Path) -> None:
-    # Load schema from repository root (bundled via wheel include)
-    schema_path = (repo_root / "spec_schema.yaml").resolve()
-    schema = yaml_loader.load(schema_path.read_text(encoding="utf-8")) or {}
+    # Load schema via package resources for installed wheels, with repo-root fallback for dev.
+    from importlib.resources import files as _res_files
+
+    schema_text: str | None = None
+    try:
+        schema_text = _res_files("teds_core").joinpath("spec_schema.yaml").read_text(encoding="utf-8")
+    except Exception:
+        try:
+            schema_path = (repo_root / "spec_schema.yaml").resolve()
+            schema_text = schema_path.read_text(encoding="utf-8")
+        except Exception:
+            schema_text = None
+    if not schema_text:
+        raise RuntimeError("spec_schema.yaml not found in package resources or repo root")
+    schema = yaml_loader.load(schema_text) or {}
     Draft202012Validator(schema).validate(doc)
 
 

@@ -10,18 +10,28 @@ from .yamlio import yaml_loader
 
 # Load compatibility manifest from repository root (bundled with the wheel)
 _REPO_ROOT = Path(__file__).resolve().parents[1]
-_COMPAT_PATH = (_REPO_ROOT / "teds_compat.yaml").resolve()
 
 def _load_compat() -> tuple[int, int, int]:
+    # Load manifest via package resources (installed) with repo-root fallback for dev.
+    from importlib.resources import files as _res_files
+    text: str | None = None
     try:
-        compat = yaml_loader.load(_COMPAT_PATH.read_text(encoding="utf-8")) or {}
+        text = _res_files("teds_core").joinpath("teds_compat.yaml").read_text(encoding="utf-8")
+    except Exception:
+        try:
+            text = (_REPO_ROOT / "teds_compat.yaml").read_text(encoding="utf-8")
+        except Exception:
+            text = None
+    if not text:
+        return 1, 0, 0
+    try:
+        compat = yaml_loader.load(text) or {}
         spec = compat.get("spec") or {}
         major = int(spec.get("major"))
         max_minor = int(spec.get("max_minor"))
         rec_minor = int(spec.get("recommended_minor", max_minor))
         return major, max_minor, rec_minor
     except Exception:
-        # Fallback to 1.0 if manifest missing or malformed
         return 1, 0, 0
 
 SUPPORTED_TESTSPEC_MAJOR, _SUPPORTED_MAX_MINOR, _RECOMMENDED_MINOR = _load_compat()
