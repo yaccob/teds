@@ -17,10 +17,12 @@ python -m venv "$tmpdir/venv"
 python -m pip install -U pip >/dev/null
 pip install --no-cache-dir dist/*.whl >/dev/null
 
-# Version line
+work=$(mktemp -d)
+cd "$work"
+# Version line (installed package)
 teds --version | sed -n '1p'
 
-# Resource loads
+# Resource loads (ensure import resolves to installed package)
 python - << 'PY'
 from teds_core.resources import read_text_resource as r
 assert r('spec_schema.yaml')
@@ -28,9 +30,7 @@ assert r('teds_compat.yaml')
 print('resource load OK')
 PY
 
-# verify demo; expect rc=1 (run from temp dir so imports resolve to installed package)
-work=$(mktemp -d)
-cd "$work"
+# verify demo; expect rc=1
 set +e
 teds verify "$REPO/demo/sample_tests.yaml" --output-level warning > "$tmpdir/out.yaml"
 rc=$?

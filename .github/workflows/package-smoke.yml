@@ -39,9 +39,11 @@ jobs:
           . .pkg-smoke/bin/activate
           python -m pip install -U pip
           pip install dist/*.whl
-          # CLI version string
+          run_dir=$(mktemp -d)
+          cd "$run_dir"
+          # CLI version string (uses installed package)
           teds --version | sed -n '1p'
-          # Resource loads
+          # Resource loads (ensure import resolves to installed package)
           python - << 'PY'
           from teds_core.resources import read_text_resource as r
           assert r('spec_schema.yaml')
@@ -49,8 +51,6 @@ jobs:
           print('resource load OK')
           PY
           # verify demo; expect rc=1
-          run_dir=$(mktemp -d)
-          cd "$run_dir"
           set +e
           teds verify "$REPO/demo/sample_tests.yaml" --output-level warning > /tmp/out.yaml
           rc=$?

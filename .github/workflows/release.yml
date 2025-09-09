@@ -61,6 +61,8 @@ jobs:
           . .pkg-smoke/bin/activate
           python -m pip install -U pip
           pip install dist/*.whl
+          run_dir=$(mktemp -d)
+          cd "$run_dir"
           teds --version | sed -n '1p'
           python - << 'PY'
           from teds_core.resources import read_text_resource as r
@@ -70,8 +72,6 @@ jobs:
           PY
           set +e
           REPO="$PWD"
-          run_dir=$(mktemp -d)
-          cd "$run_dir"
           teds verify "$REPO/demo/sample_tests.yaml" --output-level warning > /tmp/out.yaml
           rc=$?
           set -e
