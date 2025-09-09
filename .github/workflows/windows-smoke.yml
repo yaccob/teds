@@ -24,7 +24,10 @@ jobs:
         run: |
           teds --version
           teds verify demo/sample_tests.yaml --output-level warning
-          if ($LASTEXITCODE -ne 1) {
-            echo "Expected exit code 1, got $LASTEXITCODE"
+          $rc = $LASTEXITCODE
+          Write-Host "exit code: $rc"
+          if ($rc -ne 1) {
+            Write-Error "Expected exit code 1, got $rc"
             exit 1
           }
+          exit 0

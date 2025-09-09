@@ -140,14 +140,9 @@ By default, only local `file://` refs are resolved.
 
 ## 9) Versioning and compatibility
 
-- App and testspec haben getrennte Versionen. Die App deklariert eine unterstützte Testspezifikations‑Range per Manifest (`teds_compat.yaml`).
-- `teds --version` zeigt: `teds <app> (spec supported: 1.0–1.N; recommended: 1.N)`
-- Testspecs benötigen `version: MAJOR.MINOR.PATCH` am Top‑Level.
-- Gates beim Verifizieren/Schreiben:
-  - MAJOR muss passen; andernfalls RC=2.
-  - MINOR darf die unterstützte Obergrenze nicht überschreiten; andernfalls RC=2 mit klarer Meldung und Range.
-  - Strikte Schema‑Validierung gegen `spec_schema.yaml`; unbekannte Felder/Strukturen führen zu RC=2.
-- Generator stempelt die empfohlene Testspezifikations‑Version (aus dem Manifest), um Churn gering zu halten.
+- Tool uses Semantic Versioning; `teds --version` prints tool version and supported testspec major.
+- Testspecs require `version: MAJOR.MINOR.PATCH` at top‑level. The tool enforces MAJOR equality and MINOR ≤ supported.
+- On mismatch: exit 2 and no write with a clear message.
 
 ## 10) Troubleshooting
 
