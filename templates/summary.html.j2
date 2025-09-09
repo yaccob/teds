@@ -18,7 +18,7 @@
   {% set doc = inputs[0].doc %}
   {% if doc.tests %}
     <div class="refs">
-      <h3>Refs</h3>
+      <h3>Schemas</h3>
       <ul>
       {% for ref, grp in doc.tests.items() %}
         <li><strong>{{ ref }}</strong> — valid: {{ (grp.valid or {})|length }}, invalid: {{ (grp.invalid or {})|length }}</li>
