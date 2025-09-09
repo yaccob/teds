@@ -1,8 +1,10 @@
 name: windows-smoke
 
 on:
-  push:
   pull_request:
+    branches: [ master ]
+  push:
+    branches: [ master ]
 
 jobs:
   smoke:
