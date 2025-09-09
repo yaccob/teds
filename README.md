@@ -31,36 +31,15 @@ TeDS fits how most API developers already think. In practice you start from inte
 
 ### Why this matters (concrete scenarios):
 
- - Email/URI/Date formats: Validators differ in how strictly they enforce JSON Schema `format`. A value might pass in one environment and fail in another. The tool flags such cases and suggests adding a `pattern` for determinism.
-    - Real world:
-      - OpenAPITools/openapi-generator: date-time leads to wrong client typing/handling in popular generators: https://github.com/OpenAPITools/openapi-generator/issues/9380
-      - thephpleague/openapi-psr7-validator: date-time validation allowed non‑RFC3339 strings: https://github.com/thephpleague/openapi-psr7-validator/issues/247
-    - How TeDS could help to avoid this kind of problem:
-      - Add negative `date-time` cases (e.g., missing offset) and verify — WARNING/ERROR reveals divergence; enforce determinism via a `pattern`.
+ - Email/URI/Date formats: Validators differ in how strictly they enforce JSON Schema `format`. A value might pass in one environment and fail in another. See details → docs/why_this_matters.md#formats-email-uri-date-time
 
- - Boundary conditions: Off‑by‑one mistakes on `minimum`/`maximum`, `minLength`/`maxLength`, or `minItems`/`maxItems` are easy to miss when only examples are checked.
-    - Real world:
-      - Schemathesis/OpenAPI: empty array with `minItems: 0` treated as invalid (edge interpretation): https://github.com/schemathesis/schemathesis/issues/3056
-      - Kubernetes API linter discussions around `MinItems` and array field pointers: https://github.com/kubernetes-sigs/kube-api-linter/issues/116
-    - How TeDS could help to avoid this kind of problem:
-      - Add cases at N−1, N, N+1 (e.g., empty vs. non‑empty arrays) so regressions surface and intent is explicit.
- - Enum drift: Narrowing/widening an `enum` without tests can introduce breaking changes (or unintended acceptance); negative cases make this explicit.
-    - Real world:
-      - open-api (express middleware) discussion: case-insensitive enums expected by clients: https://github.com/kogosoftwarellc/open-api/issues/755
-      - swift-openapi-generator: request for case-insensitive enums: https://github.com/apple/swift-openapi-generator/issues/721
-    - How TeDS could help to avoid this kind of problem:
-      - Add a lowercase/variant invalid case. If it passes, you’ve exposed an acceptance gap; if it fails, you’ve documented strict casing for clients.
- - Additional properties: Forgetting `additionalProperties: false` can let unknown fields leak through; conversely, making it too strict can break clients — both caught by targeted cases.
-    - Real world:
-      - JSON schema: allOf with additionalProperties: https://stackoverflow.com/questions/22689900/json-schema-allof-with-additionalproperties
-      - Understanding additionalProperties: https://stackoverflow.com/questions/16459954/understanding-the-additionalproperties-keyword-in-json-schema-draft-version-4
-    - How TeDS could help to avoid this kind of problem:
-      - Add an invalid case with an unknown field. If it’s accepted, the schema is too lax; if rejected, the test documents strictness and prevents accidental relaxations.
- - Pointer/Compositions: Deeply nested structures or `oneOf`/`anyOf` compositions often allow unintended instances; explicit invalid cases document and prevent regressions.
-    - Real world:
-      - Numerous issues and Q&As around `oneOf`/`anyOf` usage and expectations, e.g.: https://stackoverflow.com/questions/25014650/json-schema-example-for-oneof-objects
-    - How TeDS could help to avoid this kind of problem:
-      - Craft a no‑match and ambiguous‑match invalid case to lock in intent; you’ll catch ambiguity and refine `oneOf`/`anyOf`.
+ - Boundary conditions: Off‑by‑one mistakes on `minimum`/`maximum`, `minLength`/`maxLength`, or `minItems`/`maxItems` are easy to miss when only examples are checked. See details → docs/why_this_matters.md#boundary-conditions-minmax-lengths-items
+
+ - Enum drift: Narrowing/widening an `enum` without tests can introduce breaking changes (or unintended acceptance); negative cases make this explicit. See details → docs/why_this_matters.md#enum-drift-casing-widening-narrowing
+
+ - Additional properties: Forgetting `additionalProperties: false` can let unknown fields leak through; conversely, making it too strict can break clients — both caught by targeted cases. See details → docs/why_this_matters.md#additional-properties-unknown-fields
+
+ - Pointer/Compositions: Deeply nested structures or `oneOf`/`anyOf` compositions often allow unintended instances; explicit invalid cases document and prevent regressions. See details → docs/why_this_matters.md#pointers--compositions-oneofanyof
 
 Bottom line: You specify the contract, you also test the contract — both what is allowed and what is forbidden. That improves quality and serves as living documentation.
 
