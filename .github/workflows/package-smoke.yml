@@ -1,67 +1,43 @@
-name: release
+name: package-smoke
 
 on:
+  pull_request:
+    branches: [ master ]
   push:
-    tags:
-      - 'v*'
+    branches: [ master ]
 
-permissions:
-  contents: read
-  id-token: write
+concurrency:
+  group: package-smoke-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  test:
+  smoke:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout tag
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # fetch tags for hatch-vcs
-          ref: ${{ github.ref }}
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: Install
-        run: |
-          python -m pip install -U pip
-          python -m pip install -r requirements.txt
-          python -m pip install -r requirements-dev.txt
-          python -m pip install hatch
-      - name: Run tests
-        run: |
-          python -m pip install -e .
-          pytest -q
+          fetch-depth: 0
 
-  build-and-publish:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout tag
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # fetch tags for hatch-vcs
-          ref: ${{ github.ref }}
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Build
+
+      - name: Build wheel and sdist
         run: |
-          python -m pip install -U pip hatch
-          rm -rf dist
-          hatch build -t sdist -t wheel
-          ls -la dist || true
-      - name: Verify artifacts and smoke-test install
-        run: |
-          set -euo pipefail
           python -m pip install -U pip build twine
+          python -m build
           twine check dist/*
+
+      - name: Assert wheel/sdist content
+        run: |
           python - << 'PY'
-          import glob, zipfile, tarfile
+          import glob, zipfile, tarfile, sys
           wheels = glob.glob('dist/*.whl')
           sdists = glob.glob('dist/*.tar.gz')
-          assert wheels and sdists, 'missing artifacts'
+          assert wheels, 'no wheel built'
+          assert sdists, 'no sdist built'
           def wheel_ok(p):
               with zipfile.ZipFile(p) as z:
                   names = set(z.namelist())
@@ -76,25 +52,33 @@ jobs:
           assert any(sdist_ok(s) for s in sdists), 'sdist missing required resources'
           print('artifact content OK')
           PY
+
+      - name: Install from wheel in clean venv and smoke-test
+        shell: bash
+        run: |
+          set -euo pipefail
           python -m venv .pkg-smoke
           . .pkg-smoke/bin/activate
           python -m pip install -U pip
           pip install dist/*.whl
+          # CLI version string
           teds --version | sed -n '1p'
+          # Resource loads
           python - << 'PY'
           from teds_core.resources import read_text_resource as r
           assert r('spec_schema.yaml')
           assert r('teds_compat.yaml')
           print('resource load OK')
           PY
+          # verify demo; expect rc=1
           set +e
           teds verify demo/sample_tests.yaml --output-level warning > /tmp/out.yaml
           rc=$?
           set -e
           echo "verify rc: $rc"
           test "$rc" -eq 1
+          # generate smoke
           teds generate demo/sample_schemas.yaml
           test -f demo/sample_schemas.tests.yaml
           deactivate
-      - name: Publish to PyPI (trusted publishing)
-        uses: pypa/gh-action-pypi-publish@release/v1
+
