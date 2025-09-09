@@ -69,13 +69,16 @@ jobs:
           print('resource load OK')
           PY
           set +e
-          teds verify demo/sample_tests.yaml --output-level warning > /tmp/out.yaml
+          REPO="$PWD"
+          run_dir=$(mktemp -d)
+          cd "$run_dir"
+          teds verify "$REPO/demo/sample_tests.yaml" --output-level warning > /tmp/out.yaml
           rc=$?
           set -e
           echo "verify rc: $rc"
           test "$rc" -eq 1
-          teds generate demo/sample_schemas.yaml
-          test -f demo/sample_schemas.tests.yaml
+          teds generate "$REPO/demo/sample_schemas.yaml=$run_dir/smoke.tests.yaml"
+          test -f "$run_dir/smoke.tests.yaml"
           deactivate
       - name: Publish to PyPI (trusted publishing)
         uses: pypa/gh-action-pypi-publish@release/v1

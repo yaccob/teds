@@ -9,7 +9,8 @@ twine check dist/*
 
 # Functional smoke only (no artifact layout assertions)
 
-# Use a temp venv outside the repo to avoid polluting the workspace
+# Use a temp venv and run from a temp dir to avoid importing the source tree
+REPO="$PWD"
 tmpdir=$(mktemp -d 2>/dev/null || mktemp -d -t teds-pkg-smoke)
 python -m venv "$tmpdir/venv"
 . "$tmpdir/venv/bin/activate"
@@ -27,17 +28,19 @@ assert r('teds_compat.yaml')
 print('resource load OK')
 PY
 
-# verify demo; expect rc=1
+# verify demo; expect rc=1 (run from temp dir so imports resolve to installed package)
+work=$(mktemp -d)
+cd "$work"
 set +e
-teds verify demo/sample_tests.yaml --output-level warning > "$tmpdir/out.yaml"
+teds verify "$REPO/demo/sample_tests.yaml" --output-level warning > "$tmpdir/out.yaml"
 rc=$?
 set -e
 echo "verify rc: $rc"
 test "$rc" -eq 1
 
-# generate smoke
-teds generate demo/sample_schemas.yaml
-test -f demo/sample_schemas.tests.yaml
+# generate smoke into temp file
+teds generate "$REPO/demo/sample_schemas.yaml=$work/smoke.tests.yaml"
+test -f "$work/smoke.tests.yaml"
 
 deactivate || true
 rm -rf "$tmpdir"
