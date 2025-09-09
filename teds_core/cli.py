@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 from .generate import generate_from
+from .report import run_report
 from .validate import validate_file
 from .errors import TedsError
 from .version import get_version, SUPPORTED_TESTSPEC_MAJOR, supported_spec_range_str, recommended_minor_str
@@ -172,6 +173,23 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p_gen.add_argument("mapping", nargs="+", help="REF[=TARGET] mappings")
 
+    p_report = sub.add_parser(
+        "report",
+        help="Render a report from one or more testspec files",
+        description=(
+            "Render a report using a Jinja2 template from verified testspec outputs.\n"
+            "- Usage: teds report --template <NAME|PATH> [--out FILE] [--output-level L] <SPEC>...\n"
+            "- Templates: built-in names (e.g., summary.md, summary.html) or filesystem path to a .j2 template.\n"
+            "- Output: writes to stdout by default; use --out to write to a file.\n"
+        ),
+        formatter_class=argparse.RawTextHelpFormatter,
+    )
+    p_report.add_argument("--template", required=True, help="Template name (built-in) or path to a .j2 template")
+    p_report.add_argument("--out", default=None, help="Output file path (default: stdout)")
+    p_report.add_argument("--output-level", choices=["all", "warning", "error"], default="warning",
+                          help="Filter cases to include: all, warning (default), or error")
+    p_report.add_argument("spec", nargs="+", help="YAML testspec file(s)")
+
     return ap
 
 
@@ -188,7 +206,7 @@ def main() -> None:
         )
         sys.exit(0)
 
-    if argv[0] in {"verify", "generate"}:
+    if argv[0] in {"verify", "generate", "report"}:
         args = ap.parse_args(argv)
         try:
             from .refs import set_network_policy
@@ -213,6 +231,21 @@ def main() -> None:
                 print(f"Unexpected error: {type(e).__name__}: {e}", file=sys.stderr)
                 sys.exit(2)
             sys.exit(0)
+        elif args.cmd == "report":
+            try:
+                rendered, rc = run_report([Path(p) for p in args.spec], args.template, args.output_level)
+                if args.out:
+                    Path(args.out).parent.mkdir(parents=True, exist_ok=True)
+                    Path(args.out).write_text(rendered, encoding="utf-8")
+                else:
+                    sys.stdout.write(rendered)
+                sys.exit(rc)
+            except FileNotFoundError as e:
+                print(str(e), file=sys.stderr)
+                sys.exit(2)
+            except Exception as e:
+                print(f"Unexpected error: {type(e).__name__}: {e}", file=sys.stderr)
+                sys.exit(2)
         else:
             ap.print_help(sys.stderr)
             sys.exit(2)

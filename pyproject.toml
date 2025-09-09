@@ -27,6 +27,7 @@ dependencies = [
   "jsonschema[format-nongpl]>=4.22.0",
   "referencing>=0.35.0",
   "ruamel.yaml>=0.18.6",
+  "Jinja2>=3.1",
 ]
 dynamic = ["version"]
 
@@ -48,6 +49,7 @@ packages = ["teds_core"]
 [tool.hatch.build.targets.wheel.force-include]
 "spec_schema.yaml" = "teds_core/spec_schema.yaml"
 "teds_compat.yaml" = "teds_core/teds_compat.yaml"
+"teds_core/templates" = "teds_core/templates"
 
 [tool.hatch.envs.test]
 dependencies = [
