@@ -1,8 +1,10 @@
 name: demo-checks
 
 on:
-  push:
   pull_request:
+    branches: [ master ]
+  push:
+    branches: [ master ]
 
 jobs:
   demo-e2e:
