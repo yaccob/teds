@@ -43,7 +43,8 @@ jobs:
                   "strict_required_status_checks_policy": true,
                   "required_status_checks": [
                     { "context": "windows-smoke / smoke" },
-                    { "context": "demo-checks / demo-e2e" }
+                    { "context": "demo-checks / demo-e2e" },
+                    { "context": "package-smoke / smoke" }
                   ]
                 }
               },
