@@ -52,5 +52,33 @@ jobs:
           rm -rf dist
           hatch build -t sdist -t wheel
           ls -la dist || true
+      - name: Verify install and smoke-test
+        run: |
+          set -euo pipefail
+          python -m pip install -U pip twine
+          twine check dist/*
+          python -m venv .pkg-smoke
+          . .pkg-smoke/bin/activate
+          python -m pip install -U pip
+          pip install dist/*.whl
+          run_dir=$(mktemp -d)
+          cd "$run_dir"
+          teds --version | sed -n '1p'
+          python - << 'PY'
+          from teds_core.resources import read_text_resource as r
+          assert r('spec_schema.yaml')
+          assert r('teds_compat.yaml')
+          print('resource load OK')
+          PY
+          set +e
+          REPO="$PWD"
+          teds verify "$REPO/demo/sample_tests.yaml" --output-level warning > /tmp/out.yaml
+          rc=$?
+          set -e
+          echo "verify rc: $rc"
+          test "$rc" -eq 1
+          teds generate "$REPO/demo/sample_schemas.yaml=$run_dir/smoke.tests.yaml"
+          test -f "$run_dir/smoke.tests.yaml"
+          deactivate
       - name: Publish to PyPI (trusted publishing)
         uses: pypa/gh-action-pypi-publish@release/v1

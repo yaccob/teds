@@ -1,0 +1,63 @@
+name: package-smoke
+
+on:
+  pull_request:
+    branches: [ master ]
+  push:
+    branches: [ master ]
+
+concurrency:
+  group: package-smoke-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build wheel and sdist
+        run: |
+          python -m pip install -U pip build twine
+          python -m build
+          twine check dist/*
+
+      - name: Install from wheel in clean venv and smoke-test
+        shell: bash
+        run: |
+          set -euo pipefail
+          REPO="$PWD"
+          python -m venv .pkg-smoke
+          . .pkg-smoke/bin/activate
+          python -m pip install -U pip
+          pip install dist/*.whl
+          run_dir=$(mktemp -d)
+          cd "$run_dir"
+          # CLI version string (uses installed package)
+          teds --version | sed -n '1p'
+          # Resource loads (ensure import resolves to installed package)
+          python - << 'PY'
+          from teds_core.resources import read_text_resource as r
+          assert r('spec_schema.yaml')
+          assert r('teds_compat.yaml')
+          print('resource load OK')
+          PY
+          # verify demo; expect rc=1
+          set +e
+          teds verify "$REPO/demo/sample_tests.yaml" --output-level warning > /tmp/out.yaml
+          rc=$?
+          set -e
+          echo "verify rc: $rc"
+          test "$rc" -eq 1
+          # generate smoke
+          teds generate "$REPO/demo/sample_schemas.yaml=$run_dir/smoke.tests.yaml"
+          test -f "$run_dir/smoke.tests.yaml"
+          deactivate

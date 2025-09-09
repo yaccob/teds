@@ -170,9 +170,11 @@ def _evaluate_case(
 
 
 def _validate_testspec_against_schema(doc: dict[str, Any], repo_root: Path) -> None:
-    # Load schema from repository root (bundled via wheel include)
-    schema_path = (repo_root / "spec_schema.yaml").resolve()
-    schema = yaml_loader.load(schema_path.read_text(encoding="utf-8")) or {}
+    # Load schema via package resources for installed wheels, with repo-root fallback for dev.
+    from .resources import read_text_resource
+
+    schema_text = read_text_resource("spec_schema.yaml")
+    schema = yaml_loader.load(schema_text) or {}
     Draft202012Validator(schema).validate(doc)
 
 
