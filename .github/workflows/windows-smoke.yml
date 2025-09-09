@@ -23,7 +23,7 @@ jobs:
         shell: pwsh
         run: |
           teds --version
-          & teds verify demo/sample_tests.yaml --output-level warning
+          teds verify demo/sample_tests.yaml --output-level warning
           $rc = $LASTEXITCODE
           Write-Host "exit code: $rc"
           if ($rc -ne 1) {
