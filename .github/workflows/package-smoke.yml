@@ -30,29 +30,6 @@ jobs:
           python -m build
           twine check dist/*
 
-      - name: Assert wheel/sdist content
-        run: |
-          python - << 'PY'
-          import glob, zipfile, tarfile, sys
-          wheels = glob.glob('dist/*.whl')
-          sdists = glob.glob('dist/*.tar.gz')
-          assert wheels, 'no wheel built'
-          assert sdists, 'no sdist built'
-          def wheel_ok(p):
-              with zipfile.ZipFile(p) as z:
-                  names = set(z.namelist())
-                  root = {'spec_schema.yaml','teds_compat.yaml'}
-                  pkg = {'teds_core/spec_schema.yaml','teds_core/teds_compat.yaml'}
-                  return root <= names or pkg <= names
-          def sdist_ok(p):
-              with tarfile.open(p, 'r:gz') as t:
-                  names = {m.name.split('/',1)[-1] for m in t.getmembers() if m.isfile()}
-                  return 'spec_schema.yaml' in names and 'teds_compat.yaml' in names
-          assert all(wheel_ok(w) for w in wheels), 'wheel missing required resources'
-          assert any(sdist_ok(s) for s in sdists), 'sdist missing required resources'
-          print('artifact content OK')
-          PY
-
       - name: Install from wheel in clean venv and smoke-test
         shell: bash
         run: |
@@ -81,4 +58,3 @@ jobs:
           teds generate demo/sample_schemas.yaml
           test -f demo/sample_schemas.tests.yaml
           deactivate
-

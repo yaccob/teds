@@ -45,7 +45,6 @@ source = "vcs"
 [tool.hatch.build.targets.wheel]
 packages = ["teds_core"]
 include = [
-  "teds_core/*.yaml",
   "spec_schema.yaml",
   "teds_compat.yaml",
 ]

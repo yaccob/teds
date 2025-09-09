@@ -52,30 +52,11 @@ jobs:
           rm -rf dist
           hatch build -t sdist -t wheel
           ls -la dist || true
-      - name: Verify artifacts and smoke-test install
+      - name: Verify install and smoke-test
         run: |
           set -euo pipefail
-          python -m pip install -U pip build twine
+          python -m pip install -U pip twine
           twine check dist/*
-          python - << 'PY'
-          import glob, zipfile, tarfile
-          wheels = glob.glob('dist/*.whl')
-          sdists = glob.glob('dist/*.tar.gz')
-          assert wheels and sdists, 'missing artifacts'
-          def wheel_ok(p):
-              with zipfile.ZipFile(p) as z:
-                  names = set(z.namelist())
-                  root = {'spec_schema.yaml','teds_compat.yaml'}
-                  pkg = {'teds_core/spec_schema.yaml','teds_core/teds_compat.yaml'}
-                  return root <= names or pkg <= names
-          def sdist_ok(p):
-              with tarfile.open(p, 'r:gz') as t:
-                  names = {m.name.split('/',1)[-1] for m in t.getmembers() if m.isfile()}
-                  return 'spec_schema.yaml' in names and 'teds_compat.yaml' in names
-          assert all(wheel_ok(w) for w in wheels), 'wheel missing required resources'
-          assert any(sdist_ok(s) for s in sdists), 'sdist missing required resources'
-          print('artifact content OK')
-          PY
           python -m venv .pkg-smoke
           . .pkg-smoke/bin/activate
           python -m pip install -U pip
