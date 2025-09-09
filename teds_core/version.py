@@ -7,22 +7,16 @@ from pathlib import Path
 import semver  # type: ignore
 
 from .yamlio import yaml_loader
+from .resources import read_text_resource
 
 # Load compatibility manifest from repository root (bundled with the wheel)
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 
 def _load_compat() -> tuple[int, int, int]:
-    # Load manifest via package resources (installed) with repo-root fallback for dev.
-    from importlib.resources import files as _res_files
-    text: str | None = None
+    # Load manifest via shared resource helper
     try:
-        text = _res_files("teds_core").joinpath("teds_compat.yaml").read_text(encoding="utf-8")
+        text = read_text_resource("teds_compat.yaml")
     except Exception:
-        try:
-            text = (_REPO_ROOT / "teds_compat.yaml").read_text(encoding="utf-8")
-        except Exception:
-            text = None
-    if not text:
         return 1, 0, 0
     try:
         compat = yaml_loader.load(text) or {}
