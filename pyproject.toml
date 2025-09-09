@@ -44,10 +44,10 @@ source = "vcs"
 
 [tool.hatch.build.targets.wheel]
 packages = ["teds_core"]
-include = [
-  "spec_schema.yaml",
-  "teds_compat.yaml",
-]
+
+[tool.hatch.build.targets.wheel.force-include]
+"spec_schema.yaml" = "teds_core/spec_schema.yaml"
+"teds_compat.yaml" = "teds_core/teds_compat.yaml"
 
 [tool.hatch.envs.test]
 dependencies = [
