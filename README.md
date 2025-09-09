@@ -31,15 +31,15 @@ TeDS fits how most API developers already think. In practice you start from inte
 
 ### Why this matters (concrete scenarios):
 
- - Email/URI/Date formats: Validators differ in how strictly they enforce JSON Schema `format`. A value might pass in one environment and fail in another. See details → [docs/why_this_matters.md#formats-email-uri-date-time](docs/why_this_matters.md#formats-email-uri-date-time)
+ - Email/URI/Date formats: Validators differ in how strictly they enforce JSON Schema `format`. A value might pass in one environment and fail in another. For details, see [Formats (deep dive)](docs/why_this_matters.md#formats-email-uri-date-time).
 
- - Boundary conditions: Off‑by‑one mistakes on `minimum`/`maximum`, `minLength`/`maxLength`, or `minItems`/`maxItems` are easy to miss when only examples are checked. See details → [docs/why_this_matters.md#boundary-conditions-minmax-lengths-items](docs/why_this_matters.md#boundary-conditions-minmax-lengths-items)
+ - Boundary conditions: Off‑by‑one mistakes on `minimum`/`maximum`, `minLength`/`maxLength`, or `minItems`/`maxItems` are easy to miss when only examples are checked. For details, see [Boundary Conditions (deep dive)](docs/why_this_matters.md#boundary-conditions-minmax-lengths-items).
 
- - Enum drift: Narrowing/widening an `enum` without tests can introduce breaking changes (or unintended acceptance); negative cases make this explicit. See details → [docs/why_this_matters.md#enum-drift-casing-widening-narrowing](docs/why_this_matters.md#enum-drift-casing-widening-narrowing)
+ - Enum drift: Narrowing/widening an `enum` without tests can introduce breaking changes (or unintended acceptance); negative cases make this explicit. For details, see [Enum Drift (deep dive)](docs/why_this_matters.md#enum-drift-casing-widening-narrowing).
 
- - Additional properties: Forgetting `additionalProperties: false` can let unknown fields leak through; conversely, making it too strict can break clients — both caught by targeted cases. See details → [docs/why_this_matters.md#additional-properties-unknown-fields](docs/why_this_matters.md#additional-properties-unknown-fields)
+ - Additional properties: Forgetting `additionalProperties: false` can let unknown fields leak through; conversely, making it too strict can break clients — both caught by targeted cases. For details, see [Additional Properties (deep dive)](docs/why_this_matters.md#additional-properties-unknown-fields).
 
- - Pointer/Compositions: Deeply nested structures or `oneOf`/`anyOf` compositions often allow unintended instances; explicit invalid cases document and prevent regressions. See details → [docs/why_this_matters.md#pointers--compositions-oneofanyof](docs/why_this_matters.md#pointers--compositions-oneofanyof)
+ - Pointer/Compositions: Deeply nested structures or `oneOf`/`anyOf` compositions often allow unintended instances; explicit invalid cases document and prevent regressions. For details, see [Pointers & Compositions (deep dive)](docs/why_this_matters.md#pointers--compositions-oneofanyof).
 
 Bottom line: You specify the contract, you also test the contract — both what is allowed and what is forbidden. That improves quality and serves as living documentation.
 
@@ -102,7 +102,7 @@ Verify negative and positive contract cases:
 - 1: verification produced cases with `result: ERROR`
 - 2: hard failures (I/O, YAML parse, invalid testspec schema, schema/ref resolution, version mismatch, unexpected)
 
-## CLI Tutorial
+## Tutorial
 
 Looking for a step‑by‑step introduction? Read the full tutorial:
 
