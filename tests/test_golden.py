@@ -5,7 +5,7 @@ from typing import Dict, Any, Iterable
 import shutil
 
 from tests.utils import load_yaml_file
-from teds_core.version import SUPPORTED_TESTSPEC_VERSION
+from teds_core.version import RECOMMENDED_TESTSPEC_VERSION
 import teds
 
 
@@ -38,7 +38,7 @@ def test_golden_warning_level(tmp_path: Path):
 
         doc = load_yaml_file(spec)
         out_tests, rc = teds.validate_doc(doc, case_dir, output_level="warning", in_place=False)
-        result_doc = {"version": SUPPORTED_TESTSPEC_VERSION, "tests": out_tests}
+        result_doc = {"version": RECOMMENDED_TESTSPEC_VERSION, "tests": out_tests}
 
         expected_doc = load_yaml_file(expected)
         assert result_doc == expected_doc, f"Mismatch in {case_dir} (warning)"
@@ -54,7 +54,7 @@ def test_golden_error_level(tmp_path: Path):
 
         doc = load_yaml_file(spec)
         out_tests, rc = teds.validate_doc(doc, case_dir, output_level="error", in_place=False)
-        result_doc = {"version": SUPPORTED_TESTSPEC_VERSION, "tests": out_tests}
+        result_doc = {"version": RECOMMENDED_TESTSPEC_VERSION, "tests": out_tests}
 
         expected_doc = load_yaml_file(expected_err)
         assert result_doc == expected_doc, f"Mismatch in {case_dir} (error)"

@@ -6,14 +6,13 @@ import re
 from tests.test_cli import run_cli
 
 
-def test_cli_version_prints_semver_and_major():
+def test_cli_version_prints_semver_and_spec_range():
     rc, out, err = run_cli(["--version"])
     assert rc == 0
     assert err == ""
-    # teds <semver> (testspec major: N)
+    # teds <semver> (spec supported: 1.0–1.N; recommended: 1.N)
     assert out.startswith("teds ")
-    m = re.search(r"teds\s+([0-9]+\.[0-9]+\.[0-9A-Za-z+.-]+)\s+\(testspec major: (\d+)\)", out.strip())
-    assert m, out
+    assert "(spec supported: " in out and "; recommended: " in out, out
 
 
 def test_in_place_rejects_mismatched_major(tmp_path: Path):
