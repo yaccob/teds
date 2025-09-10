@@ -86,7 +86,10 @@ def _plan_pairs(mappings: list[str]) -> list[tuple[str, Path]]:
             else:
                 out_path = path
 
-        pairs.append((f"{file_part}#/{pointer.lstrip('/')}" if not file_part.endswith(f"#{pointer}") else f"{file_part}#{pointer}", out_path))
+        # Build an absolute file path for the ref to avoid double-joining against base dirs later
+        file_abs = str(Path(file_part).resolve())
+        ref_out = f"{file_abs}#/{pointer.lstrip('/')}" if not file_abs.endswith(f"#{pointer}") else f"{file_abs}#{pointer}"
+        pairs.append((ref_out, out_path))
     outs_abs = [p.resolve() for _, p in pairs]
     seen = {}
     for idx, p in enumerate(outs_abs):
