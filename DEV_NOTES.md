@@ -51,8 +51,19 @@ This file tracks implementation decisions and near‑term TODOs for TeDS, so fut
 - README: add a short “Reports” section (usage, defaults, template listing).
 - More built‑in templates (e.g., per‑ref detail, warnings/errors focus).
 
+## Test Coverage Strategy
+
+- Two separate coverage gates in CI (no combined report):
+  - Unit (tests/unit): `--cov` over in‑process modules, target ≥ 75% (initial), to be raised incrementally.
+  - CLI (tests/cli): end‑to‑end subprocess tests, target ≥ 60% (initial).
+- Threshold plan:
+  - Raise Unit to 85% once additional unit tests cover validate/version/refs/generate error paths and branches.
+  - Keep CLI threshold realistic; improve gradually as more scenarios are exercised.
+- Notes:
+  - CLI coverage is harder to push very high due to subprocess nature; it complements (not replaces) Unit coverage.
+  - We do not require a combined coverage number.
+
 ## Branch/PR Workflow (reminder)
 
 - No direct pushes to `master`.
 - Short‑lived feature branches; PR + green CI before merge; Squash‑merge.
-
