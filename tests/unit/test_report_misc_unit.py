@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import pytest
 
-from teds_core.report import list_templates, resolve_template, build_context, ReportInput
+from teds_core.report import list_templates, resolve_template, build_context, ReportInput, run_report_per_spec
+from pathlib import Path
 
 
 def test_list_and_resolve_templates():
@@ -24,7 +25,15 @@ def test_build_context_totals():
     assert ctx["totals"] == {"success": 1, "warning": 3, "error": 3, "specs": 2}
 
 
+def test_run_report_per_spec_hard_failure(tmp_path: Path):
+    # Spec with invalid version should produce hard_rc=2 and no outputs
+    spec = tmp_path / "spec.yaml"
+    spec.write_text("version: '2.0.0'\ntests: {}\n", encoding="utf-8")
+    outputs, rc = run_report_per_spec([spec], "summary.md", output_level="warning")
+    assert rc == 2
+    assert outputs == [] or all(isinstance(x[1], str) for x in outputs)
+
+
 def path_name(stem: str):
     from pathlib import Path
     return Path(f"/tmp/{stem}.yaml")
-
