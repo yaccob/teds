@@ -45,6 +45,9 @@
 - Golden tests: see `tests/cases/*` — case directories are behavior-focused (e.g., `format_divergence`, `output_filtering_and_inplace`). Each case has `schema.yaml`, `spec.yaml`, and `expected*.yaml`; tests compare parsed YAML structures and verify exit codes.
 - Demos remain under `demo/` for illustrative data and manual runs.
 - Test style: small, focused tests; tmp paths for I/O; import helpers directly (`validate_doc`, `validate_file`, `generate_from`).
+- Tests-first principle:
+  - For bug fixes and new features, write a failing test first that exposes the behavior, confirm it fails, then implement the fix/feature until the test passes.
+  - Do not rewrite history to reorder fix/test after the fact; keep the timeline truthful for easier analysis.
 
 ## Developer Hygiene (Agents)
 - Do not create temporary files or directories in the project root during manual reproduction or debugging.
