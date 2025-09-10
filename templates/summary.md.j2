@@ -1,0 +1,18 @@
+# TeDS Report
+
+- Tool: teds {{ tool.version }} (spec supported: {{ tool.spec_supported }}; recommended: {{ tool.spec_recommended }})
+
+## {{ inputs[0].path }}
+
+{% set doc = inputs[0].doc %}
+{% set success = 0 %}{% set warning = 0 %}{% set error = 0 %}
+{% if doc.tests %}
+### Schemas
+{% for ref, grp in doc.tests.items() %}
+- {{ ref }}
+  - valid: {{ (grp.valid or {})|length }} cases
+  - invalid: {{ (grp.invalid or {})|length }} cases
+{% endfor %}
+{% else %}
+No cases.
+{% endif %}

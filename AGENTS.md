@@ -51,6 +51,11 @@
 - Use `pytest`'s `tmp_path` fixture or `tempfile.TemporaryDirectory()` for ad‑hoc experiments.
 - If you need a scratch workspace, keep it under a temporary directory outside the repo, not as `sandbox_*` in the root.
 
+### Session continuity
+- Persist active plans, decisions, and in‑progress feature notes in `DEV_NOTES.md` (not in AGENTS.md).
+- Treat `DEV_NOTES.md` as the living log for ongoing work so ending a session does not lose context.
+- Keep AGENTS.md for stable, repo‑wide conventions and long‑lived guidance only.
+
 ## Commit & Pull Request Guidelines
 - Git history is minimal; adopt Conventional Commits (`feat:`, `fix:`, `docs:`, etc.).
 - PRs should include: clear description, linked issues, sample commands you ran, and before/after behavior when applicable.

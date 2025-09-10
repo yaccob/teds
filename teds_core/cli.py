@@ -86,7 +86,10 @@ def _plan_pairs(mappings: list[str]) -> list[tuple[str, Path]]:
             else:
                 out_path = path
 
-        pairs.append((f"{file_part}#/{pointer.lstrip('/')}" if not file_part.endswith(f"#{pointer}") else f"{file_part}#{pointer}", out_path))
+        # Build an absolute file path for the ref to avoid double-joining against base dirs later
+        file_abs = str(Path(file_part).resolve())
+        ref_out = f"{file_abs}#/{pointer.lstrip('/')}" if not file_abs.endswith(f"#{pointer}") else f"{file_abs}#{pointer}"
+        pairs.append((ref_out, out_path))
     outs_abs = [p.resolve() for _, p in pairs]
     seen = {}
     for idx, p in enumerate(outs_abs):
@@ -139,6 +142,8 @@ def _build_parser() -> argparse.ArgumentParser:
     p_verify.add_argument("--output-level", choices=["all", "warning", "error"], default="warning",
                          help="Filter cases to emit: all, warning (default), or error")
     p_verify.add_argument("-i", "--in-place", action="store_true", help="Write results back to the given spec file(s)")
+    p_verify.add_argument("--report", help="Render report using TEMPLATE_ID or TEMPLATE_ID=OUTFILE (reports always write files)")
+    # verify remains focused on validation; reporting moved to a dedicated subcommand
 
     p_gen = sub.add_parser(
         "generate",
@@ -172,6 +177,8 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p_gen.add_argument("mapping", nargs="+", help="REF[=TARGET] mappings")
 
+    # No explicit report/templates subcommands; reporting is handled via verify --report and templates listing via top-level --list-templates.
+
     return ap
 
 
@@ -188,6 +195,14 @@ def main() -> None:
         )
         sys.exit(0)
 
+    # Top-level templates listing (like --help/--version)
+    if "--list-templates" in argv:
+        from .report import list_templates
+        for it in list_templates():
+            print(f"{it.get('id')}: {it.get('description','').strip()}")
+        sys.exit(0)
+
+
     if argv[0] in {"verify", "generate"}:
         args = ap.parse_args(argv)
         try:
@@ -196,10 +211,38 @@ def main() -> None:
         except Exception:
             pass
         if args.cmd == "verify":
-            rc_all = 0
-            for spec in args.spec:
-                rc_all = max(rc_all, validate_file(Path(spec), args.output_level, args.in_place))
-            sys.exit(rc_all)
+            if args.report:
+                # Parse TEMPLATE_ID or TEMPLATE_ID=OUTFILE
+                report_arg = args.report
+                tpl_id, out_override = (report_arg.split("=", 1) + [None])[:2] if "=" in report_arg else (report_arg, None)
+                from .report import run_report_per_spec, resolve_template
+                try:
+                    resolve_template(tpl_id)
+                except Exception as e:
+                    print(str(e), file=sys.stderr)
+                    sys.exit(2)
+                pairs, rc = run_report_per_spec([Path(s) for s in args.spec], tpl_id, args.output_level)
+                multi = len(pairs) > 1
+                for sp, content in pairs:
+                    if out_override:
+                        if multi:
+                            print("Explicit output path is only supported with a single SPEC", file=sys.stderr)
+                            sys.exit(2)
+                        out_path = Path(out_override)
+                    else:
+                        base = sp.stem
+                        ext = ".html" if tpl_id.endswith(".html") else ".md"
+                        tbase = tpl_id.split(".")[0]
+                        name = f"{base}.report{ext}" if not multi else f"{base}.{tbase}.report{ext}"
+                        out_path = sp.parent / name
+                    out_path.parent.mkdir(parents=True, exist_ok=True)
+                    out_path.write_text(content, encoding="utf-8")
+                sys.exit(rc)
+            else:
+                rc_all = 0
+                for spec in args.spec:
+                    rc_all = max(rc_all, validate_file(Path(spec), args.output_level, args.in_place))
+                sys.exit(rc_all)
         elif args.cmd == "generate":
             try:
                 pairs = _plan_pairs(args.mapping)
@@ -213,6 +256,7 @@ def main() -> None:
                 print(f"Unexpected error: {type(e).__name__}: {e}", file=sys.stderr)
                 sys.exit(2)
             sys.exit(0)
+        
         else:
             ap.print_help(sys.stderr)
             sys.exit(2)

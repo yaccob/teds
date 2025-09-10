@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>TeDS Report</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 1.5rem; }
+    h1 { margin-bottom: .2rem; }
+    .meta { color: #555; margin-bottom: 1rem; }
+    .refs { margin-left: 1rem; }
+  </style>
+  </head>
+<body>
+  <h1>TeDS Report</h1>
+  <div class="meta">teds {{ tool.version }} (spec supported: {{ tool.spec_supported }}; recommended: {{ tool.spec_recommended }})</div>
+
+  <h2>{{ inputs[0].path }}</h2>
+  {% set doc = inputs[0].doc %}
+  {% if doc.tests %}
+    <div class="refs">
+      <h3>Schemas</h3>
+      <ul>
+      {% for ref, grp in doc.tests.items() %}
+        <li><strong>{{ ref }}</strong> — valid: {{ (grp.valid or {})|length }}, invalid: {{ (grp.invalid or {})|length }}</li>
+      {% endfor %}
+      </ul>
+    </div>
+  {% else %}
+    <div>No cases.</div>
+  {% endif %}
+</body>
+</html>

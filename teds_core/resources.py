@@ -34,4 +34,3 @@ def read_text_resource(filename: str) -> str:
         return p_repo.read_text(encoding="utf-8")
 
     raise FileNotFoundError(f"Resource not found: {filename}")
-
