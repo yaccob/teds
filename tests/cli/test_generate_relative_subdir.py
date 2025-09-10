@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from tests.test_cli import run_cli
+from tests.utils import run_cli
 from tests.utils import load_yaml_file
 
 

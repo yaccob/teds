@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from tests.test_cli import run_cli
+from tests.utils import run_cli
 
 
 def test_report_markdown(tmp_path: Path):
     # Use existing case directory
-    case = Path(__file__).parent / "cases" / "format_divergence"
+    case = Path(__file__).resolve().parents[1] / "cases" / "format_divergence"
     spec = case / "spec.yaml"
     rc, out, err = run_cli([
         "verify",

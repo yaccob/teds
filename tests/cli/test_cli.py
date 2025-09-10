@@ -5,22 +5,10 @@ import subprocess
 from pathlib import Path
 
 
-CASES = Path(__file__).parent / "cases"
+CASES = Path(__file__).resolve().parents[1] / "cases"
 
 
-SCRIPT = Path(__file__).resolve().parents[1] / "teds.py"
-
-
-def run_cli(args: list[str], cwd: Path | None = None) -> tuple[int, str, str]:
-    proc = subprocess.run(
-        [sys.executable, str(SCRIPT), *args],
-        cwd=str(cwd) if cwd else None,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-        check=False,
-    )
-    return proc.returncode, proc.stdout, proc.stderr
+from tests.utils import run_cli
 
 
 from tests.utils import (

@@ -28,10 +28,13 @@ jobs:
           python -m pip install -r requirements.txt
           python -m pip install -r requirements-dev.txt
           python -m pip install hatch
-      - name: Run tests with coverage (fail-under=70)
+      - name: Unit coverage (fail-under=85)
         run: |
           python -m pip install -e .
-          pytest --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing --cov-report=xml --cov-fail-under=70 -q
+          pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing --cov-fail-under=85 -q
+      - name: CLI coverage (fail-under=60)
+        run: |
+          pytest tests/cli --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing --cov-fail-under=60 -q
 
   build-and-publish:
     needs: test
