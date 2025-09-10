@@ -1,6 +1,6 @@
 # TeDS Report
 
-- Tool: teds 0.2.5 (spec supported: 1.0–1.0; recommended: 1.0)
+- Tool: teds 0.2.4 (spec supported: 1.0–1.0; recommended: 1.0)
 
 ## /Users/yaccob/repos/github.com/yaccob/contest/tests/cases/format_divergence/spec.yaml
 
