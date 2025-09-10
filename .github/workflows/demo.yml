@@ -23,6 +23,9 @@ jobs:
           python -m pip install -U pip
           python -m pip install -r requirements.txt -r requirements-dev.txt
           python -m pip install -e .
+      - name: Run tests with coverage (fail-under=70)
+        run: |
+          pytest --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing --cov-report=xml --cov-fail-under=70 -q
       - name: Verify demo/sample_tests.yaml (expect rc=1)
         run: |
           set +e

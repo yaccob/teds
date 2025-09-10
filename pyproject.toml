@@ -55,6 +55,7 @@ packages = ["teds_core"]
 [tool.hatch.envs.test]
 dependencies = [
   "pytest>=7.0",
+  "pytest-cov>=4.0",
 ]
 pre-install-commands = [
   "python -m pip install -r requirements.txt",
@@ -62,3 +63,19 @@ pre-install-commands = [
 
 [tool.hatch.envs.test.scripts]
 test = "pytest -q"
+
+[tool.coverage.run]
+branch = true
+source = ["teds_core", "teds"]
+omit = [
+  "tests/*",
+  "demo/*",
+  "dist/*",
+  "scripts/*",
+  "teds_core/cli.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+precision = 1

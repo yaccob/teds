@@ -1,0 +1,7 @@
+tests:
+  /Users/yaccob/repos/github.com/yaccob/contest/demo/sample_tests.yaml#/version:
+    valid:
+    invalid:
+  /Users/yaccob/repos/github.com/yaccob/contest/demo/sample_tests.yaml#/tests:
+    valid:
+    invalid:
