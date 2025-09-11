@@ -1,226 +1,243 @@
-version: 1.0.0
+version: "1.0.0"
 tests:
   spec_schema.yaml#:
     valid:
       minimal_valid_spec:
-        description: Minimal valid specification with version and empty tests
+        description: "Minimal valid specification with version and empty tests"
         payload:
-          version: 1.0.0
+          version: "1.0.0"
           tests: {}
+      
       complete_user_spec:
-        description: Complete specification with user schema tests
+        description: "Complete specification with user schema tests"
         payload:
-          version: 2.1.0
+          version: "2.1.0"
           tests:
             user_schema.yaml#/properties/user:
               valid:
                 basic_user:
-                  description: Valid user with all required fields
+                  description: "Valid user with all required fields"
                   payload:
-                    name: John Doe
-                    email: john@example.com
+                    name: "John Doe"
+                    email: "john@example.com"
                     age: 30
               invalid:
                 missing_name:
-                  description: User missing required name field
+                  description: "User missing required name field"
                   payload:
-                    email: john@example.com
+                    email: "john@example.com"
                     age: 30
-                  message: 'Missing required field: name'
+                  message: "Missing required field: name"
+      
       semver_versions:
-        description: Various valid SemVer versions
+        description: "Various valid SemVer versions"
         payload:
-          version: 3.0.0-beta.1+build.123
+          version: "3.0.0-beta.1+build.123"
           tests:
             api_schema.yaml#/components/schemas/ApiResponse:
               valid:
                 simple_api:
-                  description: Basic API response
+                  description: "Basic API response"
                   payload:
-                    status: success
+                    status: "success"
                     data: {}
+      
       complex_test_cases:
-        description: Complex test cases with all features
+        description: "Complex test cases with all features"
         payload:
-          version: 1.2.3
+          version: "1.2.3"
           tests:
             product_schema.yaml#/definitions/Product:
               valid:
                 full_product:
-                  description: Product with all optional fields
+                  description: "Product with all optional fields"
                   payload:
                     id: 123
-                    name: Widget
+                    name: "Widget"
                     price: 29.99
-                    tags:
-                    - electronics
-                    - gadget
-                  result: valid
+                    tags: ["electronics", "gadget"]
+                  result: "valid"
                   from_examples: true
                 parsed_payload_test:
-                  description: Test with string payload that needs parsing
+                  description: "Test with string payload that needs parsing"
                   payload: '{"name": "Test Product", "id": 456}'
                   parse_payload: true
                   payload_parsed:
-                    name: Test Product
+                    name: "Test Product"
                     id: 456
               invalid:
                 negative_price:
-                  description: Product with negative price
+                  description: "Product with negative price"
                   payload:
                     id: 789
-                    name: Invalid Product
-                    price: -10.5
-                  message: Price must be positive
-                  validation_message: Field 'price' must be greater than 0
+                    name: "Invalid Product"
+                    price: -10.50
+                  message: "Price must be positive"
+                  validation_message: "Field 'price' must be greater than 0"
                   warnings:
-                  - Deprecated price format
-                  - generated: Format divergence detected in price field
-                    code: format-divergence
+                    - "Deprecated price format"
+                    - generated: "Format divergence detected in price field"
+                      code: "format-divergence"
+                
                 null_case:
-                  description: Null payload test
-                  payload:
-                  message: Payload cannot be null
+                  description: "Null payload test"
+                  payload: null
+                  message: "Payload cannot be null"
+
     invalid:
       missing_version:
-        description: Specification missing required version field
+        description: "Specification missing required version field"
         payload:
           tests: {}
-        message: 'Missing required field: version'
+        message: "Missing required field: version"
+      
       missing_tests:
-        description: Specification missing required tests field
+        description: "Specification missing required tests field"
         payload:
-          version: 1.0.0
-        message: 'Missing required field: tests'
+          version: "1.0.0"
+        message: "Missing required field: tests"
+      
       invalid_version_format:
-        description: Non-SemVer version string
+        description: "Non-SemVer version string"
         payload:
-          version: not-a-version
+          version: "not-a-version"
           tests: {}
-        message: Version must follow SemVer format
+        message: "Version must follow SemVer format"
+      
       invalid_version_type:
-        description: Version as number instead of string
+        description: "Version as number instead of string"
         payload:
           version: 1.0
           tests: {}
-        message: Version must be a string
+        message: "Version must be a string"
+      
       empty_version:
-        description: Empty version string
+        description: "Empty version string"
         payload:
-          version: ''
+          version: ""
           tests: {}
-        message: Version cannot be empty
+        message: "Version cannot be empty"
+      
       non_object_tests:
-        description: Tests field as array instead of object
+        description: "Tests field as array instead of object"
         payload:
-          version: 1.0.0
+          version: "1.0.0"
           tests: []
-        message: Tests must be an object
+        message: "Tests must be an object"
+      
       invalid_test_structure:
-        description: Invalid test case structure
+        description: "Invalid test case structure"
         payload:
-          version: 1.0.0
+          version: "1.0.0"
           tests:
             schema.yaml#/bad_schema:
-              valid: not-an-object
+              valid: "not-an-object"
               invalid: {}
-        message: Test cases must be objects or null
+        message: "Test cases must be objects or null"
+      
       invalid_case_object:
-        description: Test case with invalid properties
+        description: "Test case with invalid properties"
         payload:
-          version: 1.0.0
+          version: "1.0.0"
           tests:
             schema1.yaml#/properties/test:
               valid:
                 bad_case:
-                  description: Valid description
-                  payload:
-                    valid: data
-                  invalid_property: This property is not allowed
-        message: Additional properties not allowed in test case
+                  description: "Valid description"
+                  payload: {"valid": "data"}
+                  invalid_property: "This property is not allowed"
+        message: "Additional properties not allowed in test case"
+      
       invalid_warning_structure:
-        description: Malformed warning objects
+        description: "Malformed warning objects"
         payload:
-          version: 1.0.0
+          version: "1.0.0"
           tests:
             schema1.yaml#/definitions/TestSchema:
               invalid:
                 bad_warnings:
-                  description: Test with malformed warnings
-                  payload:
-                    data: test
+                  description: "Test with malformed warnings"
+                  payload: {"data": "test"}
                   warnings:
-                  - generated: Missing code field
-        message: Warning object missing required 'code' field
+                    - generated: "Missing code field"
+        message: "Warning object missing required 'code' field"
+      
       invalid_warning_code:
-        description: Invalid warning code value
+        description: "Invalid warning code value"
         payload:
-          version: 1.0.0
+          version: "1.0.0"
           tests:
             schema1.yaml#/components/schemas/TestObject:
               invalid:
                 bad_code:
-                  description: Test with invalid warning code
-                  payload:
-                    data: test
+                  description: "Test with invalid warning code"
+                  payload: {"data": "test"}
                   warnings:
-                  - generated: Some warning
-                    code: invalid-code
-        message: Warning code must be 'format-divergence'
+                    - generated: "Some warning"
+                      code: "invalid-code"
+        message: "Warning code must be 'format-divergence'"
+
   spec_schema.yaml#/properties/version:
     valid:
       valid_semver_basic:
-        description: Basic SemVer version
-        payload: 1.0.0
+        description: "Basic SemVer version"
+        payload: "1.0.0"
+      
       valid_semver_prerelease:
-        description: SemVer with prerelease
-        payload: 2.1.0-beta.1
+        description: "SemVer with prerelease"
+        payload: "2.1.0-beta.1"
+      
       valid_semver_build:
-        description: SemVer with build metadata
-        payload: 1.0.0+build.123
+        description: "SemVer with build metadata"
+        payload: "1.0.0+build.123"
+      
       valid_semver_full:
-        description: Complete SemVer with prerelease and build
-        payload: 3.2.1-alpha.1+build.456
+        description: "Complete SemVer with prerelease and build"
+        payload: "3.2.1-alpha.1+build.456"
+
     invalid:
       invalid_version_not_string:
-        description: Version as number
+        description: "Version as number"
         payload: 1.0
-        message: Version must be a string
+        message: "Version must be a string"
+      
       invalid_version_format:
-        description: Invalid version format
-        payload: v1.0.0
-        message: Version must follow SemVer format
+        description: "Invalid version format"
+        payload: "v1.0.0"
+        message: "Version must follow SemVer format"
+      
       invalid_version_empty:
-        description: Empty version string
-        payload: ''
-        message: Version cannot be empty
+        description: "Empty version string"
+        payload: ""
+        message: "Version cannot be empty"
+
   spec_schema.yaml#/properties/tests:
     valid:
       empty_tests:
-        description: Empty tests object
+        description: "Empty tests object"
         payload: {}
+      
       single_schema_test:
-        description: Single schema with test cases
+        description: "Single schema with test cases"
         payload:
           schema.yaml#/properties/user:
             valid:
               valid_user:
-                description: Valid user
-                payload:
-                  name: John
-                  age: 30
+                description: "Valid user"
+                payload: {"name": "John", "age": 30}
             invalid:
               invalid_user:
-                description: Invalid user
-                payload:
-                  name: ''
-                message: Name cannot be empty
+                description: "Invalid user"
+                payload: {"name": ""}
+                message: "Name cannot be empty"
+
     invalid:
       tests_as_array:
-        description: Tests as array instead of object
+        description: "Tests as array instead of object"
         payload: []
-        message: Tests must be an object
+        message: "Tests must be an object"
+      
       tests_as_string:
-        description: Tests as string
-        payload: invalid
-        message: Tests must be an object
+        description: "Tests as string"
+        payload: "invalid"
+        message: "Tests must be an object"

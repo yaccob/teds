@@ -226,9 +226,15 @@ def _plan_pairs(mappings: list[str]) -> list[tuple[str, Path]]:
             else:
                 out_path = path
 
-        # Build an absolute file path for the ref to avoid double-joining against base dirs later
-        file_abs = str(Path(file_part).resolve())
-        ref_out = f"{file_abs}#/{pointer.lstrip('/')}" if not file_abs.endswith(f"#{pointer}") else f"{file_abs}#{pointer}"
+        # Build a relative file path for the ref based on the output directory
+        file_path = Path(file_part)
+        try:
+            file_rel = os.path.relpath(file_path.resolve(), out_path.parent.resolve())
+        except ValueError:
+            # Different drives on Windows, fall back to absolute
+            file_rel = str(file_path.resolve())
+        
+        ref_out = f"{file_rel}#/{pointer.lstrip('/')}" if not file_rel.endswith(f"#{pointer}") else f"{file_rel}#{pointer}"
         pairs.append((ref_out, out_path))
     outs_abs = [p.resolve() for _, p in pairs]
     seen = {}
