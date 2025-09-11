@@ -6,6 +6,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 TeDS (Test-Driven Schema Development Tool) is a CLI for verifying JSON Schema contracts using YAML test specifications. The tool validates both positive cases (data that should be accepted) and negative cases (data that must be rejected).
 
+## 🚨 CRITICAL: Coverage Must Be Maintained!
+
+**MANDATORY BEFORE EVERY COMMIT:**
+```bash
+pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing --cov-fail-under=75 -q
+```
+
+**Never commit unless:**
+1. ✅ All tests pass
+2. ✅ Coverage ≥ 75% (maintain 94%+ if possible) 
+3. ✅ Coverage report reviewed
+
+**Baseline Branch:** `working-baseline-94percent-coverage` (94.64% coverage, 59 tests)
+**The tests exist for a reason - USE THEM!**
+
 ## Core Commands
 
 ### Development Setup
