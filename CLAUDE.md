@@ -135,12 +135,42 @@ make clean         # Remove build artifacts
 make coverage      # Generate HTML coverage report
 make dev-version   # Show current version info
 make status        # Project status overview
+
+# Automated Release Management
+make release-patch # Create patch release (0.2.5 → 0.2.6) - most common
+make release-minor # Create minor release (0.2.5 → 0.3.0) - new features
+make release-major # Create major release (0.2.5 → 1.0.0) - breaking changes
+make check-clean   # Verify working directory is clean for release
 ```
 
-**Version Management:**
-- Development versions auto-generated: `0.2.6.dev11+g09137808c` (hatch-vcs)
-- Only tag releases when production-ready (not during development)
-- Current stable: v0.2.5, working on features for next release
+**Release Workflow & Version Management:**
+
+The automated release workflow ensures safe, predictable releases:
+
+1. **Prerequisites**: Clean working directory + all tests passing
+2. **Version Calculation**: Automatically increments from current Git tag
+3. **Tagging**: Creates annotated Git tag with conventional commit message  
+4. **Building**: Automatically builds distribution packages
+5. **Next Steps**: Provides commands for publishing
+
+**Release Types:**
+- **Patch** (`make release-patch`): Bug fixes, documentation updates (0.2.5 → 0.2.6)
+- **Minor** (`make release-minor`): New features, backward-compatible changes (0.2.5 → 0.3.0)  
+- **Major** (`make release-major`): Breaking changes, major API changes (0.2.5 → 1.0.0)
+
+**Publishing Steps** (after successful release):
+```bash
+# Review the release
+git show v0.2.6
+
+# Publish to remote
+git push origin v0.2.6
+
+# Upload to PyPI (when ready)
+twine upload dist/*
+```
+
+**Development Versions**: Between releases, hatch-vcs auto-generates development versions like `0.2.6.dev11+g09137808c` from Git state.
 
 ## Test Architecture & Separation of Concerns
 

@@ -1,4 +1,4 @@
-.PHONY: help test test-unit test-cli test-schema test-full coverage dev-install package clean
+.PHONY: help test test-unit test-cli test-schema test-full coverage dev-install package clean check-clean release-patch release-minor release-major
 .DEFAULT_GOAL := help
 
 help: ## Show this help message
@@ -64,3 +64,41 @@ status: ## Show project status
 	@make test-schema >/dev/null 2>&1 && echo "✅ Schema validation: PASS" || echo "❌ Schema validation: FAIL"
 	@echo ""
 	@echo "Git branch: $$(git branch --show-current)"
+
+# Release Management
+check-clean: ## Verify working directory is clean for release
+	@if [ -n "$$(git status --porcelain)" ]; then \
+		echo "❌ Working directory not clean. Commit changes first."; \
+		git status --short; \
+		exit 1; \
+	fi
+	@echo "✅ Working directory is clean"
+
+define do_release
+	@echo "🚀 Creating $(1) release..."
+	@CURRENT=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/v//' || echo "0.0.0"); \
+	if [ "$(1)" = "patch" ]; then NEW=$$(echo $$CURRENT | awk -F. '{print $$1"."$$2"."$$3+1}'); \
+	elif [ "$(1)" = "minor" ]; then NEW=$$(echo $$CURRENT | awk -F. '{print $$1"."$$2+1".0"}'); \
+	elif [ "$(1)" = "major" ]; then NEW=$$(echo $$CURRENT | awk -F. '{print $$1+1".0.0"}'); \
+	fi; \
+	echo "📝 Bumping version: v$$CURRENT → v$$NEW"; \
+	git tag -a "v$$NEW" -m "chore(release): v$$NEW"; \
+	echo "✅ Tagged v$$NEW"; \
+	make package; \
+	echo "📦 Built package with version $$NEW"; \
+	echo ""; \
+	echo "🎉 Release v$$NEW completed successfully!"; \
+	echo "Next steps:"; \
+	echo "  - Review: git show v$$NEW"; \
+	echo "  - Publish: git push origin v$$NEW"; \
+	echo "  - Upload: twine upload dist/*"
+endef
+
+release-patch: check-clean test-full ## Create patch release (0.2.5 → 0.2.6)
+	$(call do_release,patch)
+
+release-minor: check-clean test-full ## Create minor release (0.2.5 → 0.3.0)
+	$(call do_release,minor)
+
+release-major: check-clean test-full ## Create major release (0.2.5 → 1.0.0)
+	$(call do_release,major)
