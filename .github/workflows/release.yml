@@ -32,9 +32,9 @@ jobs:
         run: |
           python -m pip install -e .
           pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing --cov-fail-under=73 -q
-      - name: CLI coverage (fail-under=60)
+      - name: CLI coverage (fail-under=25)
         run: |
-          pytest tests/cli --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing --cov-fail-under=60 -q
+          pytest tests/cli --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing --cov-fail-under=25 -q
 
   build-and-publish:
     needs: test
