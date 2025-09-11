@@ -113,3 +113,66 @@ Infrastructure and fallback code that is difficult to test reliably is marked wi
 - Uses hatchling with hatch-vcs for version management from Git tags
 - Packages include: `spec_schema.yaml`, `teds_compat.yaml`, `templates/`, `template_map.yaml`
 - Dependencies: jsonschema, referencing, ruamel.yaml, semver, Jinja2
+
+## Development Workflow (Makefile-based)
+
+**Maven/Gradle-style workflow established via Makefile:**
+
+```bash
+# Fast development cycle
+make test          # Unit tests only (fast, for development)
+make test-unit     # Same as above 
+make dev-install   # Install in development mode (pip install -e .)
+
+# Full validation cycle
+make test-cli      # CLI integration tests (slower)
+make test-schema   # Validate spec_schema.yaml against spec_schema.tests.yaml
+make test-full     # All tests (required for packaging)
+
+# Packaging & release
+make package       # Build distribution packages (requires all tests)
+make clean         # Remove build artifacts
+make coverage      # Generate HTML coverage report
+make dev-version   # Show current version info
+make status        # Project status overview
+```
+
+**Version Management:**
+- Development versions auto-generated: `0.2.6.dev11+g09137808c` (hatch-vcs)
+- Only tag releases when production-ready (not during development)
+- Current stable: v0.2.5, working on features for next release
+
+## Test Architecture & Separation of Concerns
+
+**spec_schema.tests.yaml structure follows clear responsibility separation:**
+
+- **`spec_schema.yaml#`**: Only top-level structure (required fields: version, tests; correct types)
+- **`$defs/SchemaToTest`**: Only own properties (additionalProperties: false, valid/invalid field structure)  
+- **`$defs/CaseSet`**: Only container logic (object|null type validation, additionalProperties to CaseObject)
+- **`$defs/CaseObject`**: All detailed validation rules (field types, constraints, warnings structure, conditional schemas)
+
+**Key principle**: Each level tests only its own concerns, avoiding redundancy and maintaining clear boundaries.
+
+**Key-as-payload parsing feature:** When `payload` field is missing from a test case, the test case key itself is parsed as YAML and used as the payload. Example: `"null": {description: "Null test"}` → key `"null"` is parsed as YAML `null` value and used as payload.
+
+## TeDS Tool Purpose & Philosophy
+
+**🎯 CRITICAL UNDERSTANDING:** TeDS validates whether **JSON Schemas meet the expectations** defined in test specifications. It does NOT validate whether test specifications are correct - the test specs define the business requirements/expectations, and TeDS verifies that schemas fulfill those expectations. This is the core value proposition.
+
+## Recent Development History
+
+**Major features completed:**
+1. ✅ Added comprehensive JSON Schema examples to spec_schema.yaml (following Draft 2020-12 standards)
+2. ✅ Fixed CLI generator bug: now produces relative paths instead of absolute paths for better portability
+3. ✅ Implemented comprehensive $defs test cases with proper separation of concerns
+4. ✅ Established Maven/Gradle-style development workflow with Makefile
+5. ✅ Maintained 94.6% test coverage throughout all changes
+
+**Branch status:** Working on `working-baseline-94percent-coverage` with all recent improvements committed.
+
+## Commit Standards
+
+- ❌ NO Claude attribution markers (`🤖 Generated with [Claude Code]`, `Co-Authored-By: Claude`)
+- ✅ Focus on technical changes and their business purpose
+- ✅ Keep git history clean and informative
+- ✅ Always run coverage verification before committing
