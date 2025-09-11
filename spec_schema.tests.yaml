@@ -8,81 +8,16 @@ tests:
           version: "1.0.0"
           tests: {}
       
-      complete_user_spec:
-        description: "Complete specification with user schema tests"
+      basic_spec_with_tests:
+        description: "Basic specification with tests structure"
         payload:
           version: "2.1.0"
           tests:
             user_schema.yaml#/properties/user:
               valid:
-                basic_user:
-                  description: "Valid user with all required fields"
-                  payload:
-                    name: "John Doe"
-                    email: "john@example.com"
-                    age: 30
-              invalid:
-                missing_name:
-                  description: "User missing required name field"
-                  payload:
-                    email: "john@example.com"
-                    age: 30
-                  message: "Missing required field: name"
-      
-      semver_versions:
-        description: "Various valid SemVer versions"
-        payload:
-          version: "3.0.0-beta.1+build.123"
-          tests:
-            api_schema.yaml#/components/schemas/ApiResponse:
-              valid:
-                simple_api:
-                  description: "Basic API response"
-                  payload:
-                    status: "success"
-                    data: {}
-      
-      complex_test_cases:
-        description: "Complex test cases with all features"
-        payload:
-          version: "1.2.3"
-          tests:
-            product_schema.yaml#/definitions/Product:
-              valid:
-                full_product:
-                  description: "Product with all optional fields"
-                  payload:
-                    id: 123
-                    name: "Widget"
-                    price: 29.99
-                    tags: ["electronics", "gadget"]
-                  result: "valid"
-                  from_examples: true
-                parsed_payload_test:
-                  description: "Test with string payload that needs parsing"
-                  payload: '{"name": "Test Product", "id": 456}'
-                  parse_payload: true
-                  payload_parsed:
-                    name: "Test Product"
-                    id: 456
-              invalid:
-                negative_price:
-                  description: "Product with negative price"
-                  payload:
-                    id: 789
-                    name: "Invalid Product"
-                    price: -10.50
-                  message: "Price must be positive"
-                  validation_message: "Field 'price' must be greater than 0"
-                  warnings:
-                    - "Deprecated price format"
-                    - generated: "Format divergence detected in price field"
-                      code: "format-divergence"
-                
-                null_case:
-                  description: "Null payload test"
-                  payload: null
-                  message: "Payload cannot be null"
+                test_case:
+                  description: "Basic test case"
+                  payload: {"name": "test"}
 
     invalid:
       missing_version:
@@ -97,13 +32,6 @@ tests:
           version: "1.0.0"
         message: "Missing required field: tests"
       
-      invalid_version_format:
-        description: "Non-SemVer version string"
-        payload:
-          version: "not-a-version"
-          tests: {}
-        message: "Version must follow SemVer format"
-      
       invalid_version_type:
         description: "Version as number instead of string"
         payload:
@@ -111,71 +39,12 @@ tests:
           tests: {}
         message: "Version must be a string"
       
-      empty_version:
-        description: "Empty version string"
-        payload:
-          version: ""
-          tests: {}
-        message: "Version cannot be empty"
-      
       non_object_tests:
         description: "Tests field as array instead of object"
         payload:
           version: "1.0.0"
           tests: []
         message: "Tests must be an object"
-      
-      invalid_test_structure:
-        description: "Invalid test case structure"
-        payload:
-          version: "1.0.0"
-          tests:
-            schema.yaml#/bad_schema:
-              valid: "not-an-object"
-              invalid: {}
-        message: "Test cases must be objects or null"
-      
-      invalid_case_object:
-        description: "Test case with invalid properties"
-        payload:
-          version: "1.0.0"
-          tests:
-            schema1.yaml#/properties/test:
-              valid:
-                bad_case:
-                  description: "Valid description"
-                  payload: {"valid": "data"}
-                  invalid_property: "This property is not allowed"
-        message: "Additional properties not allowed in test case"
-      
-      invalid_warning_structure:
-        description: "Malformed warning objects"
-        payload:
-          version: "1.0.0"
-          tests:
-            schema1.yaml#/definitions/TestSchema:
-              invalid:
-                bad_warnings:
-                  description: "Test with malformed warnings"
-                  payload: {"data": "test"}
-                  warnings:
-                    - generated: "Missing code field"
-        message: "Warning object missing required 'code' field"
-      
-      invalid_warning_code:
-        description: "Invalid warning code value"
-        payload:
-          version: "1.0.0"
-          tests:
-            schema1.yaml#/components/schemas/TestObject:
-              invalid:
-                bad_code:
-                  description: "Test with invalid warning code"
-                  payload: {"data": "test"}
-                  warnings:
-                    - generated: "Some warning"
-                      code: "invalid-code"
-        message: "Warning code must be 'format-divergence'"
 
   spec_schema.yaml#/properties/version:
     valid:
@@ -241,3 +110,158 @@ tests:
         description: "Tests as string"
         payload: "invalid"
         message: "Tests must be an object"
+
+  spec_schema.yaml#/$defs/SchemaToTest:
+    valid:
+      empty_schema_test:
+        description: "Empty schema test object"
+        payload: {}
+      
+      only_valid_cases:
+        description: "Schema test with only valid cases"
+        payload:
+          valid: {}
+      
+      only_invalid_cases:
+        description: "Schema test with only invalid cases"
+        payload:
+          invalid: {}
+      
+      both_valid_invalid:
+        description: "Schema test with both valid and invalid cases"
+        payload:
+          valid: {}
+          invalid: {}
+
+    invalid:
+      additional_properties:
+        description: "Schema test with disallowed additional properties"
+        payload:
+          valid: {}
+          extra_field: "not allowed"
+        message: "Additional properties not allowed"
+
+  spec_schema.yaml#/$defs/CaseSet:
+    valid:
+      "null":
+        description: "Null case set (allowed)"
+      
+      empty_case_set:
+        description: "Empty case set object"
+        payload: {}
+      
+      case_set_with_cases:
+        description: "Case set with test cases"
+        payload:
+          test_case: {}
+
+    invalid:
+      case_set_as_string:
+        description: "Case set as string instead of object/null"
+        payload: "invalid"
+        message: "Case set must be object or null"
+      
+      case_set_as_array:
+        description: "Case set as array instead of object/null"
+        payload: ["not", "allowed"]
+        message: "Case set must be object or null"
+
+  spec_schema.yaml#/$defs/CaseObject:
+    valid:
+      "null":
+        description: "Null case object (allowed)"
+      
+      minimal_case:
+        description: "Minimal valid case object"
+        payload:
+          description: "Test description"
+          payload: {"test": "data"}
+      
+      complete_case:
+        description: "Complete case object with all fields"
+        payload:
+          description: "Complete test case"
+          payload: {"name": "test", "value": 123}
+          parse_payload: false
+          result: "valid"
+          message: "Expected message"
+          validation_message: "Detailed validation message"
+          payload_parsed: {"parsed": "data"}
+          from_examples: true
+          warnings: 
+            - "Simple warning"
+            - generated: "Format divergence"
+              code: "format-divergence"
+      
+      string_payload_case:
+        description: "Case with string payload and parse_payload true"
+        payload:
+          description: "Parse payload test"
+          payload: '{"json": "string"}'
+          parse_payload: true
+          payload_parsed: {"json": "string"}
+      
+      warnings_only_strings:
+        description: "Case with only string warnings"
+        payload:
+          description: "Test with string warnings"
+          payload: {"data": "test"}
+          warnings:
+            - "Warning one"
+            - "Warning two"
+
+    invalid:
+      case_object_as_string:
+        description: "Case object as string"
+        payload: "invalid"
+        message: "Case object must be object or null"
+      
+      additional_properties:
+        description: "Case object with disallowed additional properties"
+        payload:
+          description: "Valid description"
+          payload: {"data": "test"}
+          extra_field: "not allowed"
+        message: "Additional properties not allowed"
+      
+      invalid_description_type:
+        description: "Case object with non-string description"
+        payload:
+          description: 123
+          payload: {"test": "data"}
+        message: "Description must be string"
+      
+      invalid_parse_payload_type:
+        description: "Case object with non-boolean parse_payload"
+        payload:
+          description: "Test case"
+          payload: {"data": "test"}
+          parse_payload: "true"
+        message: "parse_payload must be boolean"
+      
+      invalid_warning_missing_code:
+        description: "Warning object missing required code field"
+        payload:
+          description: "Test with invalid warning"
+          payload: {"data": "test"}
+          warnings:
+            - generated: "Warning without code"
+        message: "Warning object missing required 'code' field"
+      
+      invalid_warning_bad_code:
+        description: "Warning object with invalid code value"
+        payload:
+          description: "Test with bad warning code"
+          payload: {"data": "test"}
+          warnings:
+            - generated: "Warning with bad code"
+              code: "invalid-code-value"
+        message: "Warning code must be 'format-divergence'"
+      
+      parse_payload_string_constraint:
+        description: "parse_payload true but payload not string"
+        payload:
+          description: "Parse payload constraint violation"
+          payload: {"object": "not string"}
+          parse_payload: true
+        message: "When parse_payload is true, payload must be string"
