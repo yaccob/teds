@@ -38,8 +38,8 @@ pytest -q
 # Run unit tests with coverage (fail-under=73%)
 pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing --cov-fail-under=73 -q
 
-# Run CLI tests with coverage (fail-under=20%)
-pytest tests/cli --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing --cov-fail-under=20 -q
+# Run CLI integration tests (no coverage requirement)
+pytest tests/cli -v
 
 # Using hatch
 hatch run test
@@ -84,8 +84,8 @@ hatch build
 
 ### Test Structure
 - `tests/unit/`: Fast unit tests for individual modules (target: 73%+ coverage, achieved: 94%+)
-- `tests/cli/`: End-to-end CLI integration tests (target: 20%+ coverage - integration tests focus on workflows, not code coverage)
-- Dual coverage approach: separate thresholds for unit vs CLI testing
+- `tests/cli/`: End-to-end CLI integration tests (no coverage requirement - focus on workflow validation)
+- Unit tests provide comprehensive coverage; CLI tests validate end-to-end functionality
 
 ### Coverage Exclusion Strategy
 
