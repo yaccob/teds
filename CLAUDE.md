@@ -202,7 +202,8 @@ twine upload dist/*
 
 ## Commit Standards
 
-- ❌ NO Claude attribution markers (`🤖 Generated with [Claude Code]`, `Co-Authored-By: Claude`)
+- ❌ NO Claude attribution markers (`🤖 Generated with [Claude Code]`, `Co-Authored-By: Claude`, `via [Happy]`)
+- ❌ NO generated-with noise in commit messages - focus on technical content only
 - ✅ Focus on technical changes and their business purpose
 - ✅ Keep git history clean and informative
 - ✅ Always run coverage verification before committing
