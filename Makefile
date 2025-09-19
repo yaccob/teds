@@ -1,4 +1,4 @@
-.PHONY: help test test-unit test-cli test-schema test-full coverage dev-install package clean check-clean release-patch release-minor release-major
+.PHONY: help test test-unit test-cli test-schema test-full coverage dev-install test-package package clean check-clean release-patch release-minor release-major check-branch pr-ready create-pr pr-status merge-pr
 .DEFAULT_GOAL := help
 
 help: ## Show this help message
@@ -37,7 +37,18 @@ clean: ## Clean build artifacts
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name "*.pyc" -delete
 
-package: clean test-full ## Build distribution packages (requires all tests to pass)
+test-package: ## Test that package includes required files
+	@echo "🧪 Testing package contents..."
+	@rm -rf dist/ .pkg-test/
+	@hatch build >/dev/null 2>&1
+	@python -m venv .pkg-test
+	@.pkg-test/bin/pip install -q dist/*.whl
+	@echo "Testing installed package functionality..."
+	@cd /tmp && echo 'version: "1.0.0"\ntests: {}' > test.yaml
+	@cd /tmp && /Users/yaccob/repos/github.com/yaccob/contest/.pkg-test/bin/teds verify test.yaml --output-level error >/dev/null 2>&1 && echo "✅ Package test PASSED" || (echo "❌ Package test FAILED - missing files in package" && exit 1)
+	@rm -rf .pkg-test/ /tmp/test.yaml
+
+package: clean test-full test-package ## Build distribution packages (requires all tests to pass)
 	hatch build
 	@echo "📦 Package built successfully:"
 	@ls -la dist/
@@ -102,3 +113,27 @@ release-minor: check-clean test-full ## Create minor release (0.2.5 → 0.3.0)
 
 release-major: check-clean test-full ## Create major release (0.2.5 → 1.0.0)
 	$(call do_release,major)
+
+# Git Workflow
+check-branch: ## Verify we're on correct branch and up-to-date
+	@git fetch upstream 2>/dev/null || echo "⚠️  Could not fetch from remote"
+	@BRANCH=$$(git branch --show-current); \
+	if [ "$$BRANCH" = "master" ]; then \
+		echo "❌ Cannot create PR from master branch"; \
+		exit 1; \
+	fi; \
+	echo "✅ Current branch: $$BRANCH"
+
+pr-ready: check-clean test-full check-branch ## Verify branch is ready for PR
+	@echo "✅ Branch is ready for PR creation"
+
+create-pr: pr-ready ## Create pull request to master branch
+	@echo "🚀 Creating pull request..."
+	gh pr create --base master --fill
+
+pr-status: ## Check current PR status
+	gh pr status
+
+merge-pr: ## Merge PR after all checks pass (auto-merge with squash)
+	@echo "🔄 Auto-merging PR with squash..."
+	gh pr merge --auto --squash
