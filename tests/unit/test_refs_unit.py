@@ -27,3 +27,4 @@ components:
     ex = list(collect_examples(tmp_path, f"{schema}#/components/schemas/A"))
     assert ex and ex[0][0]
     assert join_fragment("components/schemas", "A") == "components/schemas/A"
+

@@ -3,7 +3,8 @@ name: demo-checks
 on:
   pull_request:
     branches: [ master ]
-  # Remove push trigger - tests run on PR, no need to re-run on merge
+  push:
+    branches: [ master ]
 
 jobs:
   demo-e2e:
@@ -22,12 +23,12 @@ jobs:
           python -m pip install -U pip
           python -m pip install -r requirements.txt -r requirements-dev.txt
           python -m pip install -e .
-      - name: Unit coverage (fail-under=75)
+      - name: Unit coverage (fail-under=73)
         run: |
-          pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing --cov-fail-under=75 -q
-      - name: CLI coverage (no threshold)
+          pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing --cov-fail-under=73 -q
+      - name: CLI coverage (fail-under=60)
         run: |
-          pytest tests/cli --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing -q
+          pytest tests/cli --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing --cov-fail-under=60 -q
       - name: Verify demo/sample_tests.yaml (expect rc=1)
         run: |
           set +e

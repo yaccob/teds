@@ -104,3 +104,4 @@ Gaps / Opportunities:
 == Conclusion
 
 The project is in a good state after the recent cleanup. Publishing is reliable again, validation output is schema‑compliant, demos and CI reflect intended behavior, and the codebase adheres to the stated guidelines. The suggested minor additions (optional tests and changelog) would further tighten maintainability without adding complexity.
+

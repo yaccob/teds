@@ -15,7 +15,7 @@ pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=term-miss
 
 **Never commit unless:**
 1. ✅ All tests pass
-2. ✅ Coverage ≥ 75% (maintain 94%+ if possible)
+2. ✅ Coverage ≥ 75% (maintain 94%+ if possible) 
 3. ✅ Coverage report reviewed
 
 **Baseline Branch:** `working-baseline-94percent-coverage` (94.64% coverage, 59 tests)
@@ -121,7 +121,7 @@ Infrastructure and fallback code that is difficult to test reliably is marked wi
 ```bash
 # Fast development cycle
 make test          # Unit tests only (fast, for development)
-make test-unit     # Same as above
+make test-unit     # Same as above 
 make dev-install   # Install in development mode (pip install -e .)
 
 # Full validation cycle
@@ -149,13 +149,13 @@ The automated release workflow ensures safe, predictable releases:
 
 1. **Prerequisites**: Clean working directory + all tests passing
 2. **Version Calculation**: Automatically increments from current Git tag
-3. **Tagging**: Creates annotated Git tag with conventional commit message
+3. **Tagging**: Creates annotated Git tag with conventional commit message  
 4. **Building**: Automatically builds distribution packages
 5. **Next Steps**: Provides commands for publishing
 
 **Release Types:**
 - **Patch** (`make release-patch`): Bug fixes, documentation updates (0.2.5 → 0.2.6)
-- **Minor** (`make release-minor`): New features, backward-compatible changes (0.2.5 → 0.3.0)
+- **Minor** (`make release-minor`): New features, backward-compatible changes (0.2.5 → 0.3.0)  
 - **Major** (`make release-major`): Breaking changes, major API changes (0.2.5 → 1.0.0)
 
 **Publishing Steps** (after successful release):
@@ -177,7 +177,7 @@ twine upload dist/*
 **spec_schema.tests.yaml structure follows clear responsibility separation:**
 
 - **`spec_schema.yaml#`**: Only top-level structure (required fields: version, tests; correct types)
-- **`$defs/SchemaToTest`**: Only own properties (additionalProperties: false, valid/invalid field structure)
+- **`$defs/SchemaToTest`**: Only own properties (additionalProperties: false, valid/invalid field structure)  
 - **`$defs/CaseSet`**: Only container logic (object|null type validation, additionalProperties to CaseObject)
 - **`$defs/CaseObject`**: All detailed validation rules (field types, constraints, warnings structure, conditional schemas)
 

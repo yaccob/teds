@@ -40,9 +40,7 @@ tests:
 
 
 def test_generate_reports_missing_schema_file(tmp_path: Path):
-    rc, out, err = run_cli(
-        ["generate", "missing.yaml#/components/schemas=out.yaml"], cwd=tmp_path
-    )
+    rc, out, err = run_cli(["generate", "missing.yaml#/components/schemas=out.yaml"], cwd=tmp_path)
     assert rc == 2
     assert "Failed to resolve parent schema ref" in err
 

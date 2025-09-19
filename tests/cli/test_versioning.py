@@ -43,3 +43,4 @@ tests:
     )
     rc, out, err = run_cli(["verify", "spec.yaml"], cwd=tmp_path)
     assert rc == 2
+

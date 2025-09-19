@@ -32,6 +32,4 @@ components:
     doc = load_yaml_file(out_file)
     # Contains group for '#/' and example-derived case
     keys = list((doc.get("tests") or {}).keys())
-    assert any("schema.yaml#/" in k for k in keys) or any(
-        "schema.yaml#/A" in k for k in keys
-    )
+    assert any("schema.yaml#/" in k for k in keys) or any("schema.yaml#/A" in k for k in keys)

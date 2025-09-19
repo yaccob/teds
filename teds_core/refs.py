@@ -2,20 +2,29 @@ from __future__ import annotations
 
 from pathlib import Path
 import sys
-from typing import Any
+from typing import Any, Tuple, List
 import re
 from urllib.parse import urlparse, unquote
 from urllib.request import urlopen
 import os
+from dataclasses import dataclass
+from functools import lru_cache
 
 from jsonschema import Draft202012Validator, FormatChecker
 from referencing import Registry, Resource
 from referencing.jsonschema import DRAFT202012
 
 from .yamlio import yaml_loader
+from .errors import NetworkError
+
+# Constants
+DEFAULT_NETWORK_TIMEOUT = 5.0  # seconds
+DEFAULT_MAX_BYTES = 5 * 1024 * 1024  # 5 MiB per resource
+SCHEMA_CACHE_SIZE = 128  # LRU cache size for schema resolution
 
 
-def build_validator_for_ref(base_dir: Path, ref_expr: str) -> tuple[Draft202012Validator, Draft202012Validator]:
+def build_validator_for_ref(base_dir: Path, ref_expr: str) -> Tuple[Draft202012Validator, Draft202012Validator]:
+    """Build validators for a schema reference."""
     file_part, _, frag = ref_expr.partition("#")
     schema_path = (base_dir / file_part).resolve()
     base_uri = schema_path.as_uri()
@@ -24,6 +33,34 @@ def build_validator_for_ref(base_dir: Path, ref_expr: str) -> tuple[Draft202012V
     root_doc = yaml_loader.load(schema_path.read_text(encoding="utf-8")) or {}
 
     registry = Registry(retrieve=_retrieve).with_resource(
+        base_uri,
+        Resource.from_contents(root_doc, default_specification=DRAFT202012),
+    )
+
+    wrapper = {"$ref": target_ref}
+    base = Draft202012Validator(wrapper, registry=registry)
+    strict = Draft202012Validator(wrapper, registry=registry, format_checker=FormatChecker())
+    return strict, base
+
+
+def build_validator_for_ref_with_config(
+    base_dir: Path, 
+    ref_expr: str, 
+    network_config: NetworkConfiguration
+) -> Tuple[Draft202012Validator, Draft202012Validator]:
+    """Build validators with specific network configuration."""
+    file_part, _, frag = ref_expr.partition("#")
+    schema_path = (base_dir / file_part).resolve()
+    base_uri = schema_path.as_uri()
+    target_ref = base_uri if not frag else f"{base_uri}#/{frag.lstrip('/')}"
+
+    root_doc = yaml_loader.load(schema_path.read_text(encoding="utf-8")) or {}
+
+    # Use specific retrieve function with config
+    def retrieve_func(uri: str) -> Resource:
+        return _retrieve_with_config(uri, network_config)
+
+    registry = Registry(retrieve=retrieve_func).with_resource(
         base_uri,
         Resource.from_contents(root_doc, default_specification=DRAFT202012),
     )
@@ -53,7 +90,7 @@ def jq_examples_prefix(fragment: str) -> str:
     return "".join(jq_segment(s) for s in segs)
 
 
-def resolve_schema_node(base_dir: Path, ref_expr: str) -> tuple[Any, str]:
+def resolve_schema_node(base_dir: Path, ref_expr: str) -> Tuple[Any, str]:
     file_part, _, frag = ref_expr.partition("#")
     schema_path = (base_dir / file_part).resolve()
     doc = yaml_loader.load(schema_path.read_text(encoding="utf-8")) or {}
@@ -68,7 +105,7 @@ def resolve_schema_node(base_dir: Path, ref_expr: str) -> tuple[Any, str]:
     return node, fragment
 
 
-def collect_examples(base_dir: Path, ref_expr: str) -> list[tuple[str, Any]]:
+def collect_examples(base_dir: Path, ref_expr: str) -> List[Tuple[str, Any]]:
     node, fragment = resolve_schema_node(base_dir, ref_expr)
     if not isinstance(node, dict):
         return []
@@ -77,7 +114,7 @@ def collect_examples(base_dir: Path, ref_expr: str) -> list[tuple[str, Any]]:
         return []
     prefix = jq_examples_prefix(fragment)
     base = f"{prefix}.examples" if prefix else ".examples"
-    out: list[tuple[str, Any]] = []
+    out: List[Tuple[str, Any]] = []
     for i, item in enumerate(ex):
         out.append((f"{base}[{i}]", item))
     return out
@@ -88,11 +125,33 @@ def join_fragment(parent_fragment: str, child: str) -> str:
     return child if not parent_fragment else f"{parent_fragment}/{child}"
 
 
-# Network policy (pauschal): default deny; overrides via CLI and env vars.
-_ALLOW_NETWORK = False
+@dataclass
+class NetworkConfiguration:
+    """Configuration for network operations."""
+    allow_network: bool = False
+    timeout: float = DEFAULT_NETWORK_TIMEOUT
+    max_bytes: int = DEFAULT_MAX_BYTES
+    
+    @classmethod
+    def from_env(cls, allow_network: bool = False) -> 'NetworkConfiguration':
+        """Create configuration from environment variables."""
+        return cls(
+            allow_network=allow_network,
+            timeout=_env_float("TEDS_NETWORK_TIMEOUT", DEFAULT_NETWORK_TIMEOUT),
+            max_bytes=_env_int("TEDS_NETWORK_MAX_BYTES", DEFAULT_MAX_BYTES)
+        )
+    
+    def update(self, allow: bool | None = None, timeout: float | None = None, max_bytes: int | None = None) -> 'NetworkConfiguration':
+        """Create updated configuration with new values."""
+        return NetworkConfiguration(
+            allow_network=allow if allow is not None else self.allow_network,
+            timeout=timeout if timeout is not None else self.timeout,
+            max_bytes=max_bytes if max_bytes is not None else self.max_bytes
+        )
 
 
 def _env_float(name: str, default: float) -> float:
+    """Get float value from environment variable with fallback."""
     try:
         v = os.getenv(name)
         return float(v) if v is not None else default
@@ -101,6 +160,7 @@ def _env_float(name: str, default: float) -> float:
 
 
 def _env_int(name: str, default: int) -> int:
+    """Get int value from environment variable with fallback."""
     try:
         v = os.getenv(name)
         return int(v) if v is not None else default
@@ -108,20 +168,18 @@ def _env_int(name: str, default: int) -> int:
         return default
 
 
-_NETWORK_TIMEOUT = _env_float("TEDS_NETWORK_TIMEOUT", 5.0)  # seconds
-_MAX_BYTES = _env_int("TEDS_NETWORK_MAX_BYTES", 5 * 1024 * 1024)  # 5 MiB/resource
+# Global default configuration - can be overridden via dependency injection
+_default_network_config = NetworkConfiguration.from_env()
 
 
 def set_network_policy(allow: bool, timeout: float | None = None, max_bytes: int | None = None) -> None:
-    global _ALLOW_NETWORK, _NETWORK_TIMEOUT, _MAX_BYTES
-    _ALLOW_NETWORK = bool(allow)
-    if timeout is not None:
-        _NETWORK_TIMEOUT = float(timeout)
-    if max_bytes is not None:
-        _MAX_BYTES = int(max_bytes)
+    """Update global network policy (legacy compatibility)."""
+    global _default_network_config
+    _default_network_config = _default_network_config.update(allow, timeout, max_bytes)
 
 
-def _retrieve(uri: str) -> Resource:
+def _retrieve_with_config(uri: str, config: NetworkConfiguration) -> Resource:
+    """Retrieve resource with specific network configuration."""
     parsed = urlparse(uri)
     if parsed.scheme == "file":
         p = Path(unquote(parsed.path))
@@ -130,16 +188,33 @@ def _retrieve(uri: str) -> Resource:
             default_specification=DRAFT202012,
         )
     if parsed.scheme in ("http", "https"):
-        if not _ALLOW_NETWORK:
-            raise LookupError("network fetch disabled; re-run with --allow-network")
-        with urlopen(uri, timeout=_NETWORK_TIMEOUT) as resp:
-            data = resp.read(_MAX_BYTES + 1)
-        if len(data) > _MAX_BYTES:
-            raise LookupError(f"resource too large (>{_MAX_BYTES} bytes): {uri}")
-        text = data.decode("utf-8", errors="strict")
+        if not config.allow_network:
+            raise NetworkError("network fetch disabled; re-run with --allow-network")
+        try:
+            with urlopen(uri, timeout=config.timeout) as resp:
+                # Fix DoS vulnerability: use proper streaming
+                data = bytearray()
+                while len(data) <= config.max_bytes:
+                    chunk = resp.read(min(8192, config.max_bytes - len(data) + 1))
+                    if not chunk:
+                        break
+                    data.extend(chunk)
+                    if len(data) > config.max_bytes:
+                        raise NetworkError(f"resource too large (>{config.max_bytes} bytes): {uri}")
+            
+            text = bytes(data).decode("utf-8", errors="strict")
+        except Exception as e:
+            if isinstance(e, NetworkError):
+                raise
+            raise NetworkError(f"failed to fetch {uri}: {e}")
         return Resource.from_contents(
             yaml_loader.load(text) or {},
             default_specification=DRAFT202012,
         )
     raise LookupError(f"unsupported URI scheme: {parsed.scheme}")
+
+
+def _retrieve(uri: str) -> Resource:
+    """Retrieve resource using global configuration (legacy compatibility)."""
+    return _retrieve_with_config(uri, _default_network_config)
 

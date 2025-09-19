@@ -9,14 +9,12 @@ def test_report_markdown(tmp_path: Path):
     # Use existing case directory
     case = Path(__file__).resolve().parents[1] / "cases" / "format_divergence"
     spec = case / "spec.yaml"
-    rc, out, err = run_cli(
-        [
-            "verify",
-            "--report",
-            "summary.md",
-            str(spec),
-        ]
-    )
+    rc, out, err = run_cli([
+        "verify",
+        "--report",
+        "summary.md",
+        str(spec),
+    ])
     # verify semantics: rc=1 for cases with ERROR
     assert rc == 1
     # output file exists next to spec

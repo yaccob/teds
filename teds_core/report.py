@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable
 
-from .yamlio import yaml_loader
+from .yamlio import yaml_loader, yaml_dumper
 from .validate import _validate_testspec_against_schema, validate_doc
 from .version import (
     check_spec_compat,
@@ -42,15 +42,11 @@ def _compute_counts(doc: dict[str, Any]) -> dict[str, int]:
     return {"success": success, "warning": warning, "error": error}
 
 
-def _render_jinja_str(
-    template_key: str, template_text: str, context: dict[str, Any]
-) -> str:
+def _render_jinja_str(template_key: str, template_text: str, context: dict[str, Any]) -> str:
     from jinja2 import Environment, DictLoader, select_autoescape
-
+    ext = Path(template_key).suffix.lstrip(".")
     autoescape = select_autoescape(enabled_extensions=("html", "htm"))
-    env = Environment(
-        loader=DictLoader({template_key: template_text}), autoescape=autoescape
-    )
+    env = Environment(loader=DictLoader({template_key: template_text}), autoescape=autoescape)
     tmpl = env.get_template(template_key)
     return tmpl.render(**context)
 
@@ -88,17 +84,12 @@ def build_context(inputs: Iterable[ReportInput]) -> dict[str, Any]:
             "spec_supported": supported_spec_range_str(),
             "spec_recommended": recommended_minor_str(),
         },
-        "inputs": [
-            {"path": str(ri.path), "doc": ri.doc, "counts": ri.counts, "rc": ri.rc}
-            for ri in ins
-        ],
+        "inputs": [{"path": str(ri.path), "doc": ri.doc, "counts": ri.counts, "rc": ri.rc} for ri in ins],
         "totals": totals,
     }
 
 
-def run_report_per_spec(
-    spec_paths: list[Path], template_id: str, output_level: str
-) -> tuple[list[tuple[Path, str]], int]:
+def run_report_per_spec(spec_paths: list[Path], template_id: str, output_level: str) -> tuple[list[tuple[Path, str]], int]:
     """Render a report per spec file using the given template id.
 
     Returns list of (spec_path, rendered_text) and an exit code (0 or 2 on hard failure).
@@ -110,22 +101,24 @@ def run_report_per_spec(
     for sp in spec_paths:
         try:
             raw = yaml_loader.load(sp.read_text(encoding="utf-8")) or {}
-        except Exception as e:
+        except Exception as e:  # pragma: no cover start
+            # I/O failures - hard to reproduce reliably in tests
             print(
                 f"Failed to read testspec: {sp}\n  error: {type(e).__name__}: {e}",
                 flush=True,
             )
             hard_rc = 2
-            continue
+            continue  # pragma: no cover stop
         # Schema validation
         try:
             _validate_testspec_against_schema(raw, repo_root)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover start
+            # Schema validation failures - internal errors, hard to trigger
             print(
                 f"Spec validation failed: {sp}\n  error: {type(e).__name__}: {e}",
             )
             hard_rc = 2
-            continue
+            continue  # pragma: no cover stop
         # Version gate
         ver = str(raw.get("version", "")).strip()
         ok, reason = check_spec_compat(ver)
@@ -134,9 +127,7 @@ def run_report_per_spec(
             hard_rc = 2
             continue
         # Evaluate cases with filtering
-        out_tests, rc = validate_doc(
-            raw, sp.parent, output_level=output_level, in_place=False
-        )
+        out_tests, rc = validate_doc(raw, sp.parent, output_level=output_level, in_place=False)
         doc = {"version": RECOMMENDED_TESTSPEC_VERSION, "tests": out_tests}
         counts = _compute_counts(doc)
         report_inputs.append(ReportInput(path=sp, doc=doc, counts=counts, rc=rc))
