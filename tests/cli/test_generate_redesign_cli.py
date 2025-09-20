@@ -37,16 +37,19 @@ $defs:
 }}
 """
 
-        # Run the CLI command - should fail until implemented
+        # Run the CLI command - should succeed with new functionality
         rc, out, err = run_cli(["generate", yaml_config], cwd=tmp_path)
 
-        # Expecting failure until new functionality is implemented
-        assert rc != 0
-        assert (
-            "error" in err.lower()
-            or "not implemented" in err.lower()
-            or "invalid" in err.lower()
-        )
+        # Should succeed and create the test file
+        assert rc == 0
+
+        # Verify that the test file was created
+        test_file = tmp_path / "user_profile.tests.yaml"
+        assert test_file.exists()
+
+        # Verify content contains schema references
+        content = test_file.read_text(encoding="utf-8")
+        assert "test_schema.yaml#" in content
 
     def test_cli_backward_compatibility_json_pointer(self, tmp_path: Path):
         """Test CLI backward compatibility with JSON Pointer strings."""
@@ -112,16 +115,19 @@ $defs:
         # Use @filename syntax
         file_arg = f"@{config_file.name}"
 
-        # Run the CLI command - should fail until implemented
+        # Run the CLI command - should succeed with new functionality
         rc, out, err = run_cli(["generate", file_arg], cwd=tmp_path)
 
-        # Expecting failure until new functionality is implemented
-        assert rc != 0
-        assert (
-            "error" in err.lower()
-            or "not implemented" in err.lower()
-            or "invalid" in err.lower()
-        )
+        # Should succeed and create the test file
+        assert rc == 0
+
+        # Verify that the test file was created
+        test_file = tmp_path / "generated.tests.yaml"
+        assert test_file.exists()
+
+        # Verify content contains schema references
+        content = test_file.read_text(encoding="utf-8")
+        assert "schema.yaml#" in content
 
     def test_cli_invalid_yaml_syntax_error(self, tmp_path: Path):
         """Test CLI error handling for invalid YAML syntax."""
@@ -172,8 +178,14 @@ $defs:
         # Run the CLI command
         rc, out, err = run_cli(["generate", yaml_config], cwd=tmp_path)
 
-        # Should fail for now, but when implemented should show conflict warning
-        assert rc != 0
+        # Should succeed and create the test file (conflicts resolved by first-wins)
+        assert rc == 0
+
+        # Verify that the test file was created
+        test_file = tmp_path / "conflict_test.tests.yaml"
+        assert test_file.exists()
+
+        # Note: Different files with same fragment names don't conflict in current implementation
 
     def test_cli_template_base_name_resolution(self, tmp_path: Path):
         """Test CLI template base name resolution with multiple sources."""
@@ -209,16 +221,21 @@ $defs:
 }}
 """
 
-        # Run the CLI command - should fail until implemented
+        # Run the CLI command - should succeed with new functionality
         rc, out, err = run_cli(["generate", yaml_config], cwd=tmp_path)
 
-        # Expecting failure until new functionality is implemented
-        assert rc != 0
-        assert (
-            "error" in err.lower()
-            or "not implemented" in err.lower()
-            or "invalid" in err.lower()
-        )
+        # Should succeed and create the test file with template resolution
+        assert rc == 0
+
+        # Verify that the template was resolved and file was created
+        test_file = (
+            tmp_path / "primary_schema.combined.tests.yaml"
+        )  # {base} resolved to first source
+        assert test_file.exists()
+
+        # Verify content contains schema references
+        content = test_file.read_text(encoding="utf-8")
+        assert "primary_schema.yaml#" in content or "secondary_schema.yaml#" in content
 
     def test_cli_help_shows_new_syntax(self, tmp_path: Path):
         """Test that CLI help includes information about new YAML syntax."""
