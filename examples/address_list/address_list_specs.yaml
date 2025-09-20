@@ -1,0 +1,67 @@
+version: "1.0.0"
+tests:
+  "address_list.yaml#/$defs/AddressWithInlineNumber":
+    valid:
+      basic_address:
+        description: "Valid address with all required fields"
+        payload:
+          street_and_housenumber: "Meine-Straße 1"
+          city: "Anytown"
+          zip: "76136"
+      complex_address:
+        description: "Address with multiple words and non-ASCII characters in street_and_housenumber name"
+        payload:
+          street_and_housenumber: "An der Henriette-Obermüller-Straße 127b"
+          city: "Anytown"
+          zip: "76136"
+    invalid:
+      additional property:
+        description: "Invalid property `number`"
+        payload:
+          street_and_housenumber: "Meine-Strasse 1"
+          number: "1"
+          city: "Anytown"
+          zip: "76136"
+      missing_inline_number:
+        description: "Address missing number in street_and_housenumber field"
+        payload:
+          street_and_housenumber: "Meine-Strasse"
+          number: "1"
+          city: "Anytown"
+          zip: "76136"
+      number_only as street_and_housenumber:
+        description: "Missing street_and_housenumber name, only number provided"
+        payload:
+          street_and_housenumber: "1"
+          city: "Anytown"
+          zip: "76136"
+
+  "address_list.yaml#/$defs/AddressWithNumberSeperated":
+    valid:
+      basic_address:
+        description: "Valid address with all required fields"
+        payload:
+          street: "Meine-Strasse"
+          housenumber: "1"
+          city: "Anytown"
+          zip: "76136"
+      complex_address:
+        description: "Address with multiple words and non-ASCII characters in street name"
+        payload:
+          street: "An der Henriette-Obermüller-Straße"
+          housenumber: "127b"
+          city: "Anytown"
+          zip: "76136"
+    invalid:
+      too short street name:
+        description: "street name too short"
+        payload:
+          street: "A"
+          housenumber: "1"
+          city: "Anytown"
+          zip: "76136"
+      missing housenumber:
+        payload:
+          street: "Meine-Strasse 1"
+          city: "Anytown"
+          zip: "76136"

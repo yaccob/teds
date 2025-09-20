@@ -1,0 +1,83 @@
+$defs:
+  AddressWithInlineNumber:
+    type: object
+    properties:
+      street_and_housenumber:
+        type: string
+        description: "Street name with inline house number"
+        pattern: "^(\\S+ )+\\d+[a-zA-Z]?$"
+        example: "Meine-Strasse 1"
+      city:
+        type: string
+        description: "City name"
+        example: "Anytown"
+      zip:
+        type: string
+        description: "ZIP code"
+        example: "76136"
+    required:
+      - street_and_housenumber
+      - city
+      - zip
+    additionalProperties: false
+    examples:
+      - street_and_housenumber: "Meine-Strasse 1"
+        city: "Anytown"
+        zip: "76136"
+      - street_and_housenumber: "An der Henriette-Obermüller-Straße 127b"
+        city: "Anytown"
+        zip: "76136"
+
+  AddressWithNumberSeperated:
+    type: object
+    properties:
+      street:
+        type: string
+        description: "Street name only - housenumber in separate field"
+        pattern: "^....+$"
+        example: "An der In-der-Straße"
+      housenumber:
+        type: string
+        description: "House number"
+        pattern: "^\\d+[a-zA-Z]?$"
+        example: "127b"
+      city:
+        type: string
+        description: "City name"
+        example: "Anytown"
+      zip:
+        type: string
+        description: "ZIP code"
+        example: "76136"
+    required:
+      - street
+      - housenumber
+      - city
+      - zip
+    additionalProperties: false
+    examples:
+      - street: "Meine-Strasse"
+        housenumber: "1"
+        city: "Anytown"
+        zip: "76136"
+      - street: "An der Henriette-Obermüller-Straße"
+        housenumber: "127b"
+        city: "Anytown"
+        zip: "76136"
+
+  AddressList:
+    type: array
+    description: "List of addresses, either with inline or separated house number"
+    items:
+      anyOf:
+        - { $ref: "#/$defs/AddressWithInlineNumber" }
+        - { $ref: "#/$defs/AddressWithNumberSeperated" }
+    minItems: 1
+    example:
+      - street_and_housenumber: "Meine-Strasse 1"
+        city: "Anytown"
+        zip: "76136"
+      - street: "An der Henriette-Obermüller-Straße"
+        housenumber: "127b"
+        city: "Anytown"
+        zip: "76136"
