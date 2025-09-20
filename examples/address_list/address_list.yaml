@@ -5,7 +5,9 @@ $defs:
       one_line_address:
         type: string
         description: "Street name with inline house number, comma, then ZIP code and city name"
-        pattern: '^([^\s,]+\s+)+\d+[a-zA-Z]?,\s+\d+\s+[^\s,]+(\s+[^\s,]+)*$'
+        pattern: '^([^\s,]+\s+)+\d+[a-zA-Z]?,\s*\d+\s+[^\s,]+(\s+[^\s,]+)*$'
+        examples:
+          - "Meine-Straße 1, 76136 Anytown"
     required:
       - one_line_address
     additionalProperties: true
