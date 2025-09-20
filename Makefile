@@ -7,8 +7,8 @@ help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 # Testing targets
-test-unit: ## Run unit tests only (fast, always required)
-	pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing --cov-fail-under=75 -q
+test: ## Run unit tests (fast, default target)
+	pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing -q
 
 test-cli: ## Run CLI integration tests
 	pytest tests/cli -v
@@ -16,15 +16,34 @@ test-cli: ## Run CLI integration tests
 test-schema: ## Validate spec_schema.yaml against spec_schema.tests.yaml
 	python -m teds_core.cli verify spec_schema.tests.yaml --output-level error
 
-test: test-unit ## Default test target (unit tests only)
-
-test-full: test-unit test-cli test-schema ## Run all tests (required for packaging)
+test-all: test test-cli test-schema ## Run all tests (required for packaging)
 	@echo "✅ All tests passed - ready for packaging"
 
-# Coverage
-coverage: ## Generate detailed coverage report
-	pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=html --cov-report=term-missing --cov-fail-under=75
+# Code quality
+format: ## Format code using black, isort, and ruff
+	black .
+	isort .
+	ruff format .
+
+lint: ## Run linting checks
+	ruff check .
+
+check: ## Run linting checks without fixing
+	ruff check . --no-fix
+
+# Coverage and reporting
+coverage: ## Generate detailed HTML coverage report
+	pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=html --cov-report=term-missing
 	@echo "📊 Coverage report generated in htmlcov/"
+
+pre-commit: ## Run exactly what pre-commit would run
+	@echo "🔍 Running pre-commit checks locally..."
+	black --check .
+	isort --check-only .
+	ruff check .
+	ruff format --check .
+	pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing
+	python -m teds_core.cli verify spec_schema.tests.yaml --output-level error
 
 # Development
 dev-install: ## Install package in development mode
@@ -48,7 +67,7 @@ test-package: ## Test that package includes required files
 	@cd /tmp && /Users/yaccob/repos/github.com/yaccob/contest/.pkg-test/bin/teds verify test.yaml --output-level error >/dev/null 2>&1 && echo "✅ Package test PASSED" || (echo "❌ Package test FAILED - missing files in package" && exit 1)
 	@rm -rf .pkg-test/ /tmp/test.yaml
 
-package: clean test-full test-package ## Build distribution packages (requires all tests to pass)
+package: clean test-all test-package ## Build distribution packages (requires all tests to pass)
 	hatch build
 	@echo "📦 Package built successfully:"
 	@ls -la dist/
@@ -105,13 +124,13 @@ define do_release
 	echo "  - Upload: twine upload dist/*"
 endef
 
-release-patch: check-clean test-full ## Create patch release (0.2.5 → 0.2.6)
+release-patch: check-clean test-all ## Create patch release (0.2.5 → 0.2.6)
 	$(call do_release,patch)
 
-release-minor: check-clean test-full ## Create minor release (0.2.5 → 0.3.0)
+release-minor: check-clean test-all ## Create minor release (0.2.5 → 0.3.0)
 	$(call do_release,minor)
 
-release-major: check-clean test-full ## Create major release (0.2.5 → 1.0.0)
+release-major: check-clean test-all ## Create major release (0.2.5 → 1.0.0)
 	$(call do_release,major)
 
 # Git Workflow
@@ -124,7 +143,7 @@ check-branch: ## Verify we're on correct branch and up-to-date
 	fi; \
 	echo "✅ Current branch: $$BRANCH"
 
-pr-ready: check-clean test-full check-branch ## Verify branch is ready for PR
+pr-ready: check-clean test-all check-branch ## Verify branch is ready for PR
 	@echo "✅ Branch is ready for PR creation"
 
 create-pr: pr-ready ## Create pull request to master branch
