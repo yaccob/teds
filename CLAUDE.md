@@ -210,6 +210,38 @@ twine upload dist/*
 
 **Branch status:** Working on `working-baseline-94percent-coverage` with all recent improvements committed.
 
+## 🚫 MANDATORY Git Workflow
+
+### NEVER COMMIT DIRECTLY TO MASTER/MAIN
+
+**MANDATORY Workflow:**
+1. Always check branch first: `git branch --show-current`
+2. Create feature branch: `git checkout -b feature/your-feature-name`
+3. Work on feature branch, commit changes
+4. Create pull request against master
+5. **Pre-commit hooks will automatically prevent master commits**
+
+**Technical Safeguards in Place:**
+- Pre-commit hook blocks master/main commits automatically
+- All tool configurations centralized in `pyproject.toml`
+- Automatic code formatting, linting, testing on every commit
+
+### Tool Configuration
+
+**All development tool settings are centralized in `pyproject.toml`:**
+- Black code formatting
+- isort import sorting
+- Ruff linting and additional formatting
+- pytest configuration
+- Coverage settings with 75% minimum threshold
+
+**Pre-commit hooks automatically run:**
+- Code formatting (black, isort, ruff)
+- Linting checks
+- Unit tests with coverage verification
+- Schema validation
+- Master commit prevention
+
 ## Commit Standards
 
 - ❌ NO Claude attribution markers (`🤖 Generated with [Claude Code]`, `Co-Authored-By: Claude`, `via [Happy]`)
