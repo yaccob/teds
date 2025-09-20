@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "teds"
-description = "Verify YAML testspecs against JSON Schemas and generate tests from schema refs"
+description = "TeDS (Test-Driven Schema Development Tool) - CLI for verifying JSON Schema contracts using YAML test specifications"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from .yamlio import yaml_loader, yaml_dumper
-from .validate import validate_doc, validate_file
 from .generate import generate_from
+from .validate import validate_doc, validate_file
 from .version import get_version
+from .yamlio import yaml_dumper, yaml_loader
 
 __version__ = get_version()
 

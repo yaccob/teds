@@ -3,7 +3,8 @@ name: windows-smoke
 on:
   pull_request:
     branches: [ master ]
-  # Remove push trigger - Windows compatibility only needs PR verification
+  push:
+    branches: [ master ]
 
 jobs:
   smoke:

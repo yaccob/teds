@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from teds_core.refs import resolve_schema_node, collect_examples, join_fragment
+from teds_core.refs import collect_examples, join_fragment, resolve_schema_node
 
 
 def test_refs_resolve_and_examples(tmp_path: Path):

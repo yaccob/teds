@@ -3,7 +3,8 @@ name: package-smoke
 on:
   pull_request:
     branches: [ master ]
-  # Remove push trigger - package smoke tests only needed on PR
+  push:
+    branches: [ master ]
 
 concurrency:
   group: package-smoke-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}

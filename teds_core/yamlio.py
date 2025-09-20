@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from ruamel.yaml import YAML
 
-
 # strict YAML loader (reject duplicate keys everywhere)
 yaml_loader = YAML(typ="safe")
 yaml_loader.allow_duplicate_keys = False

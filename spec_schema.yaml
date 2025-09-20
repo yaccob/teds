@@ -7,50 +7,139 @@ properties:
     type: string
     description: SemVer version of the testspec format
     pattern: "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?$"
+    examples:
+      - "1.0.0"
+      - "2.1.3"
+      - "1.0.0-beta.1"
+      - "3.2.1+build.123"
   tests:
     type: object
+    description: Test cases organized by schema reference
     additionalProperties: { $ref: "#/$defs/SchemaToTest" }
+    examples:
+      - user_schema.yaml#/properties/user:
+          valid:
+            basic_user:
+              description: "Valid user with required fields"
+              payload:
+                name: "John Doe"
+                email: "john@example.com"
+                age: 30
+          invalid:
+            missing_name:
+              description: "User missing required name field"
+              payload:
+                email: "john@example.com"
+                age: 30
+              message: "Missing required field: name"
 
 $defs:
   SchemaToTest:
     type: object
     additionalProperties: false
+    description: Test cases for a specific schema, with valid and invalid examples
     properties:
       valid: { $ref: "#/$defs/CaseSet" }
       invalid: { $ref: "#/$defs/CaseSet" }
+    examples:
+      - valid:
+          simple_case:
+            description: "A basic valid example"
+            payload: {"name": "test"}
+        invalid:
+          empty_object:
+            description: "Empty object should fail"
+            payload: {}
+            message: "Required field missing"
 
   CaseSet:
     type: [ object, "null" ]
+    description: Collection of test cases, either valid or invalid
     additionalProperties: { $ref: "#/$defs/CaseObject" }
+    examples:
+      - basic_test:
+          description: "Simple validation test"
+          payload: {"field": "value"}
+        edge_case:
+          description: "Edge case with boundary values"
+          payload: {"number": 0}
+          message: "Zero is not allowed"
 
   CaseObject:
     type: [ object, "null" ]
     additionalProperties: false
+    description: Individual test case with payload and expected results
     properties:
-      description: { type: string }
-      payload: {}
+      description:
+        type: string
+        description: Human-readable description of the test case
+        examples:
+          - "Valid user with all required fields"
+          - "Invalid email format should be rejected"
+          - "Missing required field triggers validation error"
+      payload:
+        description: The data to be validated against the schema
+        examples:
+          - {"name": "John", "email": "john@example.com"}
+          - {"invalid": "data"}
+          - null
       parse_payload:
         type: boolean
         default: false
-      result: { type: string }
-      message: { type: string }
-      validation_message: { type: string }
-      payload_parsed: {}
-      from_examples: { type: boolean }
+        description: Whether to parse payload as YAML/JSON string
+        examples: [true, false]
+      result:
+        type: string
+        description: Expected validation result
+        examples: ["valid", "invalid", "error"]
+      message:
+        type: string
+        description: Expected error or validation message
+        examples:
+          - "Missing required field: name"
+          - "Invalid email format"
+          - "Value must be positive"
+      validation_message:
+        type: string
+        description: Specific validation error message
+        examples:
+          - "Field 'age' must be a number"
+          - "String too long (max 50 characters)"
+      payload_parsed:
+        description: Parsed version of payload when parse_payload is true
+        examples:
+          - {"parsed": "object"}
+          - ["parsed", "array"]
+      from_examples:
+        type: boolean
+        description: Whether this case was generated from schema examples
+        examples: [true, false]
       warnings:
         type: array
         additionalItems: false
+        description: Expected warnings during validation
         items:
           oneOf:
-            - { type: string }
+            - type: string
+              examples:
+                - "Deprecated field used"
+                - "Consider using newer format"
             - type: object
               additionalProperties: false
               required: [generated, code]
-              properties: 
-                generated: { type: string }
-                code: 
+              properties:
+                generated:
+                  type: string
+                  description: Generated warning message
+                  examples: ["Format divergence detected"]
+                code:
                   type: string
                   enum: [format-divergence]
+                  description: Warning code identifier
+                  examples: ["format-divergence"]
+        examples:
+          - ["Simple warning message"]
+          - [{"generated": "Format mismatch", "code": "format-divergence"}]
     if:
       properties:
         parse_payload: { const: true }
