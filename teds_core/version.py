@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import Enum
 from importlib import metadata
 from pathlib import Path
-from subprocess import PIPE, run
+from subprocess import run
 
 import semver  # type: ignore[import-untyped]
 
@@ -46,8 +46,7 @@ def _from_git() -> str | None:
     try:
         p = run(
             ["git", "describe", "--tags", "--abbrev=0"],
-            stdout=PIPE,
-            stderr=PIPE,
+            capture_output=True,
             text=True,
             check=False,
         )
@@ -63,8 +62,8 @@ def get_version() -> str:
 
 
 def supported_spec_range_str() -> str:
-    # Display as 1.0–1.N
-    return f"{SUPPORTED_TESTSPEC_MAJOR}.0–{SUPPORTED_TESTSPEC_MAJOR}.{_SUPPORTED_MAX_MINOR}"
+    # Display as 1.0-1.N
+    return f"{SUPPORTED_TESTSPEC_MAJOR}.0-{SUPPORTED_TESTSPEC_MAJOR}.{_SUPPORTED_MAX_MINOR}"
 
 
 def recommended_minor_str() -> str:

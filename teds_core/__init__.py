@@ -8,10 +8,10 @@ from .yamlio import yaml_dumper, yaml_loader
 __version__ = get_version()
 
 __all__ = [
-    "yaml_loader",
-    "yaml_dumper",
+    "__version__",
+    "generate_from",
     "validate_doc",
     "validate_file",
-    "generate_from",
-    "__version__",
+    "yaml_dumper",
+    "yaml_loader",
 ]

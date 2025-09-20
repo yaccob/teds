@@ -11,7 +11,7 @@ def test_verify_warning():
     case = CASES / "format_divergence"
     expected = case / "expected.yaml"
 
-    rc, out, err = run_cli(
+    rc, out, _err = run_cli(
         [
             "verify",
             "spec.yaml",
@@ -31,7 +31,7 @@ def test_verify_error():
     case = CASES / "format_divergence"
     expected = case / "expected.error.yaml"
 
-    rc, out, err = run_cli(
+    rc, out, _err = run_cli(
         [
             "verify",
             "spec.yaml",
@@ -52,7 +52,7 @@ def test_verify_in_place(tmp_path: Path):
     src = CASES / "format_divergence"
     work = copy_case("format_divergence", tmp_path, "case")
 
-    rc, out, err = run_cli(["verify", "spec.yaml", "-i"], cwd=work)
+    rc, out, _err = run_cli(["verify", "spec.yaml", "-i"], cwd=work)
     assert rc == 1
     assert out == ""  # in-place writes to file, not stdout
 
@@ -65,7 +65,7 @@ def test_generate_single_ref(tmp_path: Path, monkeypatch):
     # work on a tmp copy to keep paths literal
     work = copy_case("format_divergence", tmp_path, "case_single")
 
-    rc, out, err = run_cli(
+    rc, _out, _err = run_cli(
         [
             "generate",
             "schema.yaml#/components/schemas=gen.yaml",
@@ -114,7 +114,7 @@ components:
     )
 
     # run in tmp so refs resolve relative to cwd
-    rc, out, err = run_cli(
+    rc, _out, _err = run_cli(
         [
             "generate",
             "s1.yaml#/components/schemas=a.yaml",
@@ -139,7 +139,7 @@ def test_generate_directory_target_default_filename(tmp_path: Path, monkeypatch)
     # place schema next to TARGET parent (out/)
     place_schema(work, "out")
 
-    rc, out, err = run_cli(
+    rc, _out, _err = run_cli(
         [
             "generate",
             "schema.yaml#/components/schemas=out/",
@@ -160,7 +160,7 @@ def test_generate_template_tokens_pointer_and_raw(tmp_path: Path, monkeypatch):
     place_schema(work, "out2")
 
     # sanitized pointer token
-    rc, out, err = run_cli(
+    rc, _out, _err = run_cli(
         [
             "generate",
             "schema.yaml#/components/schemas=out2/{base}.{pointer}.tests.yaml",
@@ -174,7 +174,7 @@ def test_generate_template_tokens_pointer_and_raw(tmp_path: Path, monkeypatch):
     # pointer_raw creates nested directories → parent is work/out3/schema/components
     place_schema(work, "out3/schema/components")
     # pointer_raw creates nested directories
-    rc2, out2, err2 = run_cli(
+    rc2, _out2, _err2 = run_cli(
         [
             "generate",
             "schema.yaml#/components/schemas=out3/{base}/{pointer_raw}.tests.yaml",
@@ -189,7 +189,7 @@ def test_generate_template_tokens_pointer_and_raw(tmp_path: Path, monkeypatch):
 def test_generate_omit_target_defaults_to_schema_dir(tmp_path: Path, monkeypatch):
     # Copy case to tmp; using relative ref, expect output next to schema.yaml
     work = copy_case("format_divergence", tmp_path, "case")
-    rc, out, err = run_cli(["generate", "schema.yaml#/components/schemas"], cwd=work)
+    rc, _out, _err = run_cli(["generate", "schema.yaml#/components/schemas"], cwd=work)
     assert rc == 0
     monkeypatch.chdir(work)
     assert Path("schema.components+schemas.tests.yaml").exists()
@@ -198,7 +198,7 @@ def test_generate_omit_target_defaults_to_schema_dir(tmp_path: Path, monkeypatch
 def test_generate_omit_pointer_and_target_defaults_root(tmp_path: Path, monkeypatch):
     work = copy_case("format_divergence", tmp_path, "case2")
     # no pointer → defaults to '#/'
-    rc, out, err = run_cli(["generate", "schema.yaml"], cwd=work)
+    rc, _out, _err = run_cli(["generate", "schema.yaml"], cwd=work)
     assert rc == 0
     monkeypatch.chdir(work)
     assert Path("schema.tests.yaml").exists()
@@ -210,7 +210,7 @@ def test_generate_default_pointer_root(tmp_path: Path, monkeypatch):
     # parent is work/defptr
     place_schema(work, "defptr")
     # omit '#...' → defaults to '#/'
-    rc, out, err = run_cli(
+    rc, _out, _err = run_cli(
         [
             "generate",
             "schema.yaml=defptr/",

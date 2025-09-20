@@ -22,4 +22,4 @@ tests:
       bad:
         payload: yellow
         result: SUCCESS
-        validation_message: "'yellow' is not one of ['red', 'green', 'blue']"
+        message: "'yellow' is not one of ['red', 'green', 'blue']"

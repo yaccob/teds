@@ -184,8 +184,7 @@ tests:
           payload: {"name": "test", "value": 123}
           parse_payload: false
           result: "valid"
-          message: "Expected message"
-          validation_message: "Detailed validation message"
+          message: "Detailed validation message"
           payload_parsed: {"parsed": "data"}
           from_examples: true
           warnings:

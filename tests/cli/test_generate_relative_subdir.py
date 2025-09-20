@@ -22,7 +22,7 @@ components:
     )
 
     # Run from tmp root, pass a relative path into a subdirectory
-    rc, out, err = run_cli(["generate", "sub/schema.yaml#/"], cwd=tmp_path)
+    rc, _out, err = run_cli(["generate", "sub/schema.yaml#/"], cwd=tmp_path)
     assert rc == 0, err
 
     # Expect default filename next to the schema
