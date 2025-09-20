@@ -23,4 +23,3 @@ tests:
     assert rc in (0, 1)
     html = outputs[0][1]
     assert "<html>" in html and "TeDS Report" in html
-

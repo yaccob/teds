@@ -2,10 +2,19 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from teds_core.refs import split_json_pointer, jq_examples_prefix, jq_segment, _retrieve, build_validator_for_ref_with_config, NetworkConfiguration, _retrieve_with_config
 import pytest
-from teds_core.refs import set_network_policy
+
 from teds_core.errors import NetworkError
+from teds_core.refs import (
+    NetworkConfiguration,
+    _retrieve,
+    _retrieve_with_config,
+    build_validator_for_ref_with_config,
+    jq_examples_prefix,
+    jq_segment,
+    set_network_policy,
+    split_json_pointer,
+)
 
 
 def test_split_json_pointer_and_jq():
@@ -39,15 +48,15 @@ def test_build_validator_for_ref_with_config(tmp_path: Path):
     # Test the build_validator_for_ref_with_config function
     schema = tmp_path / "test.yaml"
     schema.write_text("type: string\n", encoding="utf-8")
-    
+
     config = NetworkConfiguration(allow_network=False)
     strict, base = build_validator_for_ref_with_config(tmp_path, "test.yaml", config)
-    
+
     # Both validators should be created successfully
     assert strict is not None
     assert base is not None
-    assert hasattr(strict, 'format_checker')
-    assert not hasattr(base, 'format_checker') or base.format_checker is None
+    assert hasattr(strict, "format_checker")
+    assert not hasattr(base, "format_checker") or base.format_checker is None
 
 
 def test_network_configuration_creation():
@@ -56,11 +65,11 @@ def test_network_configuration_creation():
     assert not config.allow_network
     assert config.timeout == 5.0
     assert config.max_bytes == 5242880
-    
+
     # Test from_env class method
     config_env = NetworkConfiguration.from_env(allow_network=True)
     assert config_env.allow_network
-    
+
     # Test update method
     updated = config.update(allow=True, timeout=10.0)
     assert updated.allow_network
@@ -71,13 +80,13 @@ def test_network_configuration_creation():
 def test_retrieve_with_config_network_disabled(tmp_path: Path):
     # Test _retrieve_with_config with network disabled
     config = NetworkConfiguration(allow_network=False)
-    
+
     # File URI should work
     schema = tmp_path / "test.yaml"
     schema.write_text("key: value\n", encoding="utf-8")
     resource = _retrieve_with_config(schema.as_uri(), config)
     assert resource.contents.get("key") == "value"
-    
+
     # HTTPS URI should fail
     with pytest.raises(NetworkError, match="network fetch disabled"):
         _retrieve_with_config("https://example.com/test.yaml", config)

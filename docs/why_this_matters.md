@@ -40,5 +40,3 @@ This page collects concrete, real‑world scenarios and shows how TeDS helps avo
   - Numerous issues and Q&As around `oneOf`/`anyOf` usage and expectations, e.g.: https://stackoverflow.com/questions/25014650/json-schema-example-for-oneof-objects
 - How TeDS helps:
   - Craft a no‑match and ambiguous‑match invalid case to lock in intent; you’ll catch ambiguity and refine `oneOf`/`anyOf`.
-
-

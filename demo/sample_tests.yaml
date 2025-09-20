@@ -22,7 +22,7 @@ tests:
       parse as JSON string:
         description: payload provided as JSON string (parsed before validation)
         parse_payload: true
-        payload: "{\"id\":\"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\"name\":\"Bob Builder\",\"email\":\"bob@example.com\"}" 
+        payload: "{\"id\":\"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\"name\":\"Bob Builder\",\"email\":\"bob@example.com\"}"
     invalid:
       missing required prop:
         description: missing required property 'email'
@@ -192,4 +192,3 @@ tests:
       not a date:
         description: non-date string triggers format divergence (strict fails, base accepts)
         payload: "31-12-2025"
-

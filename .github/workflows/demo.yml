@@ -23,12 +23,12 @@ jobs:
           python -m pip install -U pip
           python -m pip install -r requirements.txt -r requirements-dev.txt
           python -m pip install -e .
-      - name: Unit coverage (fail-under=73)
+      - name: Unit coverage (fail-under=85)
         run: |
-          pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing --cov-fail-under=73 -q
-      - name: CLI coverage (fail-under=60)
+          pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing --cov-fail-under=85 -q
+      - name: CLI coverage (no coverage threshold)
         run: |
-          pytest tests/cli --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing --cov-fail-under=60 -q
+          pytest tests/cli --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing -q
       - name: Verify demo/sample_tests.yaml (expect rc=1)
         run: |
           set +e

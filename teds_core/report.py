@@ -4,16 +4,16 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable
 
-from .yamlio import yaml_loader, yaml_dumper
+from .resources import read_text_resource
 from .validate import _validate_testspec_against_schema, validate_doc
 from .version import (
-    check_spec_compat,
     RECOMMENDED_TESTSPEC_VERSION,
+    check_spec_compat,
+    get_version,
     recommended_minor_str,
     supported_spec_range_str,
-    get_version,
 )
-from .resources import read_text_resource
+from .yamlio import yaml_loader
 
 
 @dataclass
@@ -42,11 +42,15 @@ def _compute_counts(doc: dict[str, Any]) -> dict[str, int]:
     return {"success": success, "warning": warning, "error": error}
 
 
-def _render_jinja_str(template_key: str, template_text: str, context: dict[str, Any]) -> str:
-    from jinja2 import Environment, DictLoader, select_autoescape
-    ext = Path(template_key).suffix.lstrip(".")
+def _render_jinja_str(
+    template_key: str, template_text: str, context: dict[str, Any]
+) -> str:
+    from jinja2 import DictLoader, Environment, select_autoescape
+
     autoescape = select_autoescape(enabled_extensions=("html", "htm"))
-    env = Environment(loader=DictLoader({template_key: template_text}), autoescape=autoescape)
+    env = Environment(
+        loader=DictLoader({template_key: template_text}), autoescape=autoescape
+    )
     tmpl = env.get_template(template_key)
     return tmpl.render(**context)
 
@@ -84,12 +88,17 @@ def build_context(inputs: Iterable[ReportInput]) -> dict[str, Any]:
             "spec_supported": supported_spec_range_str(),
             "spec_recommended": recommended_minor_str(),
         },
-        "inputs": [{"path": str(ri.path), "doc": ri.doc, "counts": ri.counts, "rc": ri.rc} for ri in ins],
+        "inputs": [
+            {"path": str(ri.path), "doc": ri.doc, "counts": ri.counts, "rc": ri.rc}
+            for ri in ins
+        ],
         "totals": totals,
     }
 
 
-def run_report_per_spec(spec_paths: list[Path], template_id: str, output_level: str) -> tuple[list[tuple[Path, str]], int]:
+def run_report_per_spec(
+    spec_paths: list[Path], template_id: str, output_level: str
+) -> tuple[list[tuple[Path, str]], int]:
     """Render a report per spec file using the given template id.
 
     Returns list of (spec_path, rendered_text) and an exit code (0 or 2 on hard failure).
@@ -127,7 +136,9 @@ def run_report_per_spec(spec_paths: list[Path], template_id: str, output_level: 
             hard_rc = 2
             continue
         # Evaluate cases with filtering
-        out_tests, rc = validate_doc(raw, sp.parent, output_level=output_level, in_place=False)
+        out_tests, rc = validate_doc(
+            raw, sp.parent, output_level=output_level, in_place=False
+        )
         doc = {"version": RECOMMENDED_TESTSPEC_VERSION, "tests": out_tests}
         counts = _compute_counts(doc)
         report_inputs.append(ReportInput(path=sp, doc=doc, counts=counts, rc=rc))

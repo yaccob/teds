@@ -70,14 +70,14 @@ $defs:
     additionalProperties: false
     description: Individual test case with payload and expected results
     properties:
-      description: 
+      description:
         type: string
         description: Human-readable description of the test case
-        examples: 
+        examples:
           - "Valid user with all required fields"
           - "Invalid email format should be rejected"
           - "Missing required field triggers validation error"
-      payload: 
+      payload:
         description: The data to be validated against the schema
         examples:
           - {"name": "John", "email": "john@example.com"}
@@ -88,29 +88,29 @@ $defs:
         default: false
         description: Whether to parse payload as YAML/JSON string
         examples: [true, false]
-      result: 
+      result:
         type: string
         description: Expected validation result
         examples: ["valid", "invalid", "error"]
-      message: 
+      message:
         type: string
         description: Expected error or validation message
-        examples: 
+        examples:
           - "Missing required field: name"
           - "Invalid email format"
           - "Value must be positive"
-      validation_message: 
+      validation_message:
         type: string
         description: Specific validation error message
         examples:
           - "Field 'age' must be a number"
           - "String too long (max 50 characters)"
-      payload_parsed: 
+      payload_parsed:
         description: Parsed version of payload when parse_payload is true
         examples:
           - {"parsed": "object"}
           - ["parsed", "array"]
-      from_examples: 
+      from_examples:
         type: boolean
         description: Whether this case was generated from schema examples
         examples: [true, false]
@@ -121,18 +121,18 @@ $defs:
         items:
           oneOf:
             - type: string
-              examples: 
+              examples:
                 - "Deprecated field used"
                 - "Consider using newer format"
             - type: object
               additionalProperties: false
               required: [generated, code]
-              properties: 
-                generated: 
+              properties:
+                generated:
                   type: string
                   description: Generated warning message
                   examples: ["Format divergence detected"]
-                code: 
+                code:
                   type: string
                   enum: [format-divergence]
                   description: Warning code identifier

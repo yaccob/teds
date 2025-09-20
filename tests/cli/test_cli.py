@@ -1,34 +1,25 @@
 from __future__ import annotations
 
-import sys
-import subprocess
 from pathlib import Path
 
+from tests.utils import copy_case, load_yaml_file, load_yaml_text, place_schema, run_cli
 
 CASES = Path(__file__).resolve().parents[1] / "cases"
-
-
-from tests.utils import run_cli
-
-
-from tests.utils import (
-    load_yaml_text,
-    load_yaml_file,
-    copy_case,
-    place_schema,
-)
 
 
 def test_verify_warning():
     case = CASES / "format_divergence"
     expected = case / "expected.yaml"
 
-    rc, out, err = run_cli([
-        "verify",
-        "spec.yaml",
-        "--output-level",
-        "warning",
-    ], cwd=case)
+    rc, out, err = run_cli(
+        [
+            "verify",
+            "spec.yaml",
+            "--output-level",
+            "warning",
+        ],
+        cwd=case,
+    )
     assert rc == 1
 
     got_doc = load_yaml_text(out)
@@ -40,12 +31,15 @@ def test_verify_error():
     case = CASES / "format_divergence"
     expected = case / "expected.error.yaml"
 
-    rc, out, err = run_cli([
-        "verify",
-        "spec.yaml",
-        "--output-level",
-        "error",
-    ], cwd=case)
+    rc, out, err = run_cli(
+        [
+            "verify",
+            "spec.yaml",
+            "--output-level",
+            "error",
+        ],
+        cwd=case,
+    )
     assert rc == 1
 
     got_doc = load_yaml_text(out)
@@ -71,10 +65,13 @@ def test_generate_single_ref(tmp_path: Path, monkeypatch):
     # work on a tmp copy to keep paths literal
     work = copy_case("format_divergence", tmp_path, "case_single")
 
-    rc, out, err = run_cli([
-        "generate",
-        "schema.yaml#/components/schemas=gen.yaml",
-    ], cwd=work)
+    rc, out, err = run_cli(
+        [
+            "generate",
+            "schema.yaml#/components/schemas=gen.yaml",
+        ],
+        cwd=work,
+    )
     assert rc == 0
     monkeypatch.chdir(work)
     assert Path("gen.yaml").exists()
@@ -116,9 +113,6 @@ components:
         encoding="utf-8",
     )
 
-    out1 = tmp_path / "a.yaml"
-    out2 = tmp_path / "b.yaml"
-
     # run in tmp so refs resolve relative to cwd
     rc, out, err = run_cli(
         [
@@ -145,10 +139,13 @@ def test_generate_directory_target_default_filename(tmp_path: Path, monkeypatch)
     # place schema next to TARGET parent (out/)
     place_schema(work, "out")
 
-    rc, out, err = run_cli([
-        "generate",
-        "schema.yaml#/components/schemas=out/",
-    ], cwd=work)
+    rc, out, err = run_cli(
+        [
+            "generate",
+            "schema.yaml#/components/schemas=out/",
+        ],
+        cwd=work,
+    )
     assert rc == 0
     # default filename: {base}.{pointer}.tests.yaml (pointer sanitized)
     monkeypatch.chdir(work)
@@ -163,10 +160,13 @@ def test_generate_template_tokens_pointer_and_raw(tmp_path: Path, monkeypatch):
     place_schema(work, "out2")
 
     # sanitized pointer token
-    rc, out, err = run_cli([
-        "generate",
-        "schema.yaml#/components/schemas=out2/{base}.{pointer}.tests.yaml",
-    ], cwd=work)
+    rc, out, err = run_cli(
+        [
+            "generate",
+            "schema.yaml#/components/schemas=out2/{base}.{pointer}.tests.yaml",
+        ],
+        cwd=work,
+    )
     assert rc == 0
     monkeypatch.chdir(work)
     assert Path("out2/schema.components+schemas.tests.yaml").exists()
@@ -174,10 +174,13 @@ def test_generate_template_tokens_pointer_and_raw(tmp_path: Path, monkeypatch):
     # pointer_raw creates nested directories → parent is work/out3/schema/components
     place_schema(work, "out3/schema/components")
     # pointer_raw creates nested directories
-    rc2, out2, err2 = run_cli([
-        "generate",
-        "schema.yaml#/components/schemas=out3/{base}/{pointer_raw}.tests.yaml",
-    ], cwd=work)
+    rc2, out2, err2 = run_cli(
+        [
+            "generate",
+            "schema.yaml#/components/schemas=out3/{base}/{pointer_raw}.tests.yaml",
+        ],
+        cwd=work,
+    )
     assert rc2 == 0
     monkeypatch.chdir(work)
     assert Path("out3/schema/components/schemas.tests.yaml").exists()
@@ -207,10 +210,13 @@ def test_generate_default_pointer_root(tmp_path: Path, monkeypatch):
     # parent is work/defptr
     place_schema(work, "defptr")
     # omit '#...' → defaults to '#/'
-    rc, out, err = run_cli([
-        "generate",
-        "schema.yaml=defptr/",
-    ], cwd=work)
+    rc, out, err = run_cli(
+        [
+            "generate",
+            "schema.yaml=defptr/",
+        ],
+        cwd=work,
+    )
     assert rc == 0
     # default filename at root pointer: {base}.tests.yaml
     monkeypatch.chdir(work)

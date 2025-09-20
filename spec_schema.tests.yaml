@@ -7,7 +7,7 @@ tests:
         payload:
           version: "1.0.0"
           tests: {}
-      
+
       basic_spec_with_tests:
         description: "Basic specification with tests structure"
         payload:
@@ -25,20 +25,20 @@ tests:
         payload:
           tests: {}
         message: "Missing required field: version"
-      
+
       missing_tests:
         description: "Specification missing required tests field"
         payload:
           version: "1.0.0"
         message: "Missing required field: tests"
-      
+
       invalid_version_type:
         description: "Version as number instead of string"
         payload:
           version: 1.0
           tests: {}
         message: "Version must be a string"
-      
+
       non_object_tests:
         description: "Tests field as array instead of object"
         payload:
@@ -51,15 +51,15 @@ tests:
       valid_semver_basic:
         description: "Basic SemVer version"
         payload: "1.0.0"
-      
+
       valid_semver_prerelease:
         description: "SemVer with prerelease"
         payload: "2.1.0-beta.1"
-      
+
       valid_semver_build:
         description: "SemVer with build metadata"
         payload: "1.0.0+build.123"
-      
+
       valid_semver_full:
         description: "Complete SemVer with prerelease and build"
         payload: "3.2.1-alpha.1+build.456"
@@ -69,12 +69,12 @@ tests:
         description: "Version as number"
         payload: 1.0
         message: "Version must be a string"
-      
+
       invalid_version_format:
         description: "Invalid version format"
         payload: "v1.0.0"
         message: "Version must follow SemVer format"
-      
+
       invalid_version_empty:
         description: "Empty version string"
         payload: ""
@@ -85,7 +85,7 @@ tests:
       empty_tests:
         description: "Empty tests object"
         payload: {}
-      
+
       single_schema_test:
         description: "Single schema with test cases"
         payload:
@@ -105,7 +105,7 @@ tests:
         description: "Tests as array instead of object"
         payload: []
         message: "Tests must be an object"
-      
+
       tests_as_string:
         description: "Tests as string"
         payload: "invalid"
@@ -116,17 +116,17 @@ tests:
       empty_schema_test:
         description: "Empty schema test object"
         payload: {}
-      
+
       only_valid_cases:
         description: "Schema test with only valid cases"
         payload:
           valid: {}
-      
+
       only_invalid_cases:
         description: "Schema test with only invalid cases"
         payload:
           invalid: {}
-      
+
       both_valid_invalid:
         description: "Schema test with both valid and invalid cases"
         payload:
@@ -145,11 +145,11 @@ tests:
     valid:
       "null":
         description: "Null case set (allowed)"
-      
+
       empty_case_set:
         description: "Empty case set object"
         payload: {}
-      
+
       case_set_with_cases:
         description: "Case set with test cases"
         payload:
@@ -160,7 +160,7 @@ tests:
         description: "Case set as string instead of object/null"
         payload: "invalid"
         message: "Case set must be object or null"
-      
+
       case_set_as_array:
         description: "Case set as array instead of object/null"
         payload: ["not", "allowed"]
@@ -170,13 +170,13 @@ tests:
     valid:
       "null":
         description: "Null case object (allowed)"
-      
+
       minimal_case:
         description: "Minimal valid case object"
         payload:
           description: "Test description"
           payload: {"test": "data"}
-      
+
       complete_case:
         description: "Complete case object with all fields"
         payload:
@@ -188,11 +188,11 @@ tests:
           validation_message: "Detailed validation message"
           payload_parsed: {"parsed": "data"}
           from_examples: true
-          warnings: 
+          warnings:
             - "Simple warning"
             - generated: "Format divergence"
               code: "format-divergence"
-      
+
       string_payload_case:
         description: "Case with string payload and parse_payload true"
         payload:
@@ -200,7 +200,7 @@ tests:
           payload: '{"json": "string"}'
           parse_payload: true
           payload_parsed: {"json": "string"}
-      
+
       warnings_only_strings:
         description: "Case with only string warnings"
         payload:
@@ -215,7 +215,7 @@ tests:
         description: "Case object as string"
         payload: "invalid"
         message: "Case object must be object or null"
-      
+
       additional_properties:
         description: "Case object with disallowed additional properties"
         payload:
@@ -223,14 +223,14 @@ tests:
           payload: {"data": "test"}
           extra_field: "not allowed"
         message: "Additional properties not allowed"
-      
+
       invalid_description_type:
         description: "Case object with non-string description"
         payload:
           description: 123
           payload: {"test": "data"}
         message: "Description must be string"
-      
+
       invalid_parse_payload_type:
         description: "Case object with non-boolean parse_payload"
         payload:
@@ -238,7 +238,7 @@ tests:
           payload: {"data": "test"}
           parse_payload: "true"
         message: "parse_payload must be boolean"
-      
+
       invalid_warning_missing_code:
         description: "Warning object missing required code field"
         payload:
@@ -247,7 +247,7 @@ tests:
           warnings:
             - generated: "Warning without code"
         message: "Warning object missing required 'code' field"
-      
+
       invalid_warning_bad_code:
         description: "Warning object with invalid code value"
         payload:
@@ -257,7 +257,7 @@ tests:
             - generated: "Warning with bad code"
               code: "invalid-code-value"
         message: "Warning code must be 'format-divergence'"
-      
+
       parse_payload_string_constraint:
         description: "parse_payload true but payload not string"
         payload:

@@ -8,7 +8,7 @@ help: ## Show this help message
 
 # Testing targets
 test-unit: ## Run unit tests only (fast, always required)
-	pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing --cov-fail-under=75 -q
+	pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing --cov-fail-under=85 -q
 
 test-cli: ## Run CLI integration tests
 	pytest tests/cli -v
@@ -23,7 +23,7 @@ test-full: test-unit test-cli test-schema ## Run all tests (required for packagi
 
 # Coverage
 coverage: ## Generate detailed coverage report
-	pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=html --cov-report=term-missing --cov-fail-under=75
+	pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=html --cov-report=term-missing --cov-fail-under=85
 	@echo "📊 Coverage report generated in htmlcov/"
 
 # Development
