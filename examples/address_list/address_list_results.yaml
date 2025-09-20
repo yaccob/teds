@@ -1,0 +1,12 @@
+version: 1.0.0
+tests:
+  address_list.yaml#/$defs/AddressList:
+    invalid:
+      mixup:
+        description: List containing an object that seems to be both AddressOneLine and AddressTwoLines
+        payload:
+        - one_line_address: Meine-Strasse 1, 76136 Anytown
+          street_and_housenumber: Meine-Strasse 1
+          zip_and_city: 76136 Anytown
+        result: ERROR
+        message: UNEXPECTEDLY VALID
