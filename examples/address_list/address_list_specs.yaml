@@ -1,5 +1,25 @@
 version: "1.0.0"
 tests:
+  "address_list.yaml#/$defs/AddressOneLine/properties/one_line_address":
+    valid:
+      basic_address:
+        description: "Valid address with all required fields"
+        payload: "Meine-Strasse 1, 76136 Anytown"
+      complex_address:
+        description: "Address with multiple words and non-ASCII characters in street name"
+        payload: "An der Henriette-Obermüller-Straße 127b, 76136 Anytown"
+      additional property:
+        payload: "Meine-Strasse 1, 76136 Anytown"
+    invalid:
+      missing comma:
+        description: "Missing comma between street_and_housenumber and zip/city"
+        payload: "Meine-Strasse 1 76136 Anytown"
+      comma used twice:
+        description: "Comma used twice"
+        payload: "Meine-Strasse, 1, 76136 Anytown"
+      missing street_and_housenumber:
+        description: "Missing street_and_housenumber part in one_line_address field"
+        payload: "76136 Anytown"
   "address_list.yaml#/$defs/AddressOneLine":
     valid:
       basic_address:
