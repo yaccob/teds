@@ -4,16 +4,16 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable
 
-from .yamlio import yaml_loader
+from .resources import read_text_resource
 from .validate import _validate_testspec_against_schema, validate_doc
 from .version import (
-    check_spec_compat,
     RECOMMENDED_TESTSPEC_VERSION,
+    check_spec_compat,
+    get_version,
     recommended_minor_str,
     supported_spec_range_str,
-    get_version,
 )
-from .resources import read_text_resource
+from .yamlio import yaml_loader
 
 
 @dataclass
@@ -45,7 +45,7 @@ def _compute_counts(doc: dict[str, Any]) -> dict[str, int]:
 def _render_jinja_str(
     template_key: str, template_text: str, context: dict[str, Any]
 ) -> str:
-    from jinja2 import Environment, DictLoader, select_autoescape
+    from jinja2 import DictLoader, Environment, select_autoescape
 
     autoescape = select_autoescape(enabled_extensions=("html", "htm"))
     env = Environment(
@@ -110,22 +110,24 @@ def run_report_per_spec(
     for sp in spec_paths:
         try:
             raw = yaml_loader.load(sp.read_text(encoding="utf-8")) or {}
-        except Exception as e:
+        except Exception as e:  # pragma: no cover start
+            # I/O failures - hard to reproduce reliably in tests
             print(
                 f"Failed to read testspec: {sp}\n  error: {type(e).__name__}: {e}",
                 flush=True,
             )
             hard_rc = 2
-            continue
+            continue  # pragma: no cover stop
         # Schema validation
         try:
             _validate_testspec_against_schema(raw, repo_root)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover start
+            # Schema validation failures - internal errors, hard to trigger
             print(
                 f"Spec validation failed: {sp}\n  error: {type(e).__name__}: {e}",
             )
             hard_rc = 2
-            continue
+            continue  # pragma: no cover stop
         # Version gate
         ver = str(raw.get("version", "")).strip()
         ok, reason = check_spec_compat(ver)

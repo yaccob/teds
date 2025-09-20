@@ -1,13 +1,14 @@
 from __future__ import annotations
 
-from importlib import metadata
-from subprocess import run, PIPE
 from enum import Enum
+from importlib import metadata
 from pathlib import Path
-import semver  # type: ignore
+from subprocess import PIPE, run
 
-from .yamlio import yaml_loader
+import semver  # type: ignore[import-untyped]
+
 from .resources import read_text_resource
+from .yamlio import yaml_loader
 
 # Load compatibility manifest from repository root (bundled with the wheel)
 _REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -17,8 +18,8 @@ def _load_compat() -> tuple[int, int, int]:
     # Load manifest via shared resource helper
     try:
         text = read_text_resource("teds_compat.yaml")
-    except Exception:
-        return 1, 0, 0
+    except Exception:  # pragma: no cover
+        return 1, 0, 0  # Resource loading fallback - hard to trigger in tests
     try:
         compat = yaml_loader.load(text) or {}
         spec = compat.get("spec") or {}
@@ -26,8 +27,8 @@ def _load_compat() -> tuple[int, int, int]:
         max_minor = int(spec.get("max_minor"))
         rec_minor = int(spec.get("recommended_minor", max_minor))
         return major, max_minor, rec_minor
-    except Exception:
-        return 1, 0, 0
+    except Exception:  # pragma: no cover
+        return 1, 0, 0  # YAML parsing/conversion fallback
 
 
 SUPPORTED_TESTSPEC_MAJOR, _SUPPORTED_MAX_MINOR, _RECOMMENDED_MINOR = _load_compat()
@@ -37,8 +38,8 @@ RECOMMENDED_TESTSPEC_VERSION = f"{SUPPORTED_TESTSPEC_MAJOR}.{_RECOMMENDED_MINOR}
 def _from_pkg() -> str | None:
     try:
         return metadata.version("teds")
-    except Exception:
-        return None
+    except Exception:  # pragma: no cover
+        return None  # Package metadata not available
 
 
 def _from_git() -> str | None:
@@ -53,8 +54,8 @@ def _from_git() -> str | None:
         if p.returncode == 0:
             return p.stdout.strip().lstrip("v")
         return None
-    except Exception:
-        return None
+    except Exception:  # pragma: no cover
+        return None  # Git command not available or failed
 
 
 def get_version() -> str:

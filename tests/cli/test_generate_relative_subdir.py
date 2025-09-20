@@ -2,8 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from tests.utils import run_cli
-from tests.utils import load_yaml_file
+from tests.utils import load_yaml_file, run_cli
 
 
 def test_generate_with_relative_schema_in_subdir(tmp_path: Path, monkeypatch):

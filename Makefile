@@ -1,75 +1,139 @@
-.PHONY: help install test test-unit test-cli test-full lint format type-check smoke demo clean build release-check
+.PHONY: help test test-unit test-cli test-schema test-full coverage dev-install test-package package clean check-clean release-patch release-minor release-major check-branch pr-ready create-pr pr-status merge-pr
+.DEFAULT_GOAL := help
 
-# Default target
-help:  ## Show this help message
+help: ## Show this help message
+	@echo "TeDS Development Workflow"
+	@echo "========================="
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-# Setup and installation
-install:  ## Install package in development mode
-	python -m pip install -U pip
-	python -m pip install -r requirements.txt -r requirements-dev.txt
-	python -m pip install -e .
-
-install-pre-commit:  ## Install pre-commit hooks
-	pre-commit install
-
 # Testing targets
-test-unit:  ## Run unit tests with coverage
-	python -m pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing --cov-fail-under=75
+test-unit: ## Run unit tests only (fast, always required)
+	pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing --cov-fail-under=85 -q
 
-test-cli:  ## Run CLI tests
-	python -m pytest tests/cli --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing -v
+test-cli: ## Run CLI integration tests
+	pytest tests/cli -v
 
-test-full: test-unit test-cli  ## Run all tests
+test-schema: ## Validate spec_schema.yaml against spec_schema.tests.yaml
+	python -m teds_core.cli verify spec_schema.tests.yaml --output-level error
 
-test: test-full  ## Alias for test-full
+test: test-unit ## Default test target (unit tests only)
 
-# Code quality
-lint:  ## Run linting with ruff
-	ruff check --fix .
+test-full: test-unit test-cli test-schema ## Run all tests (required for packaging)
+	@echo "✅ All tests passed - ready for packaging"
 
-format:  ## Format code with ruff
-	ruff format .
+# Coverage
+coverage: ## Generate detailed coverage report
+	pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=html --cov-report=term-missing --cov-fail-under=85
+	@echo "📊 Coverage report generated in htmlcov/"
 
-type-check:  ## Run type checking with mypy
-	mypy teds_core/ teds.py
+# Development
+dev-install: ## Install package in development mode
+	pip install -e .
+	@echo "🔧 Development installation complete - changes are immediately visible"
 
-# Demo and smoke tests
-smoke-dev:  ## Run basic smoke test (development version)
-	@echo "Testing CLI version (dev)..."
-	python teds.py --version
-	@echo "Testing demo verification (expect rc=1) (dev)..."
-	@python teds.py verify demo/sample_tests.yaml --output-level warning > /dev/null; \
-	if [ $$? -eq 1 ]; then echo "✅ Demo smoke test passed (dev)"; else echo "❌ Demo smoke test failed (dev)"; exit 1; fi
+# Packaging
+clean: ## Clean build artifacts
+	rm -rf dist/ build/ *.egg-info/
+	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+	find . -type f -name "*.pyc" -delete
 
-smoke:  ## Run basic smoke test (installed package)
-	@echo "Testing installed package..."
-	@command -v teds >/dev/null 2>&1 || { echo "❌ 'teds' command not found. Run 'make install' first."; exit 1; }
-	@echo "Testing CLI version (installed)..."
-	teds --version
-	@echo "Testing demo verification (expect rc=1) (installed)..."
-	@teds verify demo/sample_tests.yaml --output-level warning > /dev/null; \
-	if [ $$? -eq 1 ]; then echo "✅ Demo smoke test passed (installed)"; else echo "❌ Demo smoke test failed (installed)"; exit 1; fi
+test-package: ## Test that package includes required files
+	@echo "🧪 Testing package contents..."
+	@rm -rf dist/ .pkg-test/
+	@hatch build >/dev/null 2>&1
+	@python -m venv .pkg-test
+	@.pkg-test/bin/pip install -q dist/*.whl
+	@echo "Testing installed package functionality..."
+	@cd /tmp && echo 'version: "1.0.0"\ntests: {}' > test.yaml
+	@cd /tmp && /Users/yaccob/repos/github.com/yaccob/contest/.pkg-test/bin/teds verify test.yaml --output-level error >/dev/null 2>&1 && echo "✅ Package test PASSED" || (echo "❌ Package test FAILED - missing files in package" && exit 1)
+	@rm -rf .pkg-test/ /tmp/test.yaml
 
-demo: smoke  ## Run demo smoke test (alias)
+package: clean test-full test-package ## Build distribution packages (requires all tests to pass)
+	hatch build
+	@echo "📦 Package built successfully:"
+	@ls -la dist/
+	@echo ""
+	@echo "Version info:"
+	@python -c "from teds_core.version import get_version; print(f'Built version: {get_version()}')"
 
-# Release preparation
-build:  ## Build package
-	python -m build
-	twine check dist/*
+# Development version management
+dev-version: ## Show current development version
+	@echo "Current version: $$(python -c 'from teds_core.version import get_version; print(get_version())')"
+	@echo "Latest git tag: $$(git describe --tags --abbrev=0 2>/dev/null || echo 'no tags')"
+	@echo "Git status: $$(git status --porcelain | wc -l | tr -d ' ') uncommitted changes"
 
-release-check: clean test-full smoke build  ## Full release readiness check
-	@echo "🎉 Release readiness check passed!"
+# Quick checks
+check-version: dev-version ## Alias for dev-version
 
-# Cleanup
-clean:  ## Clean build artifacts
-	rm -rf dist/ build/ *.egg-info/ .coverage .pytest_cache/ __pycache__/
-	find . -name "*.pyc" -delete
-	find . -name "__pycache__" -delete
+status: ## Show project status
+	@echo "TeDS Project Status"
+	@echo "=================="
+	@make dev-version
+	@echo ""
+	@echo "Test status:"
+	@make test-unit >/dev/null 2>&1 && echo "✅ Unit tests: PASS" || echo "❌ Unit tests: FAIL"
+	@make test-schema >/dev/null 2>&1 && echo "✅ Schema validation: PASS" || echo "❌ Schema validation: FAIL"
+	@echo ""
+	@echo "Git branch: $$(git branch --show-current)"
 
-# CI simulation
-ci-local: lint format type-check test-full smoke-dev  ## Simulate CI locally (pre-push check)
-	@echo "🎉 Local CI simulation passed!"
+# Release Management
+check-clean: ## Verify working directory is clean for release
+	@if [ -n "$$(git status --porcelain)" ]; then \
+		echo "❌ Working directory not clean. Commit changes first."; \
+		git status --short; \
+		exit 1; \
+	fi
+	@echo "✅ Working directory is clean"
 
-ci-package: clean test-full build smoke  ## Full package testing (like CI package-smoke)
-	@echo "🎉 Package CI simulation passed!"
+define do_release
+	@echo "🚀 Creating $(1) release..."
+	@CURRENT=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/v//' || echo "0.0.0"); \
+	if [ "$(1)" = "patch" ]; then NEW=$$(echo $$CURRENT | awk -F. '{print $$1"."$$2"."$$3+1}'); \
+	elif [ "$(1)" = "minor" ]; then NEW=$$(echo $$CURRENT | awk -F. '{print $$1"."$$2+1".0"}'); \
+	elif [ "$(1)" = "major" ]; then NEW=$$(echo $$CURRENT | awk -F. '{print $$1+1".0.0"}'); \
+	fi; \
+	echo "📝 Bumping version: v$$CURRENT → v$$NEW"; \
+	git tag -a "v$$NEW" -m "chore(release): v$$NEW"; \
+	echo "✅ Tagged v$$NEW"; \
+	make package; \
+	echo "📦 Built package with version $$NEW"; \
+	echo ""; \
+	echo "🎉 Release v$$NEW completed successfully!"; \
+	echo "Next steps:"; \
+	echo "  - Review: git show v$$NEW"; \
+	echo "  - Publish: git push origin v$$NEW"; \
+	echo "  - Upload: twine upload dist/*"
+endef
+
+release-patch: check-clean test-full ## Create patch release (0.2.5 → 0.2.6)
+	$(call do_release,patch)
+
+release-minor: check-clean test-full ## Create minor release (0.2.5 → 0.3.0)
+	$(call do_release,minor)
+
+release-major: check-clean test-full ## Create major release (0.2.5 → 1.0.0)
+	$(call do_release,major)
+
+# Git Workflow
+check-branch: ## Verify we're on correct branch and up-to-date
+	@git fetch upstream 2>/dev/null || echo "⚠️  Could not fetch from remote"
+	@BRANCH=$$(git branch --show-current); \
+	if [ "$$BRANCH" = "master" ]; then \
+		echo "❌ Cannot create PR from master branch"; \
+		exit 1; \
+	fi; \
+	echo "✅ Current branch: $$BRANCH"
+
+pr-ready: check-clean test-full check-branch ## Verify branch is ready for PR
+	@echo "✅ Branch is ready for PR creation"
+
+create-pr: pr-ready ## Create pull request to master branch
+	@echo "🚀 Creating pull request..."
+	gh pr create --base master --fill
+
+pr-status: ## Check current PR status
+	gh pr status
+
+merge-pr: ## Merge PR after all checks pass (auto-merge with squash)
+	@echo "🔄 Auto-merging PR with squash..."
+	gh pr merge --auto --squash

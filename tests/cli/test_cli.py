@@ -2,14 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-
-from tests.utils import run_cli
-from tests.utils import (
-    load_yaml_text,
-    load_yaml_file,
-    copy_case,
-    place_schema,
-)
+from tests.utils import copy_case, load_yaml_file, load_yaml_text, place_schema, run_cli
 
 CASES = Path(__file__).resolve().parents[1] / "cases"
 

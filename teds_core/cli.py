@@ -3,13 +3,180 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import List, Tuple
 
+from .errors import TedsError
 from .generate import generate_from
 from .validate import validate_file
-from .errors import TedsError
-from .version import get_version, supported_spec_range_str, recommended_minor_str
+from .version import get_version, recommended_minor_str, supported_spec_range_str
+
+
+class Command(ABC):
+    """Abstract base class for CLI commands."""
+
+    @abstractmethod
+    def execute(self, args: argparse.Namespace) -> int:
+        """Execute the command and return exit code."""
+        pass
+
+
+class VersionCommand(Command):
+    """Command to display version information."""
+
+    def execute(self, args: argparse.Namespace) -> int:
+        print(
+            f"teds {get_version()} (spec supported: {supported_spec_range_str()}; recommended: {recommended_minor_str()})"
+        )
+        return 0
+
+
+class ListTemplatesCommand(Command):
+    """Command to list available templates."""
+
+    def execute(self, args: argparse.Namespace) -> int:
+        from .report import list_templates
+
+        for it in list_templates():
+            print(f"{it.get('id')}: {it.get('description','').strip()}")
+        return 0
+
+
+class VerifyCommand(Command):
+    """Command to verify test specifications."""
+
+    def execute(self, args: argparse.Namespace) -> int:
+        self._configure_network(args)
+
+        if args.report:
+            return self._handle_report_mode(args)
+        else:
+            return self._handle_verify_mode(args)
+
+    def _configure_network(self, args: argparse.Namespace) -> None:
+        """Configure network policy from arguments."""
+        try:
+            from .refs import set_network_policy
+
+            set_network_policy(
+                args.allow_network,
+                timeout=args.network_timeout,
+                max_bytes=args.network_max_bytes,
+            )
+        except Exception:
+            pass
+
+    def _handle_report_mode(self, args: argparse.Namespace) -> int:
+        """Handle verification with report generation."""
+        # Parse TEMPLATE_ID or TEMPLATE_ID=OUTFILE
+        report_arg = args.report
+        tpl_id, out_override = (
+            (report_arg.split("=", 1) + [None])[:2]
+            if "=" in report_arg
+            else (report_arg, None)
+        )
+
+        from .report import resolve_template, run_report_per_spec
+
+        try:
+            resolve_template(tpl_id)
+        except Exception as e:
+            print(str(e), file=sys.stderr)
+            return 2
+
+        pairs, rc = run_report_per_spec(
+            [Path(s) for s in args.spec], tpl_id, args.output_level
+        )
+        multi = len(pairs) > 1
+
+        for sp, content in pairs:
+            if out_override:
+                if multi:
+                    print(
+                        "Explicit output path is only supported with a single SPEC",
+                        file=sys.stderr,
+                    )
+                    return 2
+                out_path = Path(out_override)
+            else:
+                base = sp.stem
+                ext = ".html" if tpl_id.endswith(".html") else ".md"
+                tbase = tpl_id.split(".")[0]
+                name = (
+                    f"{base}.report{ext}"
+                    if not multi
+                    else f"{base}.{tbase}.report{ext}"
+                )
+                out_path = sp.parent / name
+
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_text(content, encoding="utf-8")
+
+        return rc
+
+    def _handle_verify_mode(self, args: argparse.Namespace) -> int:
+        """Handle standard verification mode."""
+        rc_all = 0
+        for spec in args.spec:
+            rc_all = max(
+                rc_all, validate_file(Path(spec), args.output_level, args.in_place)
+            )
+        return rc_all
+
+
+class GenerateCommand(Command):
+    """Command to generate test specifications."""
+
+    def execute(self, args: argparse.Namespace) -> int:
+        self._configure_network(args)
+
+        try:
+            pairs = _plan_pairs(args.mapping)
+            for ref, outp in pairs:
+                outp.parent.mkdir(parents=True, exist_ok=True)
+                generate_from(ref, outp)
+        except TedsError as e:
+            print(str(e), file=sys.stderr)
+            return 2
+        except Exception as e:
+            print(f"Unexpected error: {type(e).__name__}: {e}", file=sys.stderr)
+            return 2
+
+        return 0
+
+    def _configure_network(self, args: argparse.Namespace) -> None:
+        """Configure network policy from arguments."""
+        try:
+            from .refs import set_network_policy
+
+            set_network_policy(
+                args.allow_network,
+                timeout=args.network_timeout,
+                max_bytes=args.network_max_bytes,
+            )
+        except Exception:
+            pass
+
+
+class CommandRegistry:
+    """Registry for CLI commands."""
+
+    def __init__(self):
+        self._commands: dict[str, Command] = {
+            "version": VersionCommand(),
+            "list-templates": ListTemplatesCommand(),
+            "verify": VerifyCommand(),
+            "generate": GenerateCommand(),
+        }
+
+    def get_command(self, name: str) -> Command | None:
+        """Get command by name."""
+        return self._commands.get(name)
+
+    def has_command(self, name: str) -> bool:
+        """Check if command exists."""
+        return name in self._commands
 
 
 def _sanitize(s: str) -> str:
@@ -88,12 +255,18 @@ def _plan_pairs(mappings: list[str]) -> list[tuple[str, Path]]:
             else:
                 out_path = path
 
-        # Build an absolute file path for the ref to avoid double-joining against base dirs later
-        file_abs = str(Path(file_part).resolve())
+        # Build a relative file path for the ref based on the output directory
+        file_path = Path(file_part)
+        try:
+            file_rel = os.path.relpath(file_path.resolve(), out_path.parent.resolve())
+        except ValueError:
+            # Different drives on Windows, fall back to absolute
+            file_rel = str(file_path.resolve())
+
         ref_out = (
-            f"{file_abs}#/{pointer.lstrip('/')}"
-            if not file_abs.endswith(f"#{pointer}")
-            else f"{file_abs}#{pointer}"
+            f"{file_rel}#/{pointer.lstrip('/')}"
+            if not file_rel.endswith(f"#{pointer}")
+            else f"{file_rel}#{pointer}"
         )
         pairs.append((ref_out, out_path))
     outs_abs = [p.resolve() for _, p in pairs]
@@ -213,108 +386,54 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def main() -> None:
+    """Main CLI entry point using Command pattern."""
     argv = sys.argv[1:]
+    registry = CommandRegistry()
+
+    # Handle special cases first
+    exit_code = _handle_special_cases(argv, registry)
+    if exit_code is not None:
+        sys.exit(exit_code)
+
+    # Parse arguments for regular commands
     ap = _build_parser()
-    if not argv or argv[0] in {"-h", "--help"}:
-        ap.print_help(sys.stderr if argv else sys.stdout)
-        sys.exit(0)
 
-    if argv[0] in {"--version", "-V"}:
-        print(
-            f"teds {get_version()} (spec supported: {supported_spec_range_str()}; recommended: {recommended_minor_str()})"
-        )
-        sys.exit(0)
+    if not argv or argv[0] not in {"verify", "generate"}:
+        ap.print_help(sys.stderr)
+        sys.exit(2)
 
-    # Top-level templates listing (like --help/--version)
-    if "--list-templates" in argv:
-        from .report import list_templates
-
-        for it in list_templates():
-            print(f"{it.get('id')}: {it.get('description','').strip()}")
-        sys.exit(0)
-
-    if argv[0] in {"verify", "generate"}:
+    try:
         args = ap.parse_args(argv)
-        try:
-            from .refs import set_network_policy
+        command = registry.get_command(args.cmd)
 
-            set_network_policy(
-                args.allow_network,
-                timeout=args.network_timeout,
-                max_bytes=args.network_max_bytes,
-            )
-        except Exception:
-            pass
-        if args.cmd == "verify":
-            if args.report:
-                # Parse TEMPLATE_ID or TEMPLATE_ID=OUTFILE
-                report_arg = args.report
-                tpl_id, out_override = (
-                    (report_arg.split("=", 1) + [None])[:2]
-                    if "=" in report_arg
-                    else (report_arg, None)
-                )
-                from .report import run_report_per_spec, resolve_template
-
-                try:
-                    resolve_template(tpl_id)
-                except Exception as e:
-                    print(str(e), file=sys.stderr)
-                    sys.exit(2)
-                pairs, rc = run_report_per_spec(
-                    [Path(s) for s in args.spec], tpl_id, args.output_level
-                )
-                multi = len(pairs) > 1
-                for sp, content in pairs:
-                    if out_override:
-                        if multi:
-                            print(
-                                "Explicit output path is only supported with a single SPEC",
-                                file=sys.stderr,
-                            )
-                            sys.exit(2)
-                        out_path = Path(out_override)
-                    else:
-                        base = sp.stem
-                        ext = ".html" if tpl_id.endswith(".html") else ".md"
-                        tbase = tpl_id.split(".")[0]
-                        name = (
-                            f"{base}.report{ext}"
-                            if not multi
-                            else f"{base}.{tbase}.report{ext}"
-                        )
-                        out_path = sp.parent / name
-                    out_path.parent.mkdir(parents=True, exist_ok=True)
-                    out_path.write_text(content, encoding="utf-8")
-                sys.exit(rc)
-            else:
-                rc_all = 0
-                for spec in args.spec:
-                    rc_all = max(
-                        rc_all,
-                        validate_file(Path(spec), args.output_level, args.in_place),
-                    )
-                sys.exit(rc_all)
-        elif args.cmd == "generate":
-            try:
-                pairs = _plan_pairs(args.mapping)
-                for ref, outp in pairs:
-                    outp.parent.mkdir(parents=True, exist_ok=True)
-                    generate_from(ref, outp)
-            except TedsError as e:
-                print(str(e), file=sys.stderr)
-                sys.exit(2)
-            except Exception as e:
-                print(f"Unexpected error: {type(e).__name__}: {e}", file=sys.stderr)
-                sys.exit(2)
-            sys.exit(0)
-
+        if command:
+            exit_code = command.execute(args)
+            sys.exit(exit_code)
         else:
             ap.print_help(sys.stderr)
             sys.exit(2)
 
-    ap.print_help(sys.stderr)
-    sys.exit(2)
+    except Exception as e:
+        print(f"Error parsing arguments: {e}", file=sys.stderr)
+        sys.exit(2)
+
+
+def _handle_special_cases(argv: List[str], registry: CommandRegistry) -> int | None:
+    """Handle special command-line cases that don't require full parsing."""
+    if not argv or argv[0] in {"-h", "--help"}:
+        ap = _build_parser()
+        ap.print_help(sys.stderr if argv else sys.stdout)
+        return 0
+
+    if argv[0] in {"--version", "-V"}:
+        command = registry.get_command("version")
+        return command.execute(argparse.Namespace()) if command else 2
+
+    if "--list-templates" in argv:
+        command = registry.get_command("list-templates")
+        return command.execute(argparse.Namespace()) if command else 2
+
+    return None  # Continue with normal processing
 
 
 __all__ = ["main"]

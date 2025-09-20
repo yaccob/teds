@@ -5,9 +5,9 @@ from typing import Any
 
 from ruamel.yaml.comments import CommentedMap
 
-from .yamlio import yaml_loader, yaml_dumper
-from .refs import resolve_schema_node, collect_examples, join_fragment
 from .errors import TedsError
+from .refs import collect_examples, join_fragment, resolve_schema_node
+from .yamlio import yaml_dumper, yaml_loader
 
 
 def _ensure_group(group: Any) -> dict[str, Any]:
@@ -80,4 +80,3 @@ def generate_from(parent_ref: str, testspec_path: Path) -> None:
         raise TedsError(
             f"Failed to write testspec: {testspec_path}\n  error: {type(e).__name__}: {e}"
         )
-
