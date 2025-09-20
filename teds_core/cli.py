@@ -9,11 +9,7 @@ from pathlib import Path
 from .errors import TedsError
 from .generate import generate_from
 from .validate import validate_file
-from .version import (
-    get_version,
-    recommended_minor_str,
-    supported_spec_range_str,
-)
+from .version import get_version, recommended_minor_str, supported_spec_range_str
 
 
 class Command(ABC):
