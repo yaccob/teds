@@ -1,68 +1,59 @@
 from __future__ import annotations
 
-from pathlib import Path
-import pytest
-from unittest.mock import patch, mock_open
-
 from teds_core.report import _compute_counts, _render_jinja_str
 
 
 def test_compute_counts_edge_cases():
     # Test _compute_counts with edge cases
-    
+
     # Empty doc
     result = _compute_counts({})
     assert result == {"success": 0, "warning": 0, "error": 0}
-    
+
     # Doc with no tests
     result = _compute_counts({"version": "1.0.0"})
     assert result == {"success": 0, "warning": 0, "error": 0}
-    
+
     # Tests with no groups
     result = _compute_counts({"tests": {}})
     assert result == {"success": 0, "warning": 0, "error": 0}
-    
+
     # Tests with empty groups
     result = _compute_counts({"tests": {"ref1": {}}})
     assert result == {"success": 0, "warning": 0, "error": 0}
-    
+
     # Tests with non-dict cases
-    result = _compute_counts({
-        "tests": {
-            "ref1": {
-                "valid": "not a dict",
-                "invalid": []
-            }
-        }
-    })
+    result = _compute_counts(
+        {"tests": {"ref1": {"valid": "not a dict", "invalid": []}}}
+    )
     assert result == {"success": 0, "warning": 0, "error": 0}
-    
+
     # Tests with None cases
-    result = _compute_counts({
-        "tests": {
-            "ref1": {
-                "valid": {"case1": None}
-            }
-        }
-    })
-    assert result == {"success": 1, "warning": 0, "error": 0}  # None defaults to SUCCESS
-    
+    result = _compute_counts({"tests": {"ref1": {"valid": {"case1": None}}}})
+    assert result == {
+        "success": 1,
+        "warning": 0,
+        "error": 0,
+    }  # None defaults to SUCCESS
+
     # Tests with mixed results
-    result = _compute_counts({
-        "tests": {
-            "ref1": {
-                "valid": {
-                    "case1": {"result": "SUCCESS"},
-                    "case2": {"result": "WARNING"},
-                    "case3": {"result": "ERROR"}
-                },
-                "invalid": {
-                    "case4": {},  # Missing result defaults to SUCCESS
-                    "case5": {"result": "ERROR"}
+    result = _compute_counts(
+        {
+            "tests": {
+                "ref1": {
+                    "valid": {
+                        "case1": {"result": "SUCCESS"},
+                        "case2": {"result": "WARNING"},
+                        "case3": {"result": "ERROR"},
+                    },
+                    "invalid": {
+                        "case4": {},  # Missing result defaults to SUCCESS
+                        "case5": {"result": "ERROR"},
+                    },
                 }
             }
         }
-    })
+    )
     assert result == {"success": 2, "warning": 1, "error": 2}
 
 

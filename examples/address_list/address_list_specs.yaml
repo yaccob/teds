@@ -1,0 +1,18 @@
+version: "1.0.0
+tests:
+  "address_list.yaml#/definitions/AddressWithInlineNumber":
+    valid:
+      basic_address:
+        description: "Valid address with all required fields"
+        payload:
+          street: "Meine-Strasse 1"
+          city: "Anytown"
+          zip: "76136"
+    invalid:
+      missing_inline_number:
+        description: "Address missing number in street field"
+        payload:
+          street: "Meine-Strasse"
+          number: 1
+          city: "Anytown"
+          zip: "76136"

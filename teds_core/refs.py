@@ -1,21 +1,19 @@
 from __future__ import annotations
 
-from pathlib import Path
-import sys
-from typing import Any, Tuple, List
-import re
-from urllib.parse import urlparse, unquote
-from urllib.request import urlopen
 import os
+import re
 from dataclasses import dataclass
-from functools import lru_cache
+from pathlib import Path
+from typing import Any
+from urllib.parse import unquote, urlparse
+from urllib.request import urlopen
 
 from jsonschema import Draft202012Validator, FormatChecker
 from referencing import Registry, Resource
 from referencing.jsonschema import DRAFT202012
 
-from .yamlio import yaml_loader
 from .errors import NetworkError
+from .yamlio import yaml_loader
 
 # Constants
 DEFAULT_NETWORK_TIMEOUT = 5.0  # seconds
@@ -23,7 +21,9 @@ DEFAULT_MAX_BYTES = 5 * 1024 * 1024  # 5 MiB per resource
 SCHEMA_CACHE_SIZE = 128  # LRU cache size for schema resolution
 
 
-def build_validator_for_ref(base_dir: Path, ref_expr: str) -> Tuple[Draft202012Validator, Draft202012Validator]:
+def build_validator_for_ref(
+    base_dir: Path, ref_expr: str
+) -> tuple[Draft202012Validator, Draft202012Validator]:
     """Build validators for a schema reference."""
     file_part, _, frag = ref_expr.partition("#")
     schema_path = (base_dir / file_part).resolve()
@@ -39,15 +39,15 @@ def build_validator_for_ref(base_dir: Path, ref_expr: str) -> Tuple[Draft202012V
 
     wrapper = {"$ref": target_ref}
     base = Draft202012Validator(wrapper, registry=registry)
-    strict = Draft202012Validator(wrapper, registry=registry, format_checker=FormatChecker())
+    strict = Draft202012Validator(
+        wrapper, registry=registry, format_checker=FormatChecker()
+    )
     return strict, base
 
 
 def build_validator_for_ref_with_config(
-    base_dir: Path, 
-    ref_expr: str, 
-    network_config: NetworkConfiguration
-) -> Tuple[Draft202012Validator, Draft202012Validator]:
+    base_dir: Path, ref_expr: str, network_config: NetworkConfiguration
+) -> tuple[Draft202012Validator, Draft202012Validator]:
     """Build validators with specific network configuration."""
     file_part, _, frag = ref_expr.partition("#")
     schema_path = (base_dir / file_part).resolve()
@@ -67,7 +67,9 @@ def build_validator_for_ref_with_config(
 
     wrapper = {"$ref": target_ref}
     base = Draft202012Validator(wrapper, registry=registry)
-    strict = Draft202012Validator(wrapper, registry=registry, format_checker=FormatChecker())
+    strict = Draft202012Validator(
+        wrapper, registry=registry, format_checker=FormatChecker()
+    )
     return strict, base
 
 
@@ -80,7 +82,7 @@ def split_json_pointer(fragment: str) -> list[str]:
 
 
 def jq_segment(seg: str) -> str:
-    return f".{seg}" if re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", seg) else f".[\"{seg}\"]"
+    return f".{seg}" if re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", seg) else f'.["{seg}"]'
 
 
 def jq_examples_prefix(fragment: str) -> str:
@@ -90,7 +92,7 @@ def jq_examples_prefix(fragment: str) -> str:
     return "".join(jq_segment(s) for s in segs)
 
 
-def resolve_schema_node(base_dir: Path, ref_expr: str) -> Tuple[Any, str]:
+def resolve_schema_node(base_dir: Path, ref_expr: str) -> tuple[Any, str]:
     file_part, _, frag = ref_expr.partition("#")
     schema_path = (base_dir / file_part).resolve()
     doc = yaml_loader.load(schema_path.read_text(encoding="utf-8")) or {}
@@ -105,7 +107,7 @@ def resolve_schema_node(base_dir: Path, ref_expr: str) -> Tuple[Any, str]:
     return node, fragment
 
 
-def collect_examples(base_dir: Path, ref_expr: str) -> List[Tuple[str, Any]]:
+def collect_examples(base_dir: Path, ref_expr: str) -> list[tuple[str, Any]]:
     node, fragment = resolve_schema_node(base_dir, ref_expr)
     if not isinstance(node, dict):
         return []
@@ -114,7 +116,7 @@ def collect_examples(base_dir: Path, ref_expr: str) -> List[Tuple[str, Any]]:
         return []
     prefix = jq_examples_prefix(fragment)
     base = f"{prefix}.examples" if prefix else ".examples"
-    out: List[Tuple[str, Any]] = []
+    out: list[tuple[str, Any]] = []
     for i, item in enumerate(ex):
         out.append((f"{base}[{i}]", item))
     return out
@@ -128,25 +130,31 @@ def join_fragment(parent_fragment: str, child: str) -> str:
 @dataclass
 class NetworkConfiguration:
     """Configuration for network operations."""
+
     allow_network: bool = False
     timeout: float = DEFAULT_NETWORK_TIMEOUT
     max_bytes: int = DEFAULT_MAX_BYTES
-    
+
     @classmethod
-    def from_env(cls, allow_network: bool = False) -> 'NetworkConfiguration':
+    def from_env(cls, allow_network: bool = False) -> NetworkConfiguration:
         """Create configuration from environment variables."""
         return cls(
             allow_network=allow_network,
             timeout=_env_float("TEDS_NETWORK_TIMEOUT", DEFAULT_NETWORK_TIMEOUT),
-            max_bytes=_env_int("TEDS_NETWORK_MAX_BYTES", DEFAULT_MAX_BYTES)
+            max_bytes=_env_int("TEDS_NETWORK_MAX_BYTES", DEFAULT_MAX_BYTES),
         )
-    
-    def update(self, allow: bool | None = None, timeout: float | None = None, max_bytes: int | None = None) -> 'NetworkConfiguration':
+
+    def update(
+        self,
+        allow: bool | None = None,
+        timeout: float | None = None,
+        max_bytes: int | None = None,
+    ) -> NetworkConfiguration:
         """Create updated configuration with new values."""
         return NetworkConfiguration(
             allow_network=allow if allow is not None else self.allow_network,
             timeout=timeout if timeout is not None else self.timeout,
-            max_bytes=max_bytes if max_bytes is not None else self.max_bytes
+            max_bytes=max_bytes if max_bytes is not None else self.max_bytes,
         )
 
 
@@ -172,7 +180,9 @@ def _env_int(name: str, default: int) -> int:
 _default_network_config = NetworkConfiguration.from_env()
 
 
-def set_network_policy(allow: bool, timeout: float | None = None, max_bytes: int | None = None) -> None:
+def set_network_policy(
+    allow: bool, timeout: float | None = None, max_bytes: int | None = None
+) -> None:
     """Update global network policy (legacy compatibility)."""
     global _default_network_config
     _default_network_config = _default_network_config.update(allow, timeout, max_bytes)
@@ -200,8 +210,10 @@ def _retrieve_with_config(uri: str, config: NetworkConfiguration) -> Resource:
                         break
                     data.extend(chunk)
                     if len(data) > config.max_bytes:
-                        raise NetworkError(f"resource too large (>{config.max_bytes} bytes): {uri}")
-            
+                        raise NetworkError(
+                            f"resource too large (>{config.max_bytes} bytes): {uri}"
+                        )
+
             text = bytes(data).decode("utf-8", errors="strict")
         except Exception as e:
             if isinstance(e, NetworkError):
@@ -217,4 +229,3 @@ def _retrieve_with_config(uri: str, config: NetworkConfiguration) -> Resource:
 def _retrieve(uri: str) -> Resource:
     """Retrieve resource using global configuration (legacy compatibility)."""
     return _retrieve_with_config(uri, _default_network_config)
-

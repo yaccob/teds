@@ -1,19 +1,19 @@
 from __future__ import annotations
 
-from pathlib import Path
-import sys
-import subprocess
 import shutil
-from typing import Any, Dict
+import subprocess
+import sys
+from pathlib import Path
+from typing import Any
 
 import teds
 
 
-def load_yaml_text(text: str) -> Dict[str, Any]:
+def load_yaml_text(text: str) -> dict[str, Any]:
     return teds.yaml_loader.load(text) or {}
 
 
-def load_yaml_file(path: Path) -> Dict[str, Any]:
+def load_yaml_file(path: Path) -> dict[str, Any]:
     return teds.yaml_loader.load(path.read_text(encoding="utf-8")) or {}
 
 
