@@ -4,7 +4,7 @@ import os
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, List, Tuple
+from typing import Any
 from urllib.parse import unquote, urlparse
 from urllib.request import urlopen
 
@@ -23,7 +23,7 @@ SCHEMA_CACHE_SIZE = 128  # LRU cache size for schema resolution
 
 def build_validator_for_ref(
     base_dir: Path, ref_expr: str
-) -> Tuple[Draft202012Validator, Draft202012Validator]:
+) -> tuple[Draft202012Validator, Draft202012Validator]:
     """Build validators for a schema reference."""
     file_part, _, frag = ref_expr.partition("#")
     schema_path = (base_dir / file_part).resolve()
@@ -47,7 +47,7 @@ def build_validator_for_ref(
 
 def build_validator_for_ref_with_config(
     base_dir: Path, ref_expr: str, network_config: NetworkConfiguration
-) -> Tuple[Draft202012Validator, Draft202012Validator]:
+) -> tuple[Draft202012Validator, Draft202012Validator]:
     """Build validators with specific network configuration."""
     file_part, _, frag = ref_expr.partition("#")
     schema_path = (base_dir / file_part).resolve()
@@ -92,7 +92,7 @@ def jq_examples_prefix(fragment: str) -> str:
     return "".join(jq_segment(s) for s in segs)
 
 
-def resolve_schema_node(base_dir: Path, ref_expr: str) -> Tuple[Any, str]:
+def resolve_schema_node(base_dir: Path, ref_expr: str) -> tuple[Any, str]:
     file_part, _, frag = ref_expr.partition("#")
     schema_path = (base_dir / file_part).resolve()
     doc = yaml_loader.load(schema_path.read_text(encoding="utf-8")) or {}
@@ -107,7 +107,7 @@ def resolve_schema_node(base_dir: Path, ref_expr: str) -> Tuple[Any, str]:
     return node, fragment
 
 
-def collect_examples(base_dir: Path, ref_expr: str) -> List[Tuple[str, Any]]:
+def collect_examples(base_dir: Path, ref_expr: str) -> list[tuple[str, Any]]:
     node, fragment = resolve_schema_node(base_dir, ref_expr)
     if not isinstance(node, dict):
         return []
@@ -116,7 +116,7 @@ def collect_examples(base_dir: Path, ref_expr: str) -> List[Tuple[str, Any]]:
         return []
     prefix = jq_examples_prefix(fragment)
     base = f"{prefix}.examples" if prefix else ".examples"
-    out: List[Tuple[str, Any]] = []
+    out: list[tuple[str, Any]] = []
     for i, item in enumerate(ex):
         out.append((f"{base}[{i}]", item))
     return out
@@ -136,7 +136,7 @@ class NetworkConfiguration:
     max_bytes: int = DEFAULT_MAX_BYTES
 
     @classmethod
-    def from_env(cls, allow_network: bool = False) -> "NetworkConfiguration":
+    def from_env(cls, allow_network: bool = False) -> NetworkConfiguration:
         """Create configuration from environment variables."""
         return cls(
             allow_network=allow_network,
@@ -149,7 +149,7 @@ class NetworkConfiguration:
         allow: bool | None = None,
         timeout: float | None = None,
         max_bytes: int | None = None,
-    ) -> "NetworkConfiguration":
+    ) -> NetworkConfiguration:
         """Create updated configuration with new values."""
         return NetworkConfiguration(
             allow_network=allow if allow is not None else self.allow_network,
@@ -218,7 +218,7 @@ def _retrieve_with_config(uri: str, config: NetworkConfiguration) -> Resource:
         except Exception as e:
             if isinstance(e, NetworkError):
                 raise
-            raise NetworkError(f"failed to fetch {uri}: {e}")
+            raise NetworkError(f"failed to fetch {uri}: {e}") from e
         return Resource.from_contents(
             yaml_loader.load(text) or {},
             default_specification=DRAFT202012,

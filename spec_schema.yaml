@@ -99,10 +99,6 @@ $defs:
           - "Missing required field: name"
           - "Invalid email format"
           - "Value must be positive"
-      validation_message:
-        type: string
-        description: Specific validation error message
-        examples:
           - "Field 'age' must be a number"
           - "String too long (max 50 characters)"
       payload_parsed:
