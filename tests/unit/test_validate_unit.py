@@ -1,15 +1,15 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 from teds_core.validate import _iter_cases, _visible, validate_doc, validate_file
 from teds_core.yamlio import yaml_loader
 
 
-def write_yaml(p: Path, data: Dict[str, Any]) -> None:
+def write_yaml(p: Path, data: dict[str, Any]) -> None:
     p.write_text(
-        "\n".join([line for line in (yaml_loader.dump(data) or "").splitlines()]),
+        "\n".join(list((yaml_loader.dump(data) or "").splitlines())),
         encoding="utf-8",
     )
 
@@ -121,10 +121,10 @@ def test_validate_doc_invalid_success_and_valid_error(tmp_path: Path):
             }
         },
     }
-    out, rc = validate_doc(doc, tmp_path, output_level="all", in_place=False)
+    out, _rc = validate_doc(doc, tmp_path, output_level="all", in_place=False)
     grp = out[ref]
     assert grp["invalid"]["str"]["result"] == "SUCCESS"
-    assert grp["invalid"]["str"].get("validation_message")  # carries validator message
+    assert grp["invalid"]["str"].get("message")  # carries validator message
     assert grp["valid"]["str"]["result"] == "ERROR"
 
 
@@ -136,7 +136,7 @@ def test_validate_doc_add_warning_strict_errs_non_format_and_base_fails(tmp_path
     )
     ref = f"{schema}#/components/schemas/I"
     doc = {"version": "1.0.0", "tests": {ref: {}}}
-    out, rc = validate_doc(doc, tmp_path, output_level="all", in_place=False)
+    out, _rc = validate_doc(doc, tmp_path, output_level="all", in_place=False)
     case = next(iter(out[ref]["valid"].values()))
     # remains SUCCESS (no warning), since no format-related divergence
     assert case.get("result") == "SUCCESS"
@@ -215,7 +215,7 @@ def test_validate_doc_collect_examples_failure(monkeypatch, tmp_path: Path):
     schema.write_text("components: {schemas: {S: {type: integer}}}\n", encoding="utf-8")
     ref = f"{schema}#/components/schemas/S"
     doc = {"version": "1.0.0", "tests": {ref: {}}}
-    out, rc = v.validate_doc(doc, tmp_path, output_level="warning", in_place=False)
+    _out, rc = v.validate_doc(doc, tmp_path, output_level="warning", in_place=False)
     assert rc == 2
 
 
@@ -231,7 +231,7 @@ def test_validate_doc_build_validator_failure(monkeypatch, tmp_path: Path):
     schema.write_text("{}\n", encoding="utf-8")
     ref = f"{schema}#/"
     doc = {"version": "1.0.0", "tests": {ref: {}}}
-    out, rc = v.validate_doc(doc, tmp_path, output_level="warning", in_place=False)
+    _out, rc = v.validate_doc(doc, tmp_path, output_level="warning", in_place=False)
     assert rc == 2
 
 
@@ -241,7 +241,7 @@ def test_validate_doc_unsupported_scheme_failure(tmp_path: Path):
         "version": "1.0.0",
         "tests": {"http://example.com/schema.yaml#/:": {}},
     }
-    out, rc = validate_doc(doc, tmp_path, output_level="warning", in_place=False)
+    _out, rc = validate_doc(doc, tmp_path, output_level="warning", in_place=False)
     assert rc == 2
 
 
@@ -308,7 +308,7 @@ def test_iter_cases_with_warnings():
 
     cases = list(_iter_cases(test_data, "valid"))
     assert len(cases) == 1
-    payload, desc, parse_flag, case_key, from_examples, warnings = cases[0]
+    payload, _desc, _parse_flag, _case_key, _from_examples, warnings = cases[0]
     assert payload == "test"
     assert len(warnings) == 1  # Only string warnings are kept
     assert warnings[0] == "string warning"

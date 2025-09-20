@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from socket import timeout as SocketTimeout
 from unittest.mock import MagicMock, patch
 from urllib.error import URLError
 
@@ -18,7 +17,7 @@ class TestHttpRetrieve:
         config = NetworkConfiguration(allow_network=True, timeout=1.0)
 
         with patch("teds_core.refs.urlopen") as mock_urlopen:
-            mock_urlopen.side_effect = SocketTimeout("Connection timed out")
+            mock_urlopen.side_effect = TimeoutError("Connection timed out")
 
             with pytest.raises(NetworkError) as exc_info:
                 _retrieve_with_config("http://example.com/schema.yaml", config)

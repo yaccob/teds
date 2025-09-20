@@ -5,7 +5,6 @@ import os
 import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List, Tuple
 
 from .errors import TedsError
 from .generate import generate_from
@@ -25,7 +24,7 @@ class Command(ABC):
 class VersionCommand(Command):
     """Command to display version information."""
 
-    def execute(self, args: argparse.Namespace) -> int:
+    def execute(self, _args: argparse.Namespace) -> int:
         print(
             f"teds {get_version()} (spec supported: {supported_spec_range_str()}; recommended: {recommended_minor_str()})"
         )
@@ -35,7 +34,7 @@ class VersionCommand(Command):
 class ListTemplatesCommand(Command):
     """Command to list available templates."""
 
-    def execute(self, args: argparse.Namespace) -> int:
+    def execute(self, _args: argparse.Namespace) -> int:
         from .report import list_templates
 
         for it in list_templates():
@@ -72,7 +71,7 @@ class VerifyCommand(Command):
         # Parse TEMPLATE_ID or TEMPLATE_ID=OUTFILE
         report_arg = args.report
         tpl_id, out_override = (
-            (report_arg.split("=", 1) + [None])[:2]
+            ([*report_arg.split("=", 1), None])[:2]
             if "=" in report_arg
             else (report_arg, None)
         )
@@ -234,7 +233,7 @@ def _default_filename(base: str, pointer: str) -> str:
 
 
 def _plan_pairs(mappings: list[str]) -> list[tuple[str, Path]]:
-    pairs: List[Tuple[str, Path]] = []
+    pairs: list[tuple[str, Path]] = []
     for i, m in enumerate(mappings, start=1):
         ref_str, target = _split_ref(m)
         file_part, pointer = _parse_ref(ref_str)
@@ -278,7 +277,7 @@ def _plan_pairs(mappings: list[str]) -> list[tuple[str, Path]]:
                 f"Output collision: mappings #{other+1} and #{idx+1} both target {p}"
             )
         seen[p] = idx
-    return [(ref, p) for (ref, _), p in zip(pairs, outs_abs)]
+    return [(ref, p) for (ref, _), p in zip(pairs, outs_abs, strict=False)]
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -418,7 +417,7 @@ def main() -> None:
         sys.exit(2)
 
 
-def _handle_special_cases(argv: List[str], registry: CommandRegistry) -> int | None:
+def _handle_special_cases(argv: list[str], registry: CommandRegistry) -> int | None:
     """Handle special command-line cases that don't require full parsing."""
     if not argv or argv[0] in {"-h", "--help"}:
         ap = _build_parser()

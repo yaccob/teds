@@ -13,7 +13,7 @@ def test_validation_result():
     assert result.is_valid
     assert not result.has_errors
     assert result.error_message is None
-    assert result.validation_message is None
+    assert result.message is None
 
     result_with_error = ValidationResult(is_valid=False, error_message="test error")
     assert not result_with_error.is_valid

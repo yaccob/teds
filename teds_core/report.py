@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 from .resources import read_text_resource
 from .validate import _validate_testspec_against_schema, validate_doc
@@ -130,7 +131,7 @@ def run_report_per_spec(
             continue  # pragma: no cover stop
         # Version gate
         ver = str(raw.get("version", "")).strip()
-        ok, reason = check_spec_compat(ver)
+        ok, _reason = check_spec_compat(ver)
         if not ok:
             print(f"Unsupported testspec version in {sp}: {ver}")
             hard_rc = 2

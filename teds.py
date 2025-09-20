@@ -15,13 +15,13 @@ from teds_core import (
 from teds_core.cli import main
 
 __all__ = [
-    "yaml_loader",
-    "yaml_dumper",
+    "__version__",
+    "generate_from",
+    "main",
     "validate_doc",
     "validate_file",
-    "generate_from",
-    "__version__",
-    "main",
+    "yaml_dumper",
+    "yaml_loader",
 ]
 
 if __name__ == "__main__":  # pragma: no cover

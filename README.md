@@ -73,8 +73,7 @@ Case objects may contain:
 - `payload`: any
 - `parse_payload`: boolean (if true, `payload` is parsed as YAML/JSON)
 - `result`: SUCCESS|WARNING|ERROR
-- `message`: string (error message)
-- `validation_message`: string (validator message)
+- `message`: string (validation message)
 - `payload_parsed`: any (emitted when parse_payload is true)
 - `from_examples`: boolean (derived by generator)
 - `warnings`: [string | {generated, code}]

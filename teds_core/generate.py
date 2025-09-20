@@ -11,10 +11,7 @@ from .yamlio import yaml_dumper, yaml_loader
 
 
 def _ensure_group(group: Any) -> dict[str, Any]:
-    if not isinstance(group, dict):
-        group = {}
-    else:
-        group = dict(group)
+    group = {} if not isinstance(group, dict) else dict(group)
     group.setdefault("valid", None)
     group.setdefault("invalid", None)
     return group
@@ -27,7 +24,7 @@ def generate_from(parent_ref: str, testspec_path: Path) -> None:
         except Exception as e:
             raise TedsError(
                 f"Failed to read or create testspec: {testspec_path}\n  error: {type(e).__name__}: {e}"
-            )
+            ) from e
     else:
         doc = {}
     tests = doc.get("tests")
@@ -41,7 +38,7 @@ def generate_from(parent_ref: str, testspec_path: Path) -> None:
     except Exception as e:
         raise TedsError(
             f"Failed to resolve parent schema ref: {parent_ref}\n  base_dir: {base_dir}\n  error: {type(e).__name__}: {e}"
-        )
+        ) from e
     file_part, _, _ = parent_ref.partition("#")
     if not isinstance(parent_node, dict):
         try:
@@ -50,10 +47,10 @@ def generate_from(parent_ref: str, testspec_path: Path) -> None:
         except Exception as e:
             raise TedsError(
                 f"Failed to write testspec: {testspec_path}\n  error: {type(e).__name__}: {e}"
-            )
+            ) from e
         return
 
-    for child_key in parent_node.keys():
+    for child_key in parent_node:
         child_fragment = join_fragment(parent_frag, child_key)
         child_ref = f"{file_part}#/{child_fragment}"
         group = _ensure_group(tests.get(child_ref))
@@ -79,4 +76,4 @@ def generate_from(parent_ref: str, testspec_path: Path) -> None:
     except Exception as e:
         raise TedsError(
             f"Failed to write testspec: {testspec_path}\n  error: {type(e).__name__}: {e}"
-        )
+        ) from e

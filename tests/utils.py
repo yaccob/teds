@@ -4,16 +4,16 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import teds
 
 
-def load_yaml_text(text: str) -> Dict[str, Any]:
+def load_yaml_text(text: str) -> dict[str, Any]:
     return teds.yaml_loader.load(text) or {}
 
 
-def load_yaml_file(path: Path) -> Dict[str, Any]:
+def load_yaml_file(path: Path) -> dict[str, Any]:
     return teds.yaml_loader.load(path.read_text(encoding="utf-8")) or {}
 
 
@@ -38,8 +38,7 @@ def run_cli(args: list[str], cwd: Path | None = None) -> tuple[int, str, str]:
     proc = subprocess.run(
         [sys.executable, str(_SCRIPT), *args],
         cwd=str(cwd) if cwd else None,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
         text=True,
         check=False,
     )

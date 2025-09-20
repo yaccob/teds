@@ -24,7 +24,7 @@ tests:
         encoding="utf-8",
     )
     before = spec.read_text(encoding="utf-8")
-    rc, out, err = run_cli(["verify", "spec.yaml", "-i"], cwd=tmp_path)
+    rc, out, _err = run_cli(["verify", "spec.yaml", "-i"], cwd=tmp_path)
     assert rc == 2
     assert out == ""
     after = spec.read_text(encoding="utf-8")
@@ -41,5 +41,5 @@ tests:
         """,
         encoding="utf-8",
     )
-    rc, out, err = run_cli(["verify", "spec.yaml"], cwd=tmp_path)
+    rc, _out, _err = run_cli(["verify", "spec.yaml"], cwd=tmp_path)
     assert rc == 2

@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import sys
+from collections.abc import Generator
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Generator, Tuple
+from typing import Any
 
 from jsonschema import Draft202012Validator
 from jsonschema import ValidationError as JsonSchemaValidationError
@@ -25,7 +26,7 @@ class ValidationResult:
 
     is_valid: bool
     error_message: str | None = None
-    validation_message: str | None = None
+    message: str | None = None
 
     @property
     def has_errors(self) -> bool:
@@ -69,7 +70,7 @@ class ValidatorStrategy:
             if is_rejected:
                 return ValidationResult(
                     is_valid=True,
-                    validation_message=final_error,  # Correctly rejected
+                    message=final_error,  # Correctly rejected
                 )
             else:
                 # Provide detailed error for unexpectedly valid cases
@@ -83,7 +84,7 @@ class ValidatorStrategy:
 
     def _validate_with_validator(
         self, validator: Draft202012Validator, instance: Any
-    ) -> Tuple[bool, str | None]:
+    ) -> tuple[bool, str | None]:
         """Validate instance with a single validator."""
         try:
             validator.validate(instance)
@@ -92,7 +93,7 @@ class ValidatorStrategy:
             return False, e.message
 
     def _format_unexpected_valid_error(
-        self, instance: Any, strict_valid: bool, strict_error: str | None
+        self, instance: Any, strict_valid: bool, _strict_error: str | None
     ) -> str:
         """Format error message for unexpectedly valid instances."""
         if not strict_valid:
@@ -118,7 +119,7 @@ class ValidatorStrategy:
 
 def _iter_cases(
     test_value: Any, key: str
-) -> Generator[Tuple[Any, str, bool, str, bool, list[str]], None, None]:
+) -> Generator[tuple[Any, str, bool, str, bool, list[str]], None, None]:
     items: Any = {}
     if isinstance(test_value, dict):
         group = test_value.get(key)
@@ -150,7 +151,7 @@ def _iter_cases(
 
 def _prepare_case(
     payload: Any, parse_flag: bool, case_key: str, desc: str
-) -> Tuple[Any, Any | None, Any | None, bool, str]:
+) -> tuple[Any, Any | None, Any | None, bool, str]:
     if payload is None:
         instance = yaml_loader.load(case_key)
         orig_payload = None
@@ -173,7 +174,7 @@ def _prepare_case(
 # Legacy function - now uses ValidatorStrategy internally
 def _validate_raw(
     validator: Draft202012Validator, instance: Any
-) -> Tuple[bool, str | None]:
+) -> tuple[bool, str | None]:
     try:
         validator.validate(instance)
         return True, None
@@ -201,7 +202,7 @@ def _assemble_output(
     if error_msg is not None:
         out["message"] = error_msg
     elif validation_msg is not None:
-        out["validation_message"] = validation_msg
+        out["message"] = validation_msg
     if payload_parsed is not None:
         out["payload_parsed"] = payload_parsed
     return out
@@ -256,7 +257,7 @@ def _evaluate_case(
     validator_strict: Draft202012Validator,
     validator_base: Draft202012Validator,
     user_warnings: list[str] | None = None,
-) -> Tuple[str, dict[str, Any], int]:
+) -> tuple[str, dict[str, Any], int]:
     """Evaluate a test case using validator strategy."""
     instance, orig_payload, payload_parsed, emit_pf, desc = _prepare_case(
         payload, parse_flag, case_key, desc
@@ -269,11 +270,11 @@ def _evaluate_case(
     if validation_result.is_valid:
         result = "SUCCESS"
         err_msg = None
-        val_msg = validation_result.validation_message
+        val_msg = validation_result.message
     else:
         result = "ERROR"
         err_msg = validation_result.error_message
-        val_msg = validation_result.validation_message
+        val_msg = validation_result.message
 
     out_case = _assemble_output(
         desc, orig_payload, payload_parsed, emit_pf, result, err_msg, val_msg
@@ -283,7 +284,7 @@ def _evaluate_case(
     return case_key, out_case, 1 if result == "ERROR" else 0
 
 
-def _validate_testspec_against_schema(doc: dict[str, Any], repo_root: Path) -> None:
+def _validate_testspec_against_schema(doc: dict[str, Any], _repo_root: Path) -> None:
     # Load schema via package resources for installed wheels, with repo-root fallback for dev.
     from .resources import read_text_resource
 
@@ -307,7 +308,7 @@ def _process_example_cases(
     validator_base: Draft202012Validator,
     output_level: str,
     in_place: bool,
-) -> Tuple[dict[str, Any], int]:
+) -> tuple[dict[str, Any], int]:
     """Process example cases for a schema reference."""
     cases_valid: dict[str, Any] = {}
     rc = 0
@@ -343,7 +344,7 @@ def _process_manual_cases(
     validator_base: Draft202012Validator,
     output_level: str,
     in_place: bool,
-) -> Tuple[dict[str, Any], dict[str, Any], int]:
+) -> tuple[dict[str, Any], dict[str, Any], int]:
     """Process manual test cases for a schema reference."""
     cases_valid: dict[str, Any] = {}
     cases_invalid: dict[str, Any] = {}
@@ -399,7 +400,7 @@ def _process_schema_ref(
     testspec_dir: Path,
     output_level: str,
     in_place: bool,
-) -> Tuple[dict[str, Any], int]:
+) -> tuple[dict[str, Any], int]:
     """Process a single schema reference and its test cases."""
     try:
         validator_strict, validator_base = build_validator_for_ref(
@@ -446,7 +447,7 @@ def _process_schema_ref(
 
 def validate_doc(
     doc: dict[str, Any], testspec_dir: Path, output_level: str, in_place: bool = False
-) -> Tuple[dict[str, Any], int]:
+) -> tuple[dict[str, Any], int]:
     """Validate a testspec document against schemas."""
     tests = doc.get("tests") or {}
     rc = 0
