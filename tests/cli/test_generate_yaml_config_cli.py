@@ -5,8 +5,8 @@ from pathlib import Path
 from tests.utils import load_yaml_file, run_cli
 
 
-class TestGenerateCommandRedesignCLI:
-    """CLI integration tests for the redesigned generate command."""
+class TestGenerateYamlConfigCLI:
+    """CLI integration tests for the generate command YAML configuration features."""
 
     def test_cli_yaml_object_config_basic(self, tmp_path: Path):
         """Test CLI with basic YAML object configuration."""
@@ -37,10 +37,7 @@ $defs:
 }}
 """
 
-        # Run the CLI command - should succeed with new functionality
         rc, out, err = run_cli(["generate", yaml_config], cwd=tmp_path)
-
-        # Should succeed and create the test file
         assert rc == 0
 
         # Verify that the test file was created
@@ -68,10 +65,7 @@ components:
         # Old-style JSON Pointer reference
         json_pointer = f"{schema.name}#/components/schemas/Message"
 
-        # Run the CLI command - should work (backward compatibility)
         rc, out, err = run_cli(["generate", json_pointer], cwd=tmp_path)
-
-        # Should succeed (existing functionality)
         assert rc == 0, f"Error: {err}"
 
         # Check that output file was created (current naming convention)
@@ -115,10 +109,7 @@ $defs:
         # Use @filename syntax
         file_arg = f"@{config_file.name}"
 
-        # Run the CLI command - should succeed with new functionality
         rc, out, err = run_cli(["generate", file_arg], cwd=tmp_path)
-
-        # Should succeed and create the test file
         assert rc == 0
 
         # Verify that the test file was created
@@ -134,12 +125,9 @@ $defs:
         # Invalid YAML configuration
         invalid_yaml = "{ broken yaml syntax: [ unclosed"
 
-        # Run the CLI command
         rc, out, err = run_cli(["generate", invalid_yaml], cwd=tmp_path)
-
-        # Should fail with error
         assert rc != 0
-        assert len(err) > 0  # Should have error message
+        assert len(err) > 0
 
     def test_cli_conflict_warning_output(self, tmp_path: Path):
         """Test CLI conflict warning output to stderr."""
@@ -175,10 +163,7 @@ $defs:
 }}
 """
 
-        # Run the CLI command
         rc, out, err = run_cli(["generate", yaml_config], cwd=tmp_path)
-
-        # Should succeed and create the test file (conflicts resolved by first-wins)
         assert rc == 0
 
         # Verify that the test file was created
@@ -221,10 +206,7 @@ $defs:
 }}
 """
 
-        # Run the CLI command - should succeed with new functionality
         rc, out, err = run_cli(["generate", yaml_config], cwd=tmp_path)
-
-        # Should succeed and create the test file with template resolution
         assert rc == 0
 
         # Verify that the template was resolved and file was created

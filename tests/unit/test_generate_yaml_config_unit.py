@@ -7,8 +7,8 @@ from unittest.mock import patch
 from teds_core.cli import GenerateCommand
 
 
-class TestGenerateCommandRedesign:
-    """Test suite for the redesigned generate command with YAML configuration."""
+class TestGenerateYamlConfig:
+    """Test suite for the generate command YAML configuration features."""
 
     def test_yaml_object_config_with_jsonpath_wildcards(self, tmp_path: Path):
         """Test YAML object configuration with JsonPath wildcard expressions."""
@@ -90,7 +90,7 @@ tests:
 
         try:
             result = command.execute(args)
-            assert result == 0  # Should succeed
+            assert result == 0
 
             # Verify that the test file was created/updated
             assert existing_tests.exists()
@@ -151,9 +151,8 @@ $defs:
         os.chdir(tmp_path)
 
         try:
-            # Execute the command - should work with template resolution
             result = command.execute(args)
-            assert result == 0  # Should succeed
+            assert result == 0
 
             # Verify that the template was resolved and file was created
             expected_file = (
@@ -196,8 +195,6 @@ components:
             },
         )()
 
-        # Should work after implementation (currently may pass with old code)
-        # We expect this to generate a test file
         result = command.execute(args)
         assert result == 0
 
@@ -307,9 +304,8 @@ $defs:
         os.chdir(tmp_path)
 
         try:
-            # Execute the command - should work with file configuration
             result = command.execute(args)
-            assert result == 0  # Should succeed
+            assert result == 0
 
             # Verify that the output file was created
             expected_file = tmp_path / "output.tests.yaml"
@@ -338,7 +334,6 @@ $defs:
             },
         )()
 
-        # Should fail with appropriate error due to invalid YAML
         result = command.execute(args)
         assert result == 2  # Error exit code for parse/config errors
 
@@ -375,7 +370,6 @@ $defs:
             },
         )()
 
-        # Should fail with appropriate error due to invalid JsonPath
         result = command.execute(args)
         assert result == 2  # Error exit code for validation/parsing errors
 
@@ -434,9 +428,8 @@ $defs:
         os.chdir(tmp_path)
 
         try:
-            # Should succeed - multiple output files generation works
             result = command.execute(args)
-            assert result == 0  # Should succeed
+            assert result == 0
 
             # Verify that both output files were created
             user_file = tmp_path / "user.tests.yaml"
