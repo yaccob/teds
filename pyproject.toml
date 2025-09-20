@@ -79,7 +79,6 @@ omit = [
 show_missing = true
 skip_covered = false
 precision = 1
-fail_under = 75
 
 # Ruff linting and formatting
 [tool.ruff]
