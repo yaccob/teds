@@ -137,11 +137,12 @@ release-major: check-clean test-all ## Create major release (0.2.5 → 1.0.0)
 check-branch: ## Verify we're on correct branch and up-to-date
 	@git fetch upstream 2>/dev/null || echo "⚠️  Could not fetch from remote"
 	@BRANCH=$$(git branch --show-current); \
-	if [ "$$BRANCH" = "master" ]; then \
-		echo "❌ Cannot create PR from master branch"; \
+	if [ "$$BRANCH" = "master" ] || [ "$$BRANCH" = "main" ]; then \
+		echo "❌ Cannot create PR from master/main branch"; \
 		exit 1; \
 	fi; \
 	echo "✅ Current branch: $$BRANCH"
+
 
 pr-ready: check-clean test-all check-branch ## Verify branch is ready for PR
 	@echo "✅ Branch is ready for PR creation"

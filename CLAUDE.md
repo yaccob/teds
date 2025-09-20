@@ -210,10 +210,27 @@ twine upload dist/*
 
 **Branch status:** Working on `working-baseline-94percent-coverage` with all recent improvements committed.
 
-## Commit Standards
+## Git Workflow Standards
 
+### 🚫 NEVER COMMIT DIRECTLY TO MASTER/MAIN
+
+**MANDATORY Workflow:**
+1. **Always check branch first**: `git branch --show-current`
+2. **Create feature branch**: `git checkout -b feature/your-feature-name`
+3. **Make changes on feature branch**
+4. **Create PR**: `make pr-ready && make create-pr`
+5. **Only merge after review**
+
+**Technical Safeguards:**
+- ✅ Pre-commit hook automatically blocks master/main commits
+- ✅ Makefile targets check branch safety for PR creation
+
+### Commit Standards
+
+- 🚫 **CRITICAL**: Never commit directly to master/main branches
 - ❌ NO Claude attribution markers (`🤖 Generated with [Claude Code]`, `Co-Authored-By: Claude`, `via [Happy]`)
 - ❌ NO generated-with noise in commit messages - focus on technical content only
+- ✅ Always use feature branches for changes
 - ✅ Focus on technical changes and their business purpose
 - ✅ Keep git history clean and informative
 - ✅ Always run coverage verification before committing
