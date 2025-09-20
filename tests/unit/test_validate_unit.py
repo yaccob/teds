@@ -1,15 +1,17 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
-from teds_core.validate import validate_doc, validate_file, _visible, _iter_cases
+from teds_core.validate import _iter_cases, _visible, validate_doc, validate_file
 from teds_core.yamlio import yaml_loader
-from teds_core.errors import ValidationError
 
 
-def write_yaml(p: Path, data: Dict[str, Any]) -> None:
-    p.write_text("\n".join([line for line in (yaml_loader.dump(data) or "").splitlines()]), encoding="utf-8")
+def write_yaml(p: Path, data: dict[str, Any]) -> None:
+    p.write_text(
+        "\n".join([line for line in (yaml_loader.dump(data) or "").splitlines()]),
+        encoding="utf-8",
+    )
 
 
 def test_validate_doc_format_divergence_warning(tmp_path: Path):
@@ -39,7 +41,10 @@ components:
     key = next(iter(out.keys()))
     case = next(iter(out[key]["valid"].values()))
     assert case["result"] == "WARNING"
-    assert any(isinstance(w, dict) and w.get("code") == "format-divergence" for w in case.get("warnings", []))
+    assert any(
+        isinstance(w, dict) and w.get("code") == "format-divergence"
+        for w in case.get("warnings", [])
+    )
 
 
 def test_validate_file_version_gates(tmp_path: Path):
@@ -86,14 +91,7 @@ components:
     doc = {
         "version": "1.0.0",
         "tests": {
-            ref: {
-                "invalid": {
-                    "a": {"payload": "a"}
-                },
-                "valid": {
-                    "a": {"payload": "a"}
-                }
-            }
+            ref: {"invalid": {"a": {"payload": "a"}}, "valid": {"a": {"payload": "a"}}}
         },
     }
     # output-level=error should include only the ERROR case
@@ -116,8 +114,10 @@ def test_validate_doc_invalid_success_and_valid_error(tmp_path: Path):
         "version": "1.0.0",
         "tests": {
             ref: {
-                "invalid": {"str": {"payload": "x"}},  # invalid expectation succeeds (both validators fail)
-                "valid": {"str": {"payload": "x"}},    # valid expectation errors
+                "invalid": {
+                    "str": {"payload": "x"}
+                },  # invalid expectation succeeds (both validators fail)
+                "valid": {"str": {"payload": "x"}},  # valid expectation errors
             }
         },
     }
@@ -131,7 +131,9 @@ def test_validate_doc_invalid_success_and_valid_error(tmp_path: Path):
 def test_validate_doc_add_warning_strict_errs_non_format_and_base_fails(tmp_path: Path):
     # Schema with type integer (non-format validator). Provide SUCCESS result so _add_warning... early-returns
     schema = tmp_path / "schema.yaml"
-    schema.write_text("components: {schemas: {I: {type: integer, examples: [1]}}}\n", encoding="utf-8")
+    schema.write_text(
+        "components: {schemas: {I: {type: integer, examples: [1]}}}\n", encoding="utf-8"
+    )
     ref = f"{schema}#/components/schemas/I"
     doc = {"version": "1.0.0", "tests": {ref: {}}}
     out, rc = validate_doc(doc, tmp_path, output_level="all", in_place=False)
@@ -147,11 +149,7 @@ def test_validate_doc_iter_cases_scalar_key_parsed(tmp_path: Path):
     ref = f"{schema}#/components/schemas/I"
     doc = {
         "version": "1.0.0",
-        "tests": {
-            ref: {
-                "valid": {"1": None}
-            }
-        },
+        "tests": {ref: {"valid": {"1": None}}},
     }
     out, rc = validate_doc(doc, tmp_path, output_level="all", in_place=False)
     assert rc == 0
@@ -241,9 +239,7 @@ def test_validate_doc_build_validator_failure(tmp_path: Path):
     # Unsupported scheme should surface as rc=2 and continue
     doc = {
         "version": "1.0.0",
-        "tests": {
-            "http://example.com/schema.yaml#/:": {}
-        },
+        "tests": {"http://example.com/schema.yaml#/:": {}},
     }
     out, rc = validate_doc(doc, tmp_path, output_level="warning", in_place=False)
     assert rc == 2
@@ -254,11 +250,11 @@ def test_visible_function():
     assert _visible("all", "SUCCESS")
     assert _visible("all", "WARNING")
     assert _visible("all", "ERROR")
-    
+
     assert not _visible("warning", "SUCCESS")
     assert _visible("warning", "WARNING")
     assert _visible("warning", "ERROR")
-    
+
     assert not _visible("error", "SUCCESS")
     assert not _visible("error", "WARNING")
     assert _visible("error", "ERROR")
@@ -266,23 +262,23 @@ def test_visible_function():
 
 def test_iter_cases_empty_and_edge_cases():
     # Test _iter_cases with various edge cases
-    
+
     # Non-dict test_value
     cases = list(_iter_cases("not a dict", "valid"))
     assert len(cases) == 0
-    
+
     # Empty dict
     cases = list(_iter_cases({}, "valid"))
     assert len(cases) == 0
-    
+
     # Dict without the requested key
     cases = list(_iter_cases({"invalid": {}}, "valid"))
     assert len(cases) == 0
-    
+
     # Non-dict group
     cases = list(_iter_cases({"valid": "not a dict"}, "valid"))
     assert len(cases) == 0
-    
+
     # Dict with non-dict item
     test_data = {"valid": {"case1": "not a dict"}}
     cases = list(_iter_cases(test_data, "valid"))
@@ -302,11 +298,14 @@ def test_iter_cases_with_warnings():
         "valid": {
             "case1": {
                 "payload": "test",
-                "warnings": ["string warning", {"generated": "generated warning", "code": "test"}]
+                "warnings": [
+                    "string warning",
+                    {"generated": "generated warning", "code": "test"},
+                ],
             }
         }
     }
-    
+
     cases = list(_iter_cases(test_data, "valid"))
     assert len(cases) == 1
     payload, desc, parse_flag, case_key, from_examples, warnings = cases[0]

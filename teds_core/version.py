@@ -1,16 +1,18 @@
 from __future__ import annotations
 
-from importlib import metadata
-from subprocess import run, PIPE
 from enum import Enum
+from importlib import metadata
 from pathlib import Path
+from subprocess import PIPE, run
+
 import semver  # type: ignore
 
-from .yamlio import yaml_loader
 from .resources import read_text_resource
+from .yamlio import yaml_loader
 
 # Load compatibility manifest from repository root (bundled with the wheel)
 _REPO_ROOT = Path(__file__).resolve().parents[1]
+
 
 def _load_compat() -> tuple[int, int, int]:
     # Load manifest via shared resource helper
@@ -28,6 +30,7 @@ def _load_compat() -> tuple[int, int, int]:
     except Exception:  # pragma: no cover
         return 1, 0, 0  # YAML parsing/conversion fallback
 
+
 SUPPORTED_TESTSPEC_MAJOR, _SUPPORTED_MAX_MINOR, _RECOMMENDED_MINOR = _load_compat()
 RECOMMENDED_TESTSPEC_VERSION = f"{SUPPORTED_TESTSPEC_MAJOR}.{_RECOMMENDED_MINOR}.0"
 
@@ -41,7 +44,13 @@ def _from_pkg() -> str | None:
 
 def _from_git() -> str | None:
     try:
-        p = run(["git", "describe", "--tags", "--abbrev=0"], stdout=PIPE, stderr=PIPE, text=True, check=False)
+        p = run(
+            ["git", "describe", "--tags", "--abbrev=0"],
+            stdout=PIPE,
+            stderr=PIPE,
+            text=True,
+            check=False,
+        )
         if p.returncode == 0:
             return p.stdout.strip().lstrip("v")
         return None
@@ -56,6 +65,7 @@ def get_version() -> str:
 def supported_spec_range_str() -> str:
     # Display as 1.0–1.N
     return f"{SUPPORTED_TESTSPEC_MAJOR}.0–{SUPPORTED_TESTSPEC_MAJOR}.{_SUPPORTED_MAX_MINOR}"
+
 
 def recommended_minor_str() -> str:
     return f"{SUPPORTED_TESTSPEC_MAJOR}.{_RECOMMENDED_MINOR}"

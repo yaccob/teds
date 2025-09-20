@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from pathlib import Path
-import pytest
-from unittest.mock import patch, mock_open
 
-from teds_core.generate import generate_from
+import pytest
+
 from teds_core.errors import TedsError
+from teds_core.generate import generate_from
 from tests.utils import load_yaml_file
 
 
@@ -49,7 +49,9 @@ tests:
     grp = doc["tests"][f"{schema}#/components/schemas/C"]
     valid = list(grp["valid"].keys())
     # Example-derived keys should be present alongside 'existing'
-    assert any(".examples[0]" in k for k in valid) and any(".examples[1]" in k for k in valid)
+    assert any(".examples[0]" in k for k in valid) and any(
+        ".examples[1]" in k for k in valid
+    )
 
 
 def test_generate_from_file_read_error(tmp_path: Path):
@@ -58,7 +60,7 @@ def test_generate_from_file_read_error(tmp_path: Path):
     schema.write_text("type: string\n", encoding="utf-8")
     testspec = tmp_path / "out.yaml"
     testspec.write_text("invalid: yaml: content", encoding="utf-8")
-    
+
     with pytest.raises(TedsError, match="Failed to read or create testspec"):
         generate_from(f"{schema}#/", testspec)
 
@@ -66,20 +68,20 @@ def test_generate_from_file_read_error(tmp_path: Path):
 def test_generate_from_schema_resolution_error(tmp_path: Path):
     # Test exception handling when schema resolution fails
     testspec = tmp_path / "out.yaml"
-    
+
     with pytest.raises(TedsError, match="Failed to resolve parent schema ref"):
         generate_from("nonexistent.yaml#/", testspec)
 
 
 def test_generate_from_write_error_non_dict_parent(tmp_path: Path):
-    # Test write error handling for non-dict parent case  
+    # Test write error handling for non-dict parent case
     # Use a read-only file to trigger the write error path
     schema = tmp_path / "s.yaml"
     schema.write_text("- not a dict\n", encoding="utf-8")
     testspec = tmp_path / "readonly.yaml"
     testspec.write_text("{}\n", encoding="utf-8")
     testspec.chmod(0o444)  # Make file read-only
-    
+
     with pytest.raises(TedsError, match="Failed to write testspec"):
         generate_from(f"{schema}#/", testspec)
 
@@ -91,6 +93,6 @@ def test_generate_from_write_error_final(tmp_path: Path):
     testspec = tmp_path / "readonly.yaml"
     testspec.write_text("{}\n", encoding="utf-8")
     testspec.chmod(0o444)  # Make file read-only
-    
+
     with pytest.raises(TedsError, match="Failed to write testspec"):
         generate_from(f"{schema}#/components/schemas", testspec)

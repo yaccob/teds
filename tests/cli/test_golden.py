@@ -10,4 +10,3 @@ def test_golden_output_filtering_and_inplace(tmp_path: Path):
     # The golden files live in the repo; just verify they load and match themselves (sanity placeholder)
     exp = load_yaml_file(case / "expected.yaml")
     assert isinstance(exp, dict) and "tests" in exp
-

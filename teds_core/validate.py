@@ -1,24 +1,26 @@
 from __future__ import annotations
 
-from pathlib import Path
 import sys
-from typing import Any, Optional, Generator, Tuple
-
-from jsonschema import Draft202012Validator, ValidationError as JsonSchemaValidationError
+from collections.abc import Generator
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
 
-from .yamlio import yaml_loader, yaml_dumper
+from jsonschema import Draft202012Validator
+from jsonschema import ValidationError as JsonSchemaValidationError
+
 from .refs import build_validator_for_ref, collect_examples
-from .errors import SchemaResolutionError, ValidationError
+from .yamlio import yaml_dumper, yaml_loader
 
 
 @dataclass
 class ValidationResult:
     """Result of validating an instance against a schema."""
+
     is_valid: bool
     error_message: str | None = None
     validation_message: str | None = None
-    
+
     @property
     def has_errors(self) -> bool:
         return not self.is_valid
@@ -26,57 +28,77 @@ class ValidationResult:
 
 class ValidatorStrategy:
     """Strategy for validating instances with different policies."""
-    
-    def __init__(self, strict_validator: Draft202012Validator, base_validator: Draft202012Validator):
+
+    def __init__(
+        self,
+        strict_validator: Draft202012Validator,
+        base_validator: Draft202012Validator,
+    ):
         self.strict_validator = strict_validator
         self.base_validator = base_validator
-    
+
     def validate(self, instance: Any, expectation: str) -> ValidationResult:
         """Validate instance according to expectation (valid/invalid)."""
-        strict_valid, strict_error = self._validate_with_validator(self.strict_validator, instance)
-        
+        strict_valid, strict_error = self._validate_with_validator(
+            self.strict_validator, instance
+        )
+
         if not strict_valid:
-            base_valid, base_error = self._validate_with_validator(self.base_validator, instance)
+            base_valid, base_error = self._validate_with_validator(
+                self.base_validator, instance
+            )
             observed_valid = base_valid
             final_error = strict_error or base_error
         else:
             observed_valid = True
             final_error = None
-        
+
         if expectation == "valid":
             return ValidationResult(
                 is_valid=observed_valid,
-                error_message=final_error if not observed_valid else None
+                error_message=final_error if not observed_valid else None,
             )
         else:  # expectation == "invalid"
             is_rejected = not observed_valid
             if is_rejected:
                 return ValidationResult(
-                    is_valid=True,  # Correctly rejected
-                    validation_message=final_error
+                    is_valid=True,
+                    validation_message=final_error,  # Correctly rejected
                 )
             else:
                 # Provide detailed error for unexpectedly valid cases
-                error_msg = self._format_unexpected_valid_error(instance, strict_valid, strict_error)
+                error_msg = self._format_unexpected_valid_error(
+                    instance, strict_valid, strict_error
+                )
                 return ValidationResult(
                     is_valid=False,  # Should have been rejected but wasn't
-                    error_message=error_msg
+                    error_message=error_msg,
                 )
-    
-    def _validate_with_validator(self, validator: Draft202012Validator, instance: Any) -> Tuple[bool, str | None]:
+
+    def _validate_with_validator(
+        self, validator: Draft202012Validator, instance: Any
+    ) -> tuple[bool, str | None]:
         """Validate instance with a single validator."""
         try:
             validator.validate(instance)
             return True, None
         except JsonSchemaValidationError as e:
             return False, e.message
-    
-    def _format_unexpected_valid_error(self, instance: Any, strict_valid: bool, strict_error: str | None) -> str:
+
+    def _format_unexpected_valid_error(
+        self, instance: Any, strict_valid: bool, strict_error: str | None
+    ) -> str:
         """Format error message for unexpectedly valid instances."""
         if not strict_valid:
             # Get detailed format errors like the original implementation
             strict_errs = list(self.strict_validator.iter_errors(instance))
-            fmts = sorted({e.schema.get("format") for e in strict_errs if getattr(e, "validator", None) == "format"})
+            fmts = sorted(
+                {
+                    e.schema.get("format")
+                    for e in strict_errs
+                    if getattr(e, "validator", None) == "format"
+                }
+            )
             fmts_str = f" (format: {', '.join(fmts)})" if fmts else ""
             err_lines = [
                 "UNEXPECTEDLY VALID",
@@ -86,16 +108,20 @@ class ValidatorStrategy:
             ]
             return "\n".join(err_lines)
         return "UNEXPECTEDLY VALID"
+
+
 from .version import (
     RECOMMENDED_TESTSPEC_VERSION,
     SUPPORTED_TESTSPEC_MAJOR,
-    supported_spec_range_str,
-    recommended_minor_str,
     check_spec_compat,
+    recommended_minor_str,
+    supported_spec_range_str,
 )
 
 
-def _iter_cases(test_value: Any, key: str) -> Generator[Tuple[Any, str, bool, str, bool, list[str]], None, None]:
+def _iter_cases(
+    test_value: Any, key: str
+) -> Generator[tuple[Any, str, bool, str, bool, list[str]], None, None]:
     items: Any = {}
     if isinstance(test_value, dict):
         group = test_value.get(key)
@@ -113,12 +139,21 @@ def _iter_cases(test_value: Any, key: str) -> Generator[Tuple[Any, str, bool, st
                         user_warns.append(w)
                     elif isinstance(w, dict) and "generated" in w:
                         pass
-            yield it.get("payload"), (it.get("description") or ""), bool(it.get("parse_payload", False)), k, bool(it.get("from_examples", False)), user_warns
+            yield (
+                it.get("payload"),
+                (it.get("description") or ""),
+                bool(it.get("parse_payload", False)),
+                k,
+                bool(it.get("from_examples", False)),
+                user_warns,
+            )
         else:
             yield None, "", False, k, False, []
 
 
-def _prepare_case(payload: Any, parse_flag: bool, case_key: str, desc: str) -> Tuple[Any, Any | None, Any | None, bool, str]:
+def _prepare_case(
+    payload: Any, parse_flag: bool, case_key: str, desc: str
+) -> tuple[Any, Any | None, Any | None, bool, str]:
     if payload is None:
         instance = yaml_loader.load(case_key)
         orig_payload = None
@@ -139,7 +174,9 @@ def _prepare_case(payload: Any, parse_flag: bool, case_key: str, desc: str) -> T
 
 
 # Legacy function - now uses ValidatorStrategy internally
-def _validate_raw(validator: Draft202012Validator, instance: Any) -> Tuple[bool, str | None]:
+def _validate_raw(
+    validator: Draft202012Validator, instance: Any
+) -> tuple[bool, str | None]:
     try:
         validator.validate(instance)
         return True, None
@@ -147,13 +184,15 @@ def _validate_raw(validator: Draft202012Validator, instance: Any) -> Tuple[bool,
         return False, e.message
 
 
-def _assemble_output(desc: str,
-                    orig_payload: Any | None,
-                    payload_parsed: Any | None,
-                    emit_parse_flag: bool,
-                    result: str,
-                    error_msg: str | None,
-                    validation_msg: str | None) -> dict[str, Any]:
+def _assemble_output(
+    desc: str,
+    orig_payload: Any | None,
+    payload_parsed: Any | None,
+    emit_parse_flag: bool,
+    result: str,
+    error_msg: str | None,
+    validation_msg: str | None,
+) -> dict[str, Any]:
     out = {}
     if desc:
         out["description"] = desc
@@ -175,18 +214,30 @@ def _pattern_advice() -> str:
     return "Consider enforcing the expected format by adding an explicit 'pattern' property to the schema."
 
 
-def _add_warning_if_only_strict_fails(out_case: dict[str, Any], validator_strict: Draft202012Validator, validator_base: Draft202012Validator) -> None:
+def _add_warning_if_only_strict_fails(
+    out_case: dict[str, Any],
+    validator_strict: Draft202012Validator,
+    validator_base: Draft202012Validator,
+) -> None:
     if out_case.get("result") != "SUCCESS":
         return
     inst = out_case.get("payload_parsed", out_case.get("payload"))
     if inst is None:
         return
     strict_errs = list(validator_strict.iter_errors(inst))
-    if not strict_errs or not any(getattr(e, "validator", None) == "format" for e in strict_errs):
+    if not strict_errs or not any(
+        getattr(e, "validator", None) == "format" for e in strict_errs
+    ):
         return
     if any(True for _ in validator_base.iter_errors(inst)):
         return
-    fmts = sorted({e.schema.get("format") for e in strict_errs if getattr(e, "validator", None) == "format"})
+    fmts = sorted(
+        {
+            e.schema.get("format")
+            for e in strict_errs
+            if getattr(e, "validator", None) == "format"
+        }
+    )
     fmts_str = f" (format: {', '.join(fmts)})" if fmts else ""
     lines = [
         f"Relies on JSON Schema 'format' assertion{fmts_str}.",
@@ -208,14 +259,16 @@ def _evaluate_case(
     validator_strict: Draft202012Validator,
     validator_base: Draft202012Validator,
     user_warnings: list[str] | None = None,
-) -> Tuple[str, dict[str, Any], int]:
+) -> tuple[str, dict[str, Any], int]:
     """Evaluate a test case using validator strategy."""
-    instance, orig_payload, payload_parsed, emit_pf, desc = _prepare_case(payload, parse_flag, case_key, desc)
-    
+    instance, orig_payload, payload_parsed, emit_pf, desc = _prepare_case(
+        payload, parse_flag, case_key, desc
+    )
+
     # Use new validator strategy
     validator_strategy = ValidatorStrategy(validator_strict, validator_base)
     validation_result = validator_strategy.validate(instance, expectation)
-    
+
     if validation_result.is_valid:
         result = "SUCCESS"
         err_msg = None
@@ -224,8 +277,10 @@ def _evaluate_case(
         result = "ERROR"
         err_msg = validation_result.error_message
         val_msg = validation_result.validation_message
-    
-    out_case = _assemble_output(desc, orig_payload, payload_parsed, emit_pf, result, err_msg, val_msg)
+
+    out_case = _assemble_output(
+        desc, orig_payload, payload_parsed, emit_pf, result, err_msg, val_msg
+    )
     if user_warnings:
         out_case.setdefault("warnings", []).extend(user_warnings)
     return case_key, out_case, 1 if result == "ERROR" else 0
@@ -254,15 +309,17 @@ def _process_example_cases(
     validator_strict: Draft202012Validator,
     validator_base: Draft202012Validator,
     output_level: str,
-    in_place: bool
-) -> Tuple[dict[str, Any], int]:
+    in_place: bool,
+) -> tuple[dict[str, Any], int]:
     """Process example cases for a schema reference."""
     cases_valid: dict[str, Any] = {}
     rc = 0
-    
+
     for ex_key, ex_payload in examples:
         try:
-            ck, oc, _ = _evaluate_case(ex_payload, "", False, ex_key, "valid", validator_strict, validator_base)
+            ck, oc, _ = _evaluate_case(
+                ex_payload, "", False, ex_key, "valid", validator_strict, validator_base
+            )
         except Exception as e:  # pragma: no cover start
             # Internal validation errors - difficult to trigger in controlled tests
             print(
@@ -278,7 +335,7 @@ def _process_example_cases(
         if in_place or _visible(output_level, oc.get("result", "SUCCESS")):
             cases_valid[ck] = oc
         rc = max(rc, 1 if oc.get("result") == "ERROR" else 0)
-    
+
     return cases_valid, rc
 
 
@@ -288,20 +345,36 @@ def _process_manual_cases(
     validator_strict: Draft202012Validator,
     validator_base: Draft202012Validator,
     output_level: str,
-    in_place: bool
-) -> Tuple[dict[str, Any], dict[str, Any], int]:
+    in_place: bool,
+) -> tuple[dict[str, Any], dict[str, Any], int]:
     """Process manual test cases for a schema reference."""
     cases_valid: dict[str, Any] = {}
     cases_invalid: dict[str, Any] = {}
     rc = 0
-    
+
     for expectation in ("valid", "invalid"):
         if isinstance(value, dict) and expectation in value:
-            for pl, desc, parse_flag, case_key, is_from_examples, user_warnings in _iter_cases(value, expectation):
+            for (
+                pl,
+                desc,
+                parse_flag,
+                case_key,
+                is_from_examples,
+                user_warnings,
+            ) in _iter_cases(value, expectation):
                 if is_from_examples:
                     continue
                 try:
-                    ck, oc, _ = _evaluate_case(pl, desc, parse_flag, case_key, expectation, validator_strict, validator_base, user_warnings)
+                    ck, oc, _ = _evaluate_case(
+                        pl,
+                        desc,
+                        parse_flag,
+                        case_key,
+                        expectation,
+                        validator_strict,
+                        validator_base,
+                        user_warnings,
+                    )
                 except Exception as e:  # pragma: no cover start
                     # Internal validation errors - difficult to trigger in controlled tests
                     print(
@@ -319,7 +392,7 @@ def _process_manual_cases(
                     else:
                         cases_invalid[ck] = oc
                 rc = max(rc, 1 if oc.get("result") == "ERROR" else 0)
-    
+
     return cases_valid, cases_invalid, rc
 
 
@@ -328,18 +401,20 @@ def _process_schema_ref(
     value: dict[str, Any],
     testspec_dir: Path,
     output_level: str,
-    in_place: bool
-) -> Tuple[dict[str, Any], int]:
+    in_place: bool,
+) -> tuple[dict[str, Any], int]:
     """Process a single schema reference and its test cases."""
     try:
-        validator_strict, validator_base = build_validator_for_ref(testspec_dir, schema_ref)
+        validator_strict, validator_base = build_validator_for_ref(
+            testspec_dir, schema_ref
+        )
     except Exception as e:
         print(
             f"Failed to build validator for ref: {schema_ref}\n  in: {testspec_dir}\n  error: {type(e).__name__}: {e}",
             file=sys.stderr,
         )
         return {}, 2
-        
+
     try:
         examples = collect_examples(testspec_dir, schema_ref)
     except Exception as e:
@@ -348,40 +423,44 @@ def _process_schema_ref(
             file=sys.stderr,
         )
         return {}, 2
-    
+
     # Process example cases
     cases_valid_from_examples, rc_examples = _process_example_cases(
         examples, schema_ref, validator_strict, validator_base, output_level, in_place
     )
-    
+
     # Process manual cases
     cases_valid_manual, cases_invalid, rc_manual = _process_manual_cases(
         value, schema_ref, validator_strict, validator_base, output_level, in_place
     )
-    
+
     # Merge valid cases
     cases_valid = {**cases_valid_from_examples, **cases_valid_manual}
-    
+
     # Build output group
     out_group: dict = {}
     if cases_valid:
         out_group["valid"] = cases_valid
     if cases_invalid:
         out_group["invalid"] = cases_invalid
-        
+
     return out_group, max(rc_examples, rc_manual)
 
 
-def validate_doc(doc: dict[str, Any], testspec_dir: Path, output_level: str, in_place: bool = False) -> Tuple[dict[str, Any], int]:
+def validate_doc(
+    doc: dict[str, Any], testspec_dir: Path, output_level: str, in_place: bool = False
+) -> tuple[dict[str, Any], int]:
     """Validate a testspec document against schemas."""
     tests = doc.get("tests") or {}
     rc = 0
     out_tests: dict = {}
 
     for schema_ref, value in tests.items():
-        out_group, ref_rc = _process_schema_ref(schema_ref, value, testspec_dir, output_level, in_place)
+        out_group, ref_rc = _process_schema_ref(
+            schema_ref, value, testspec_dir, output_level, in_place
+        )
         rc = max(rc, ref_rc)
-        
+
         if out_group:
             out_tests[schema_ref] = out_group
 
@@ -419,6 +498,7 @@ def validate_file(testspec_path: Path, output_level: str, in_place: bool) -> int
     ok, reason = check_spec_compat(ver)
     if not ok:
         from .version import SpecVersionIssue
+
         if reason == SpecVersionIssue.INVALID:
             print(
                 f"Spec version invalid: {testspec_path}\n  value: {ver or '<missing>'}",

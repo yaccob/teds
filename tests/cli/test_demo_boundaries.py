@@ -9,4 +9,3 @@ def test_demo_boundary_conditions():
     demo_spec = Path("demo/public_specs.yaml")
     rc, out, err = run_cli(["verify", str(demo_spec), "--output-level", "all"])
     assert rc == 1
-
