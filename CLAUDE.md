@@ -189,6 +189,32 @@ twine upload dist/*
 
 **🎯 CRITICAL UNDERSTANDING:** TeDS validates whether **JSON Schemas meet the expectations** defined in test specifications. It does NOT validate whether test specifications are correct - the test specs define the business requirements/expectations, and TeDS verifies that schemas fulfill those expectations. This is the core value proposition.
 
+## Test-Driven Development (TDD) Best Practices
+
+**🚨 CRITICAL TDD RULE:** When doing test-driven development, **write tests that describe desired functionality and fail initially**. Do NOT write tests that expect errors (like `ImportError`, `NotImplementedError`) - these are not real tests.
+
+**Correct TDD approach:**
+1. Write tests that describe what the functionality should do
+2. Run tests to verify they fail (due to missing implementation)
+3. Implement the production code to make tests pass
+4. Do NOT change the tests after implementation - only change production code
+
+**Example of wrong approach (❌):**
+```python
+def test_new_feature():
+    with pytest.raises(NotImplementedError):  # ❌ Wrong!
+        some_function()
+```
+
+**Example of correct approach (✅):**
+```python
+def test_new_feature():
+    result = some_function("input")        # ✅ Describes desired behavior
+    assert result == "expected_output"     # ✅ Tests actual functionality
+```
+
+**Key principle:** Tests should verify that the implementation works correctly, not that it fails as expected. Tests define the contract/specification that the code must fulfill.
+
 ## Recent Development History
 
 **Major features completed:**
