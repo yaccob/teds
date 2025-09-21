@@ -279,27 +279,17 @@ def expand_jsonpath_expressions(source_file: Path, expressions: list[str]) -> li
                     path_str = path_str[1:]  # Remove $
 
                 if path_str:
-                    # Handle bracket notation like ["$defs"]["User"]["properties"]["name"]
-                    import re
-
-                    bracket_pattern = r'\["([^"]+)"\]'
-                    matches_parts = re.findall(bracket_pattern, path_str)
-                    if matches_parts:
-                        path_parts.extend(matches_parts)
-                    else:
-                        # Handle dot notation like 'key'.User.properties.name or key.value.prop
-                        if path_str.startswith("."):
-                            path_str = path_str[1:]  # Remove leading .
-                        for part in path_str.split("."):
-                            # Handle quoted parts like '$defs' -> $defs
-                            if part.startswith("'") and part.endswith("'"):
-                                part = part[1:-1]
-                            # Handle bracket array notation like [0]
-                            elif part.startswith("[") and part.endswith("]"):
-                                part = part[1:-1]
-                                if part.startswith("'") and part.endswith("'"):
-                                    part = part[1:-1]
-                            path_parts.append(part)
+                    # Handle dot notation like 'key'.User.properties.name or key.value.prop
+                    # jsonpath-ng returns paths in formats like:
+                    # - '$defs'.User -> ['$defs', 'User']
+                    # - items.[0] -> ['items', '[0]']
+                    # - key.nested.prop -> ['key', 'nested', 'prop']
+                    for part in path_str.split("."):
+                        # Handle quoted parts like '$defs' -> $defs
+                        if part.startswith("'") and part.endswith("'"):
+                            part = part[1:-1]
+                        # Keep bracket array notation as-is (like [0])
+                        path_parts.append(part)
 
                 if path_parts:
                     json_pointer = "/" + "/".join(path_parts)
