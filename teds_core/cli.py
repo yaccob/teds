@@ -148,6 +148,9 @@ class GenerateCommand(Command):
                     # Use the old system with children expansion
                     if target:
                         target_path = Path(target)
+                        abs_ref_str = (
+                            ref_str  # Use original ref when target is specified
+                        )
                     else:
                         file_part, pointer = _parse_ref(ref_str)
                         base = Path(file_part).stem
