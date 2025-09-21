@@ -373,13 +373,13 @@ def generate_from_source_config(
 
         # Determine target file
         if source_config["target"]:
-            # Explicit target with possible {base} template resolution
+            # Explicit target: relative to cwd (standard CLI behavior)
             target_name = source_config["target"].replace("{base}", source_file.stem)
+            target_path = base_dir / target_name
         else:
-            # Default: {base}.tests.yaml
+            # Default: {base}.tests.yaml next to schema file
             target_name = f"{source_file.stem}.tests.yaml"
-
-        target_path = base_dir / target_name
+            target_path = source_file.parent / target_name
 
         # Expand JsonPath expressions for this source
         expanded_refs = expand_jsonpath_expressions(source_file, source_config["paths"])
