@@ -147,7 +147,20 @@ class GenerateCommand(Command):
 
                     # Use the old system with children expansion
                     if target:
-                        target_path = Path(target)
+                        # Parse ref to get components for template expansion
+                        file_part, pointer = _parse_ref(ref_str)
+                        # Expand templates in target path
+                        expanded_target = _expand_target_template(
+                            target, file_part, pointer
+                        )
+                        target_path = Path(expanded_target)
+
+                        # If target ends with /, treat as directory and use default filename
+                        if target.endswith("/"):
+                            base = Path(file_part).stem
+                            default_name = _default_filename(base, pointer)
+                            target_path = target_path / default_name
+
                         abs_ref_str = (
                             ref_str  # Use original ref when target is specified
                         )
@@ -265,6 +278,40 @@ def _default_filename(base: str, pointer: str, exact_ref: bool = False) -> str:
     if not pointer_raw:
         return f"{base}.tests.yaml"
     return f"{base}.{_sanitize(pointer_raw)}.tests.yaml"
+
+
+def _expand_target_template(target: str, file_part: str, pointer: str) -> str:
+    """Expand template variables in target path."""
+    import urllib.parse
+
+    file_path = Path(file_part)
+    base = file_path.stem
+    ext = file_path.suffix.lstrip(".")
+    file_name = file_path.name
+    dir_name = str(file_path.parent) if file_path.parent != Path(".") else ""
+
+    pointer_raw = pointer.lstrip("/")
+    pointer_sanitized = _sanitize(pointer_raw)
+    pointer_strict = urllib.parse.quote(pointer_raw, safe="")
+
+    # Template variables
+    variables = {
+        "base": base,
+        "ext": ext,
+        "file": file_name,
+        "dir": dir_name,
+        "pointer": pointer_sanitized,
+        "pointer_raw": pointer_raw,
+        "pointer_strict": pointer_strict,
+        "index": "1",  # Single ref, so index is always 1
+    }
+
+    # Expand templates
+    expanded = target
+    for var, value in variables.items():
+        expanded = expanded.replace(f"{{{var}}}", value)
+
+    return expanded
 
 
 def _plan_pairs(mappings: list[str]) -> list[tuple[str, Path]]:
