@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import re
 import sys
 from pathlib import Path
@@ -36,12 +37,33 @@ def generate_from(parent_ref: str, testspec_path: Path) -> None:
         doc["tests"] = tests
 
     base_dir = testspec_path.parent
+
+    # Try to resolve the schema reference
     try:
         parent_node, parent_frag = resolve_schema_node(base_dir, parent_ref)
-    except Exception as e:
-        raise TedsError(
-            f"Failed to resolve parent schema ref: {parent_ref}\n  base_dir: {base_dir}\n  error: {type(e).__name__}: {e}"
-        ) from e
+    except Exception as first_error:
+        # If the reference is relative and fails, try to find the schema file
+        file_part = parent_ref.split("#")[0]
+        if not Path(file_part).is_absolute():
+            # Search for the schema file in the directory tree
+            schema_path = _find_schema_file(base_dir, file_part)
+            if schema_path:
+                # Update base_dir to the schema's directory and try again
+                base_dir = schema_path.parent
+                try:
+                    parent_node, parent_frag = resolve_schema_node(base_dir, parent_ref)
+                except Exception as second_error:
+                    raise TedsError(
+                        f"Failed to resolve parent schema ref: {parent_ref}\n  base_dir: {base_dir}\n  error: {type(second_error).__name__}: {second_error}"
+                    ) from second_error
+            else:
+                raise TedsError(
+                    f"Failed to resolve parent schema ref: {parent_ref}\n  base_dir: {base_dir}\n  error: {type(first_error).__name__}: {first_error}"
+                ) from first_error
+        else:
+            raise TedsError(
+                f"Failed to resolve parent schema ref: {parent_ref}\n  base_dir: {base_dir}\n  error: {type(first_error).__name__}: {first_error}"
+            ) from first_error
     file_part, _, _ = parent_ref.partition("#")
     if not isinstance(parent_node, dict):
         try:
@@ -192,6 +214,25 @@ def validate_jsonpath_expression(expr: str) -> None:
     for pattern in invalid_patterns:
         if re.search(pattern, expr):
             raise TedsError(f"Invalid JsonPath expression: {expr}")
+
+
+def _find_schema_file(base_dir: Path, filename: str) -> Path | None:
+    """Find a schema file by searching in subdirectories.
+
+    Searches for the file starting from base_dir and walking through subdirectories.
+    Returns the first match found, or None if not found.
+    """
+    # First check current directory
+    candidate = base_dir / filename
+    if candidate.exists():
+        return candidate
+
+    # Search in subdirectories
+    for root, _dirs, files in os.walk(base_dir):
+        if filename in files:
+            return Path(root) / filename
+
+    return None
 
 
 def expand_jsonpath_expressions(source_file: Path, expressions: list[str]) -> list[str]:

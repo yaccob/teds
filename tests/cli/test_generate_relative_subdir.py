@@ -91,10 +91,14 @@ schemas/api.yaml:
     doc = load_yaml_file(test_file)
     tests = doc.get("tests", {})
 
-    # Should contain references with proper relative paths
+    # TeDS generates tests for children of referenced nodes, not the nodes themselves
+    # From $.components.schemas.User.properties -> generates tests for name, age properties
+    # From $.components.schemas.User.properties.name -> generates tests for type, examples
     expected_keys = [
-        "api.yaml#/components/schemas/User/properties",
         "api.yaml#/components/schemas/User/properties/name",
+        "api.yaml#/components/schemas/User/properties/age",
+        "api.yaml#/components/schemas/User/properties/name/type",
+        "api.yaml#/components/schemas/User/properties/name/examples",
     ]
 
     for expected_key in expected_keys:
