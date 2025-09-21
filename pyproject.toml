@@ -57,6 +57,7 @@ packages = ["teds_core"]
 dependencies = [
   "pytest>=7.0",
   "pytest-cov>=4.0",
+  "pytest-bdd>=6.0",
 ]
 pre-install-commands = [
   "python -m pip install -r requirements.txt",

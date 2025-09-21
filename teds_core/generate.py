@@ -21,6 +21,52 @@ def _ensure_group(group: Any) -> dict[str, Any]:
     return group
 
 
+def generate_exact_node(node_ref: str, testspec_path: Path) -> None:
+    """Generate a test for the exact referenced node without expanding children."""
+    if testspec_path.exists():
+        try:
+            doc = yaml_loader.load(testspec_path.read_text(encoding="utf-8")) or {}
+        except Exception as e:
+            raise TedsError(
+                f"Failed to read or create testspec: {testspec_path}\n  error: {type(e).__name__}: {e}"
+            ) from e
+    else:
+        doc = {}
+    tests = doc.get("tests")
+    if not isinstance(tests, dict):
+        tests = {}
+        doc["tests"] = tests
+
+    base_dir = testspec_path.parent
+
+    # Create test only for the exact referenced node (no children expansion)
+    group = _ensure_group(tests.get(node_ref))
+    tests[node_ref] = group
+
+    # Add examples if available
+    ex_list = collect_examples(base_dir, node_ref)
+    if ex_list:
+        vm = group.get("valid")
+        if not isinstance(vm, dict):
+            vm = CommentedMap()
+        elif not isinstance(vm, CommentedMap):
+            vm = CommentedMap(vm)
+
+        missing = [(ek, ep) for ek, ep in ex_list if ek not in vm]
+        for ek, ep in reversed(missing):
+            vm.insert(0, ek, {"payload": ep, "from_examples": True})
+
+        group["valid"] = vm
+
+    try:
+        with testspec_path.open("w", encoding="utf-8") as fh:
+            yaml_dumper.dump(doc, fh)
+    except Exception as e:
+        raise TedsError(
+            f"Failed to write testspec: {testspec_path}\n  error: {type(e).__name__}: {e}"
+        ) from e
+
+
 def generate_from(parent_ref: str, testspec_path: Path) -> None:
     if testspec_path.exists():
         try:
@@ -75,6 +121,7 @@ def generate_from(parent_ref: str, testspec_path: Path) -> None:
             ) from e
         return
 
+    # Create tests for children of the referenced node (standard behavior)
     for child_key in parent_node:
         child_fragment = join_fragment(parent_frag, child_key)
         child_ref = f"{file_part}#/{child_fragment}"
@@ -256,9 +303,8 @@ def expand_jsonpath_expressions(source_file: Path, expressions: list[str]) -> li
         if "#" in expr:
             file_part, fragment = expr.split("#", 1)
             if "*" not in fragment:
-                # No wildcards, use as-is
-                expanded.append(expr)
-                continue
+                # No wildcards - append wildcard for backward compatibility (children expansion)
+                expr = f"{file_part}#{fragment}/*" if fragment else f"{file_part}#/*"
 
             # Convert JSON Pointer to JsonPath format for expansion
             jsonpath_expr = fragment.lstrip("/")
@@ -401,9 +447,9 @@ def generate_from_source_config(
                 seen.add(ref)
                 unique_refs.append(ref)
 
-        # Generate tests for each unique reference
+        # Generate tests for each unique reference (exact nodes only, no children expansion)
         for ref in unique_refs:
             try:
-                generate_from(ref, target_path)
+                generate_exact_node(ref, target_path)
             except Exception as e:
                 print(f"Warning: Failed to generate from '{ref}': {e}", file=sys.stderr)

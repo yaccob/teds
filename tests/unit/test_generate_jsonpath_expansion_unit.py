@@ -213,8 +213,8 @@ class TestGenerateCoverageEdgeCases:
         schema = tmp_path / "pointer_test.yaml"
         schema.write_text('{"defs": {"User": "test"}}', encoding="utf-8")
 
-        result = expand_jsonpath_expressions(schema, ["schema.yaml#/defs/User"])
-        assert result == ["schema.yaml#/defs/User"]
+        result = expand_jsonpath_expressions(schema, ["pointer_test.yaml#/defs/User"])
+        assert result == ["pointer_test.yaml#/defs/User"]
 
     def test_expand_jsonpath_json_pointer_with_wildcards(self, tmp_path: Path):
         """Test expand_jsonpath_expressions with JSON Pointer format containing wildcards."""
@@ -248,14 +248,14 @@ class TestGenerateCoverageEdgeCases:
         os.chdir(tmp_path)
 
         try:
-            # Mock generate_from to raise an exception
-            with patch("teds_core.generate.generate_from") as mock_generate:
+            # Mock generate_exact_node to raise an exception (JSONPath uses this)
+            with patch("teds_core.generate.generate_exact_node") as mock_generate:
                 mock_generate.side_effect = Exception("Test error")
 
                 # Should not raise, but print warning to stderr
                 with patch("sys.stderr"):
                     generate_from_source_config(config, tmp_path)
-                    # Verify warning was printed (generate_from was called and failed)
+                    # Verify warning was printed (generate_exact_node was called and failed)
                     assert mock_generate.called
         finally:
             os.chdir(old_cwd)
@@ -322,8 +322,8 @@ class TestGenerateCoverageEdgeCases:
         schema.write_text('{"root": "value"}', encoding="utf-8")
 
         # Empty fragment should result in root reference
-        result = expand_jsonpath_expressions(schema, ["schema.yaml#"])
-        assert "schema.yaml#" in result
+        result = expand_jsonpath_expressions(schema, ["root_test.yaml#"])
+        assert "root_test.yaml#/" in result
 
     def test_expand_jsonpath_path_starts_with_dollar(self, tmp_path: Path):
         """Test path string processing when it starts with $."""
