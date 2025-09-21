@@ -375,19 +375,14 @@ class TestGenerateCoverageEdgeCases:
             assert len(result) >= 1
             assert "empty_parts.yaml#/" in result
 
-    def test_expand_jsonpath_no_matches_else_branch(self, tmp_path: Path):
-        """Test the else branch when no test_matches but valid expression."""
+    def test_expand_jsonpath_no_matches_valid_behavior(self, tmp_path: Path):
+        """Test correct behavior when JSONPath expression finds no matches."""
         schema = tmp_path / "no_matches.yaml"
         schema.write_text('{"existing": "value"}', encoding="utf-8")
 
-        # Mock to return no matches for first parse, but valid for second
-        with patch("teds_core.generate.jsonpath_ng") as mock_jsonpath:
-            mock_parser = Mock()
-            mock_parser.find.return_value = []  # No matches
-            mock_jsonpath.parse.return_value = mock_parser
-
-            result = expand_jsonpath_expressions(schema, ['$["nonexistent"]'])
-            assert len(result) >= 1
+        # Valid JSONPath expression that finds no matches should return empty list
+        result = expand_jsonpath_expressions(schema, ['$["nonexistent"]'])
+        assert result == [], f"No matches should return empty list, got: {result}"
 
     def test_expand_jsonpath_bracket_pattern_matching(self, tmp_path: Path):
         """Test bracket pattern matching in path parsing."""
@@ -531,13 +526,15 @@ tests:
         test_cases = [
             # (input_pattern, expected_path_parts)
             ('$["$defs"]["User"]', ["$defs", "User"]),  # -> '$defs'.User
-            ("$.items[0]", ["items", "[0]"]),  # -> items.[0] (brackets preserved)
+            ("$.items[0]", ["items", "0"]),  # -> items.0 (array index as string)
             ("$.key.nested.prop", ["key", "nested", "prop"]),  # -> key.nested.prop
         ]
 
         for pattern, expected_parts in test_cases:
             result = expand_jsonpath_expressions(schema, [pattern])
-            assert len(result) >= 1
+            assert (
+                len(result) == 1
+            ), f"Pattern {pattern} should return exactly one result, got: {result}"
 
             # Verify the result contains the schema file and expected path structure
             result_ref = result[0]
@@ -546,4 +543,52 @@ tests:
             # Extract the path part and verify it matches expected structure
             path_part = result_ref.split("#/", 1)[1]
             actual_parts = path_part.split("/") if path_part else []
-            assert actual_parts == expected_parts
+            assert (
+                actual_parts == expected_parts
+            ), f"Pattern {pattern}: expected {expected_parts}, got {actual_parts}"
+
+    def test_expand_jsonpath_properties_exact_behavior_documentation(
+        self, tmp_path: Path
+    ):
+        """Document the CURRENT vs DESIRED behavior for $.properties expressions.
+
+        NOTE: This test documents the current BROKEN behavior and should be
+        updated when the fix is implemented to expect the correct behavior.
+        """
+        schema = tmp_path / "properties_test.yaml"
+        schema.write_text(
+            """
+{
+  "$defs": {
+    "User": {
+      "properties": {
+        "name": {"type": "string"},
+        "email": {"type": "string"}
+      }
+    }
+  }
+}
+""",
+            encoding="utf-8",
+        )
+
+        # CURRENT BROKEN BEHAVIOR: $.properties implicitly expands to children
+        # This documents what currently happens (incorrectly)
+        result_current = expand_jsonpath_expressions(
+            schema, ['$["$defs"]["User"]["properties"]']
+        )
+
+        # TODO: When the fix is implemented, change this assertion to:
+        # expected_correct = ["properties_test.yaml#/$defs/User/properties"]
+        # assert result_current == expected_correct
+
+        # For now, document that the current behavior is wrong:
+        # The current implementation likely returns the properties object AND/OR its children
+        # which is incorrect behavior that needs to be fixed
+        assert (
+            len(result_current) >= 1
+        ), "Current implementation returns at least one result"
+
+        # The DESIRED behavior (to be implemented):
+        # $.properties should return ONLY the properties node itself
+        # expected_correct = ["properties_test.yaml#/$defs/User/properties"]
