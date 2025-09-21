@@ -28,6 +28,7 @@ dependencies = [
   "referencing>=0.35.0",
   "ruamel.yaml>=0.18.6",
   "Jinja2>=3.1",
+  "jsonpath-ng>=1.6.0",
 ]
 dynamic = ["version"]
 
@@ -131,3 +132,13 @@ ignore = [
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10
+
+# Configure isort to match ruff's import sorting behavior
+[tool.isort]
+profile = "black"
+line_length = 88
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true

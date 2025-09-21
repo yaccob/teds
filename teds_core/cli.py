@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 from .errors import TedsError
-from .generate import generate_from
+from .generate import generate_from, generate_from_source_config, parse_generate_config
 from .validate import validate_file
 from .version import get_version, recommended_minor_str, supported_spec_range_str
 
@@ -131,10 +131,21 @@ class GenerateCommand(Command):
         self._configure_network(args)
 
         try:
-            pairs = _plan_pairs(args.mapping)
-            for ref, outp in pairs:
-                outp.parent.mkdir(parents=True, exist_ok=True)
-                generate_from(ref, outp)
+            # Process each mapping argument
+            for mapping_str in args.mapping:
+                config = parse_generate_config(mapping_str)
+
+                if isinstance(config, dict):
+                    # Source-centric YAML object format - use current working directory
+                    # Note: This assumes relative paths in config are relative to cwd
+                    base_dir = Path.cwd()
+                    generate_from_source_config(config, base_dir)
+                else:
+                    # Backward compatibility: JSON Pointer string
+                    pairs = _plan_pairs([mapping_str])
+                    for ref, outp in pairs:
+                        outp.parent.mkdir(parents=True, exist_ok=True)
+                        generate_from(ref, outp)
         except TedsError as e:
             print(str(e), file=sys.stderr)
             return 2
