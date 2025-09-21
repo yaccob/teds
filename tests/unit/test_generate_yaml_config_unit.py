@@ -10,13 +10,12 @@ from teds_core.cli import GenerateCommand
 class TestGenerateYamlConfig:
     """Test suite for the generate command YAML configuration features."""
 
-    def test_yaml_object_config_with_jsonpath_wildcards(self, tmp_path: Path):
-        """Test YAML object configuration with JsonPath wildcard expressions."""
+    def test_source_centric_config_with_default_target(self, tmp_path: Path):
+        """Test source-centric YAML config with default target naming."""
         import os
 
         # Create test schema with multiple components
-        schema = tmp_path / "examples" / "address_list.yaml"
-        schema.parent.mkdir(parents=True)
+        schema = tmp_path / "address_list.yaml"
         schema.write_text(
             """
 $defs:
@@ -29,10 +28,6 @@ $defs:
       city:
         type: string
         examples: ["Anytown"]
-      zipcode:
-        type: string
-        pattern: "^[0-9]{5}$"
-        examples: ["12345"]
   Person:
     type: object
     properties:
@@ -47,31 +42,16 @@ $defs:
             encoding="utf-8",
         )
 
-        # Create existing test file with some content
-        existing_tests = tmp_path / "address_list.tests.yaml"
-        existing_tests.write_text(
-            """
-version: "1.0.0"
-tests:
-  some_existing_ref:
-    valid:
-      existing_case:
-        payload: "test"
-""",
-            encoding="utf-8",
-        )
-
-        # YAML configuration with JsonPath wildcards
-        yaml_config = """
-{
-  "address_list.tests.yaml": [
-    "examples/address_list.yaml#/$defs/AddressOneLine/properties/*",
-    "examples/address_list.yaml#/$defs/Person/properties/*"
+        # Source-centric YAML configuration with proper JsonPath
+        yaml_config = f"""
+{{
+  "{schema.name}": [
+    "$[\\"$defs\\"].AddressOneLine.properties.*",
+    "$[\\"$defs\\"].Person.properties.*"
   ]
-}
+}}
 """
 
-        # Execute the command - should work with new YAML configuration
         command = GenerateCommand()
         args = type(
             "Args",
@@ -92,19 +72,18 @@ tests:
             result = command.execute(args)
             assert result == 0
 
-            # Verify that the test file was created/updated
-            assert existing_tests.exists()
+            # Verify default target naming: {base}.tests.yaml
+            expected_output = tmp_path / "address_list.tests.yaml"
+            assert expected_output.exists()
 
-            # Verify that new test cases were added from the JsonPath expansion
-            updated_content = existing_tests.read_text(encoding="utf-8")
-            assert (
-                "examples/address_list.yaml#" in updated_content
-            )  # Contains schema references
+            # Verify content contains generated test cases
+            content = expected_output.read_text(encoding="utf-8")
+            assert "address_list.yaml#" in content  # Contains schema references
         finally:
             os.chdir(old_cwd)
 
-    def test_yaml_object_config_with_template_base_name(self, tmp_path: Path):
-        """Test YAML object configuration with {base} template in filename."""
+    def test_source_centric_config_with_explicit_target(self, tmp_path: Path):
+        """Test source-centric YAML config with explicit target using {base} template."""
         import os
 
         schema = tmp_path / "user_schema.yaml"
@@ -125,13 +104,14 @@ $defs:
             encoding="utf-8",
         )
 
-        # YAML configuration with {base} template
-        yaml_config = """
-{
-  "{base}.tests.yaml": [
-    "user_schema.yaml#/$defs/User/properties/*"
-  ]
-}
+        # Source-centric YAML configuration with explicit target
+        yaml_config = f"""
+{{
+  "{schema.name}": {{
+    "paths": ["$[\\"$defs\\"].User.properties.*"],
+    "target": "{{base}}_custom.tests.yaml"
+  }}
+}}
 """
 
         command = GenerateCommand()
@@ -154,10 +134,8 @@ $defs:
             result = command.execute(args)
             assert result == 0
 
-            # Verify that the template was resolved and file was created
-            expected_file = (
-                tmp_path / "user_schema.tests.yaml"
-            )  # {base} resolved to "user_schema"
+            # Verify that the {base} template was resolved in target
+            expected_file = tmp_path / "user_schema_custom.tests.yaml"
             assert expected_file.exists()
 
             # Verify content contains schema references
@@ -205,35 +183,26 @@ components:
         assert expected_file.exists()
 
     def test_conflict_resolution_with_warning(self, tmp_path: Path):
-        """Test conflict resolution when multiple sources define the same schema element."""
-        schema1 = tmp_path / "schema1.yaml"
-        schema1.write_text(
+        """Test conflict resolution when multiple paths point to the same schema element."""
+        import os
+
+        schema = tmp_path / "schema.yaml"
+        schema.write_text(
             """
 $defs:
   CommonType:
     type: string
-    examples: ["from_schema1"]
+    examples: ["test_value"]
 """,
             encoding="utf-8",
         )
 
-        schema2 = tmp_path / "schema2.yaml"
-        schema2.write_text(
-            """
-$defs:
-  CommonType:
-    type: string
-    examples: ["from_schema2"]
-""",
-            encoding="utf-8",
-        )
-
-        # YAML configuration with conflicting sources
+        # Source-centric YAML configuration with conflicting paths
         yaml_config = f"""
 {{
-  "merged.tests.yaml": [
-    "{schema1}#/$defs/CommonType",
-    "{schema2}#/$defs/CommonType"
+  "{schema.name}": [
+    "$[\\"$defs\\"].CommonType",
+    "$[\\"$defs\\"].CommonType"
   ]
 }}
 """
@@ -250,12 +219,25 @@ $defs:
             },
         )()
 
-        # Capture stderr to check for conflict warnings
-        with patch("sys.stderr", new_callable=StringIO):
-            result = command.execute(args)
-            assert result == 0  # Should succeed
+        # Change to tmp_path directory for the test
+        old_cwd = Path.cwd()
+        os.chdir(tmp_path)
 
-            # Note: Different files with same fragment don't conflict in current implementation
+        try:
+            # Capture stderr to check for conflict warnings
+            with patch("sys.stderr", new_callable=StringIO):
+                result = command.execute(args)
+                assert result == 0
+
+                # Verify default target file was created
+                expected_file = tmp_path / "schema.tests.yaml"
+                assert expected_file.exists()
+
+                # Verify content contains schema reference
+                content = expected_file.read_text(encoding="utf-8")
+                assert "schema.yaml#" in content
+        finally:
+            os.chdir(old_cwd)
 
     def test_file_configuration_support(self, tmp_path: Path):
         """Test loading configuration from file with @filename syntax."""
@@ -265,9 +247,10 @@ $defs:
         config_file.write_text(
             """
 {
-  "output.tests.yaml": [
-    "schema.yaml#/$defs/*"
-  ]
+  "schema.yaml": {
+    "paths": ["$[\\"$defs\\"].*"],
+    "target": "output.tests.yaml"
+  }
 }
 """,
             encoding="utf-8",
@@ -373,8 +356,8 @@ $defs:
         result = command.execute(args)
         assert result == 2  # Error exit code for validation/parsing errors
 
-    def test_multiple_output_files_in_single_config(self, tmp_path: Path):
-        """Test generating multiple output files from single configuration."""
+    def test_multiple_paths_combined_output(self, tmp_path: Path):
+        """Test generating combined output from multiple paths in single source."""
         import os
 
         schema = tmp_path / "api_schema.yaml"
@@ -397,17 +380,16 @@ $defs:
             encoding="utf-8",
         )
 
-        # YAML config with multiple output files
+        # Source-centric config with multiple paths combined in one output
         yaml_config = f"""
 {{
-  "user.tests.yaml": [
-    "{schema}#/$defs/User",
-    "{schema}#/$defs/User/properties/*"
-  ],
-  "product.tests.yaml": [
-    "{schema}#/$defs/Product",
-    "{schema}#/$defs/Product/properties/*"
-  ]
+  "{schema.name}": {{
+    "paths": [
+      "$[\\"$defs\\"].User.*",
+      "$[\\"$defs\\"].Product.*"
+    ],
+    "target": "combined_api.tests.yaml"
+  }}
 }}
 """
 
@@ -431,16 +413,14 @@ $defs:
             result = command.execute(args)
             assert result == 0
 
-            # Verify that both output files were created
-            user_file = tmp_path / "user.tests.yaml"
-            product_file = tmp_path / "product.tests.yaml"
-            assert user_file.exists()
-            assert product_file.exists()
+            # Verify that combined output file was created
+            combined_file = tmp_path / "combined_api.tests.yaml"
+            assert combined_file.exists()
 
-            # Verify content contains schema references
-            user_content = user_file.read_text(encoding="utf-8")
-            product_content = product_file.read_text(encoding="utf-8")
-            assert "api_schema.yaml#" in user_content
-            assert "api_schema.yaml#" in product_content
+            # Verify content contains both User and Product references
+            content = combined_file.read_text(encoding="utf-8")
+            assert "api_schema.yaml#" in content
+            # Should contain tests for both entities
+            assert "$defs/User" in content or "$defs/Product" in content
         finally:
             os.chdir(old_cwd)

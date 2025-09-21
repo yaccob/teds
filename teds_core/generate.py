@@ -82,11 +82,11 @@ def generate_from(parent_ref: str, testspec_path: Path) -> None:
         ) from e
 
 
-def parse_generate_config(config_str: str) -> dict[str, list[str]] | str:
+def parse_generate_config(config_str: str) -> dict[str, dict[str, Any]] | str:
     """Parse generate configuration from YAML string or file reference.
 
     Returns:
-        - dict: YAML object configuration for multiple outputs
+        - dict: Source-centric configuration {source_file: config}
         - str: JSON Pointer string for backward compatibility
     """
     # Handle @filename syntax
@@ -109,18 +109,40 @@ def parse_generate_config(config_str: str) -> dict[str, list[str]] | str:
 
     # Check result type
     if isinstance(parsed, dict):
-        # New YAML object format
-        for output_file, sources in parsed.items():
-            if not isinstance(sources, list):
+        # Source-centric YAML object format
+        normalized_config = {}
+
+        for source_file, config in parsed.items():
+            if isinstance(config, list):
+                # Simple format: {"source.yaml": ["path1", "path2"]}
+                normalized_config[source_file] = {
+                    "paths": config,
+                    "target": None,  # Will use default
+                }
+            elif isinstance(config, dict):
+                # Explicit format: {"source.yaml": {"paths": [...], "target": "..."}}
+                if "paths" not in config:
+                    raise TedsError(f"Source '{source_file}': missing 'paths' field")
+                if not isinstance(config["paths"], list):
+                    raise TedsError(f"Source '{source_file}': 'paths' must be a list")
+
+                normalized_config[source_file] = {
+                    "paths": config["paths"],
+                    "target": config.get("target"),
+                }
+            else:
                 raise TedsError(
-                    f"Sources for '{output_file}' must be a list, got {type(sources).__name__}"
+                    f"Source '{source_file}': config must be list or object, got {type(config).__name__}"
                 )
-            for source in sources:
-                if not isinstance(source, str):
+
+            # Validate all paths are strings
+            for path in normalized_config[source_file]["paths"]:
+                if not isinstance(path, str):
                     raise TedsError(
-                        f"Source reference must be string, got {type(source).__name__}"
+                        f"Source '{source_file}': path must be string, got {type(path).__name__}"
                     )
-        return parsed
+
+        return normalized_config
     elif isinstance(parsed, str):
         # Backward compatibility: JSON Pointer string
         return parsed
@@ -132,66 +154,118 @@ def parse_generate_config(config_str: str) -> dict[str, list[str]] | str:
 
 def validate_jsonpath_expression(expr: str) -> None:
     """Validate a JsonPath expression for basic syntax."""
-    # Split schema file and fragment
-    if "#" not in expr:
-        raise TedsError(f"Invalid reference format, missing '#': {expr}")
+    # Handle backward compatibility: JSON Pointer format (with #)
+    if "#" in expr:
+        file_part, fragment = expr.split("#", 1)
+        if not file_part:
+            raise TedsError(f"Missing schema file path: {expr}")
 
-    file_part, fragment = expr.split("#", 1)
-    if not file_part:
-        raise TedsError(f"Missing schema file path: {expr}")
+        # Convert to JsonPath for validation
+        if fragment.startswith("/"):
+            fragment = fragment[1:]  # Remove leading slash
+        if not fragment:
+            return  # Root reference is valid
 
-    # Basic JsonPath validation - check for obviously invalid syntax
-    if fragment.startswith("/"):
-        fragment = fragment[1:]  # Remove leading slash for JsonPath
+        # Check for basic syntax errors in JSON Pointer format
+        invalid_patterns = [
+            r"\.\./",  # Parent navigation (not supported)
+        ]
+        for pattern in invalid_patterns:
+            if re.search(pattern, fragment):
+                raise TedsError(f"Invalid JSON Pointer expression: {expr}")
+        return
 
-    if not fragment:
-        return  # Root reference is valid
+    # Pure JsonPath expression validation
+    if not expr:
+        raise TedsError("Empty JsonPath expression")
+
+    # Basic JsonPath validation - must start with $ for root
+    if not expr.startswith("$"):
+        raise TedsError(f"JsonPath expression must start with '$': {expr}")
 
     # Check for basic syntax errors
     invalid_patterns = [
         r"\[([^]]+$)",  # Unclosed bracket
         r"\.\./",  # Parent navigation (not supported)
-        r"^[^$]",  # Must start with $ for root
     ]
 
     for pattern in invalid_patterns:
-        if re.search(pattern, fragment):
+        if re.search(pattern, expr):
             raise TedsError(f"Invalid JsonPath expression: {expr}")
 
 
-def expand_jsonpath_expressions(base_dir: Path, expressions: list[str]) -> list[str]:
+def expand_jsonpath_expressions(source_file: Path, expressions: list[str]) -> list[str]:
     """Expand JsonPath expressions with wildcards to concrete JSON Pointer references."""
     expanded = []
+
+    # Load schema document once
+    try:
+        schema_doc = yaml_loader.load(source_file.read_text(encoding="utf-8")) or {}
+    except Exception as e:
+        raise TedsError(f"Failed to load schema {source_file}: {e}") from e
 
     for expr in expressions:
         validate_jsonpath_expression(expr)
 
-        file_part, fragment = expr.split("#", 1)
-        if "*" not in fragment:
-            # No wildcards, use as-is
-            expanded.append(expr)
-            continue
+        # Handle backward compatibility: JSON Pointer format
+        if "#" in expr:
+            file_part, fragment = expr.split("#", 1)
+            if "*" not in fragment:
+                # No wildcards, use as-is
+                expanded.append(expr)
+                continue
 
-        # Load schema and expand wildcards
-        schema_path = (base_dir / file_part).resolve()
-        try:
-            schema_doc = yaml_loader.load(schema_path.read_text(encoding="utf-8")) or {}
-        except Exception as e:
-            raise TedsError(f"Failed to load schema {schema_path}: {e}") from e
-
-        # Convert JSON Pointer to JsonPath format
-        jsonpath_expr = fragment.lstrip("/")
-        if jsonpath_expr:
-            # Convert /path/to/property to $["path"]["to"]["property"]
-            # This handles special characters like $ in property names
-            parts = jsonpath_expr.split("/")
-            quoted_parts = [f'["{part}"]' for part in parts]
-            jsonpath_expr = "$" + "".join(quoted_parts)
+            # Convert JSON Pointer to JsonPath format for expansion
+            jsonpath_expr = fragment.lstrip("/")
+            if jsonpath_expr:
+                # Convert /path/to/property to $["path"]["to"]["property"]
+                parts = jsonpath_expr.split("/")
+                quoted_parts = [f'["{part}"]' for part in parts]
+                jsonpath_expr = "$" + "".join(quoted_parts)
+            else:
+                jsonpath_expr = "$"
         else:
-            jsonpath_expr = "$"
+            # Pure JsonPath expression
+            jsonpath_expr = expr
+            if "*" not in expr:
+                # No wildcards, convert to JSON Pointer format
+                try:
+                    # Test if expression is valid by parsing it
+                    test_parser = jsonpath_ng.parse(jsonpath_expr)
+                    test_matches = test_parser.find(schema_doc)
+                    if test_matches:
+                        # Convert to JSON Pointer format for consistency
+                        match = test_matches[0]  # Take first match for path structure
+                        path_str = str(match.full_path)
+                        if path_str.startswith("$"):
+                            path_str = path_str[1:]  # Remove $
+
+                        path_parts = []
+                        if path_str:
+                            # Handle dot notation parsing
+                            if path_str.startswith("."):
+                                path_str = path_str[1:]  # Remove leading .
+                            for part in path_str.split("."):
+                                if part.startswith("'") and part.endswith("'"):
+                                    part = part[1:-1]
+                                path_parts.append(part)
+
+                        if path_parts:
+                            json_pointer = "/" + "/".join(path_parts)
+                            expanded.append(f"{source_file.name}#{json_pointer}")
+                        else:
+                            expanded.append(f"{source_file.name}#/")
+                        continue
+                    else:
+                        # No matches, but expression is valid - include as-is
+                        expanded.append(f"{source_file.name}#{jsonpath_expr}")
+                        continue
+                except Exception:
+                    # Invalid expression, let it fail below
+                    pass
 
         try:
-            # Parse and find matches
+            # Parse and find matches for wildcard expressions
             jsonpath_parser = jsonpath_ng.parse(jsonpath_expr)
             matches = jsonpath_parser.find(schema_doc)
 
@@ -229,9 +303,9 @@ def expand_jsonpath_expressions(base_dir: Path, expressions: list[str]) -> list[
 
                 if path_parts:
                     json_pointer = "/" + "/".join(path_parts)
-                    expanded.append(f"{file_part}#{json_pointer}")
+                    expanded.append(f"{source_file.name}#{json_pointer}")
                 else:
-                    expanded.append(f"{file_part}#/")
+                    expanded.append(f"{source_file.name}#/")
 
         except Exception as e:
             raise TedsError(
@@ -270,37 +344,33 @@ def extract_base_name(sources: list[str]) -> str:
     return Path(file_part).stem
 
 
-def resolve_template_variables(config: dict[str, list[str]]) -> dict[str, list[str]]:
-    """Resolve template variables like {base} in output filenames."""
-    resolved = {}
+def generate_from_source_config(
+    config: dict[str, dict[str, Any]], base_dir: Path
+) -> None:
+    """Generate test specifications from source-centric YAML configuration."""
 
-    for output_template, sources in config.items():
-        if "{base}" in output_template:
-            base_name = extract_base_name(sources)
-            output_file = output_template.replace("{base}", base_name)
+    for source_file_str, source_config in config.items():
+        source_file = base_dir / source_file_str
+
+        # Determine target file
+        if source_config["target"]:
+            # Explicit target with possible {base} template resolution
+            target_name = source_config["target"].replace("{base}", source_file.stem)
         else:
-            output_file = output_template
+            # Default: {base}.tests.yaml
+            target_name = f"{source_file.stem}.tests.yaml"
 
-        resolved[output_file] = sources
+        target_path = base_dir / target_name
 
-    return resolved
+        # Expand JsonPath expressions for this source
+        expanded_refs = expand_jsonpath_expressions(source_file, source_config["paths"])
 
-
-def generate_from_config(config: dict[str, list[str]], base_dir: Path) -> None:
-    """Generate test specifications from YAML configuration."""
-    # Resolve template variables
-    resolved_config = resolve_template_variables(config)
-
-    for output_file, sources in resolved_config.items():
-        # Expand JsonPath expressions
-        expanded_refs = expand_jsonpath_expressions(base_dir, sources)
-
-        # Detect and warn about conflicts
+        # Detect and warn about conflicts within this source
         conflicts = detect_conflicts(expanded_refs)
         for ref, indices in conflicts:
             source_positions = ", ".join(f"#{i+1}" for i in indices)
             print(
-                f"Warning: Conflict detected for '{ref}' (sources {source_positions}). Using first occurrence.",
+                f"Warning: Conflict detected for '{ref}' (paths {source_positions}). Using first occurrence.",
                 file=sys.stderr,
             )
 
@@ -312,12 +382,9 @@ def generate_from_config(config: dict[str, list[str]], base_dir: Path) -> None:
                 seen.add(ref)
                 unique_refs.append(ref)
 
-        # Determine output path
-        output_path = base_dir / output_file
-
         # Generate tests for each unique reference
         for ref in unique_refs:
             try:
-                generate_from(ref, output_path)
+                generate_from(ref, target_path)
             except Exception as e:
                 print(f"Warning: Failed to generate from '{ref}': {e}", file=sys.stderr)

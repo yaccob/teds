@@ -10,26 +10,26 @@ class TestGenerateConfigurationParser:
     """Test suite for the new generate command configuration parser."""
 
     def test_parse_yaml_string_to_object(self):
-        """Test parsing YAML string to configuration object."""
+        """Test parsing YAML string to source-centric configuration object."""
         from teds_core.generate import parse_generate_config
 
         yaml_string = """
 {
-  "output.tests.yaml": [
-    "schema.yaml#/$defs/Type1",
-    "schema.yaml#/$defs/Type2/properties/*"
+  "schema.yaml": [
+    "$[\\"$defs\\"].Type1",
+    "$[\\"$defs\\"].Type2.properties.*"
   ],
-  "another.tests.yaml": [
-    "other_schema.yaml#/$defs/*"
+  "other_schema.yaml": [
+    "$[\\"$defs\\"].*"
   ]
 }
 """
 
         result = parse_generate_config(yaml_string)
         assert isinstance(result, dict)
-        assert "output.tests.yaml" in result
-        assert "another.tests.yaml" in result
-        assert isinstance(result["output.tests.yaml"], list)
+        assert "schema.yaml" in result
+        assert "other_schema.yaml" in result
+        assert isinstance(result["schema.yaml"]["paths"], list)
 
     def test_parse_yaml_string_to_json_pointer(self):
         """Test parsing YAML string that evaluates to JSON Pointer string."""
@@ -88,22 +88,24 @@ class TestGenerateConfigurationParser:
         with pytest.raises(TedsError, match="Configuration must be object or string"):
             parse_generate_config(unsupported_yaml)
 
-    def test_template_variable_resolution(self):
-        """Test template variable resolution in output filenames."""
-        from teds_core.generate import resolve_template_variables
+    def test_source_centric_template_resolution(self):
+        """Test template variable resolution in source-centric configuration."""
+        from teds_core.generate import parse_generate_config
 
-        config = {
-            "{base}.tests.yaml": [
-                "user_schema.yaml#/$defs/User",
-                "product_schema.yaml#/$defs/Product",
-            ]
-        }
+        # Source-centric configuration with {base} template in target
+        yaml_config = """
+{
+  "user_schema.yaml": {
+    "paths": ["$[\\"$defs\\"].User"],
+    "target": "{base}.custom.tests.yaml"
+  }
+}
+"""
 
-        result = resolve_template_variables(config)
+        result = parse_generate_config(yaml_config)
         assert isinstance(result, dict)
-        assert (
-            "user_schema.tests.yaml" in result
-        )  # {base} resolved to first file's stem
+        assert "user_schema.yaml" in result
+        assert result["user_schema.yaml"]["target"] == "{base}.custom.tests.yaml"
 
     def test_jsonpath_expression_validation(self):
         """Test JsonPath expression validation."""
@@ -115,8 +117,8 @@ class TestGenerateConfigurationParser:
         validate_jsonpath_expression("schema.yaml#/$defs/*/properties/*")
 
         # Invalid expressions should raise TedsError
-        with pytest.raises(TedsError, match="Invalid reference format"):
-            validate_jsonpath_expression("schema.yaml")  # Missing #
+        with pytest.raises(TedsError, match="JsonPath expression must start with"):
+            validate_jsonpath_expression("schema.yaml")  # Missing $ prefix
 
         with pytest.raises(TedsError, match="Missing schema file path"):
             validate_jsonpath_expression("#/$defs/User")  # Missing file path

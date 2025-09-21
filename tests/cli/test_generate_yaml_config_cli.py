@@ -8,8 +8,8 @@ from tests.utils import load_yaml_file, run_cli
 class TestGenerateYamlConfigCLI:
     """CLI integration tests for the generate command YAML configuration features."""
 
-    def test_cli_yaml_object_config_basic(self, tmp_path: Path):
-        """Test CLI with basic YAML object configuration."""
+    def test_cli_source_centric_basic_config(self, tmp_path: Path):
+        """Test CLI with basic source-centric YAML configuration."""
         schema = tmp_path / "test_schema.yaml"
         schema.write_text(
             """
@@ -28,20 +28,18 @@ $defs:
             encoding="utf-8",
         )
 
-        # YAML configuration as CLI argument
+        # Source-centric YAML configuration as CLI argument
         yaml_config = f"""
 {{
-  "user_profile.tests.yaml": [
-    "{schema.name}#/$defs/UserProfile/properties/*"
-  ]
+  "{schema.name}": ["$[\\"$defs\\"].UserProfile.properties.*"]
 }}
 """
 
         rc, out, err = run_cli(["generate", yaml_config], cwd=tmp_path)
         assert rc == 0
 
-        # Verify that the test file was created
-        test_file = tmp_path / "user_profile.tests.yaml"
+        # Verify default target naming: {base}.tests.yaml
+        test_file = tmp_path / "test_schema.tests.yaml"
         assert test_file.exists()
 
         # Verify content contains schema references
@@ -62,7 +60,7 @@ components:
             encoding="utf-8",
         )
 
-        # Old-style JSON Pointer reference
+        # JSON Pointer string reference
         json_pointer = f"{schema.name}#/components/schemas/Message"
 
         rc, out, err = run_cli(["generate", json_pointer], cwd=tmp_path)
@@ -84,9 +82,10 @@ components:
         config_file.write_text(
             """
 {
-  "generated.tests.yaml": [
-    "schema.yaml#/$defs/*"
-  ]
+  "schema.yaml": {
+    "paths": ["$[\\"$defs\\"].*"],
+    "target": "generated.tests.yaml"
+  }
 }
 """,
             encoding="utf-8",
@@ -131,35 +130,27 @@ $defs:
 
     def test_cli_conflict_warning_output(self, tmp_path: Path):
         """Test CLI conflict warning output to stderr."""
-        schema1 = tmp_path / "first.yaml"
-        schema1.write_text(
+        schema = tmp_path / "schema.yaml"
+        schema.write_text(
             """
 $defs:
   Shared:
     type: string
-    examples: ["first"]
+    examples: ["test"]
 """,
             encoding="utf-8",
         )
 
-        schema2 = tmp_path / "second.yaml"
-        schema2.write_text(
-            """
-$defs:
-  Shared:
-    type: string
-    examples: ["second"]
-""",
-            encoding="utf-8",
-        )
-
-        # YAML config with conflicting sources
+        # Source-centric YAML config with conflicting paths
         yaml_config = f"""
 {{
-  "conflict_test.tests.yaml": [
-    "{schema1.name}#/$defs/Shared",
-    "{schema2.name}#/$defs/Shared"
-  ]
+  "{schema.name}": {{
+    "paths": [
+      "$[\\"$defs\\"].Shared",
+      "$[\\"$defs\\"].Shared"
+    ],
+    "target": "conflict_test.tests.yaml"
+  }}
 }}
 """
 
@@ -170,25 +161,19 @@ $defs:
         test_file = tmp_path / "conflict_test.tests.yaml"
         assert test_file.exists()
 
-        # Note: Different files with same fragment names don't conflict in current implementation
+        # Verify content contains schema reference
+        content = test_file.read_text(encoding="utf-8")
+        assert "schema.yaml#" in content
 
     def test_cli_template_base_name_resolution(self, tmp_path: Path):
-        """Test CLI template base name resolution with multiple sources."""
-        schema1 = tmp_path / "primary_schema.yaml"
-        schema1.write_text(
+        """Test CLI template base name resolution in target field."""
+        schema = tmp_path / "primary_schema.yaml"
+        schema.write_text(
             """
 $defs:
   Type1:
     type: string
     examples: ["value1"]
-""",
-            encoding="utf-8",
-        )
-
-        schema2 = tmp_path / "secondary_schema.yaml"
-        schema2.write_text(
-            """
-$defs:
   Type2:
     type: integer
     examples: [123]
@@ -196,13 +181,13 @@ $defs:
             encoding="utf-8",
         )
 
-        # YAML config with {base} template and multiple sources
+        # Source-centric YAML config with {base} template in target
         yaml_config = f"""
 {{
-  "{{base}}.combined.tests.yaml": [
-    "{schema1.name}#/$defs/Type1",
-    "{schema2.name}#/$defs/Type2"
-  ]
+  "{schema.name}": {{
+    "paths": ["$[\\"$defs\\"].*"],
+    "target": "{{base}}.combined.tests.yaml"
+  }}
 }}
 """
 
@@ -210,14 +195,12 @@ $defs:
         assert rc == 0
 
         # Verify that the template was resolved and file was created
-        test_file = (
-            tmp_path / "primary_schema.combined.tests.yaml"
-        )  # {base} resolved to first source
+        test_file = tmp_path / "primary_schema.combined.tests.yaml"
         assert test_file.exists()
 
         # Verify content contains schema references
         content = test_file.read_text(encoding="utf-8")
-        assert "primary_schema.yaml#" in content or "secondary_schema.yaml#" in content
+        assert "primary_schema.yaml#" in content
 
     def test_cli_help_shows_new_syntax(self, tmp_path: Path):
         """Test that CLI help includes information about new YAML syntax."""
