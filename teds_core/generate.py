@@ -195,7 +195,11 @@ def validate_jsonpath_expression(expr: str) -> None:
 
 
 def expand_jsonpath_expressions(source_file: Path, expressions: list[str]) -> list[str]:
-    """Expand JsonPath expressions with wildcards to concrete JSON Pointer references."""
+    """Expand JsonPath expressions to concrete JSON Pointer references.
+
+    This function follows the JSONPath specification exactly - no interpretation,
+    no "intelligent" fallback logic. jsonpath-ng does the work correctly.
+    """
     expanded = []
 
     # Load schema document once
@@ -225,71 +229,19 @@ def expand_jsonpath_expressions(source_file: Path, expressions: list[str]) -> li
             else:
                 jsonpath_expr = "$"
         else:
-            # Pure JsonPath expression
+            # Pure JsonPath expression - let jsonpath-ng handle it exactly
             jsonpath_expr = expr
-            if "*" not in expr:
-                # No wildcards, convert to JSON Pointer format
-                try:
-                    # Test if expression is valid by parsing it
-                    test_parser = jsonpath_ng.parse(jsonpath_expr)
-                    test_matches = test_parser.find(schema_doc)
-                    if test_matches:
-                        # Convert to JSON Pointer format for consistency
-                        match = test_matches[0]  # Take first match for path structure
-                        path_str = str(match.full_path)
-                        if path_str.startswith("$"):
-                            path_str = path_str[1:]  # Remove $
-
-                        path_parts = []
-                        if path_str:
-                            # Handle dot notation parsing
-                            if path_str.startswith("."):
-                                path_str = path_str[1:]  # Remove leading .
-                            for part in path_str.split("."):
-                                if part.startswith("'") and part.endswith("'"):
-                                    part = part[1:-1]
-                                path_parts.append(part)
-
-                        if path_parts:
-                            json_pointer = "/" + "/".join(path_parts)
-                            expanded.append(f"{source_file.name}#{json_pointer}")
-                        else:
-                            expanded.append(f"{source_file.name}#/")
-                        continue
-                    else:
-                        # No matches, but expression is valid - include as-is
-                        expanded.append(f"{source_file.name}#{jsonpath_expr}")
-                        continue
-                except Exception:
-                    # Invalid expression, let it fail below
-                    pass
 
         try:
-            # Parse and find matches for wildcard expressions
+            # Parse and find matches - jsonpath-ng knows what it's doing
             jsonpath_parser = jsonpath_ng.parse(jsonpath_expr)
             matches = jsonpath_parser.find(schema_doc)
 
             for match in matches:
                 # Convert path back to JSON Pointer
-                path_parts = []
-
-                # Parse the full path from jsonpath-ng
-                path_str = str(match.full_path)
-                if path_str.startswith("$"):
-                    path_str = path_str[1:]  # Remove $
-
-                if path_str:
-                    # Handle dot notation like 'key'.User.properties.name or key.value.prop
-                    # jsonpath-ng returns paths in formats like:
-                    # - '$defs'.User -> ['$defs', 'User']
-                    # - items.[0] -> ['items', '[0]']
-                    # - key.nested.prop -> ['key', 'nested', 'prop']
-                    for part in path_str.split("."):
-                        # Handle quoted parts like '$defs' -> $defs
-                        if part.startswith("'") and part.endswith("'"):
-                            part = part[1:-1]
-                        # Keep bracket array notation as-is (like [0])
-                        path_parts.append(part)
+                path_parts = _convert_jsonpath_match_to_json_pointer_parts(
+                    match.full_path
+                )
 
                 if path_parts:
                     json_pointer = "/" + "/".join(path_parts)
@@ -303,6 +255,42 @@ def expand_jsonpath_expressions(source_file: Path, expressions: list[str]) -> li
             ) from e
 
     return expanded
+
+
+def _convert_jsonpath_match_to_json_pointer_parts(full_path: str) -> list[str]:
+    """Convert jsonpath-ng full_path to JSON Pointer parts.
+
+    jsonpath-ng returns paths in formats like:
+    - '$defs'.User -> ['$defs', 'User']
+    - items.[0] -> ['items', '0']  (convert [0] to 0)
+    - key.nested.prop -> ['key', 'nested', 'prop']
+    """
+    path_str = str(full_path)
+    if path_str.startswith("$"):
+        path_str = path_str[1:]  # Remove $
+
+    if not path_str:
+        return []
+
+    path_parts = []
+
+    # Handle dot notation parsing
+    if path_str.startswith("."):
+        path_str = path_str[1:]  # Remove leading .
+
+    for part in path_str.split("."):
+        # Handle quoted parts like '$defs' -> $defs
+        if part.startswith("'") and part.endswith("'"):
+            part = part[1:-1]
+        # Convert array bracket notation [0] -> 0
+        elif part.startswith("[") and part.endswith("]"):
+            # Remove brackets and quotes if present
+            part = part[1:-1]
+            if part.startswith("'") and part.endswith("'"):
+                part = part[1:-1]
+        path_parts.append(part)
+
+    return path_parts
 
 
 def detect_conflicts(expanded_refs: list[str]) -> list[tuple[str, list[int]]]:
