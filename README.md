@@ -16,11 +16,14 @@ APIs live and die by their contracts. Most teams only test the "happy path" — 
 ### Installation
 
 ```bash
-# From source (current)
+# From PyPI (recommended)
+pip install teds
+
+# From source (development)
+git clone https://github.com/yaccob/teds.git
+cd teds
 python3 -m venv .venv && . .venv/bin/activate
 pip install -r requirements.txt
-
-# Coming soon: pip install teds
 ```
 
 ### Basic Usage
@@ -123,7 +126,7 @@ Reports show complete test results with clean YAML formatting and clear message 
 
 ## Tutorial
 
-For a comprehensive step-by-step guide, see the [complete tutorial](docs/tutorial.md).
+For a comprehensive step-by-step guide, see the [complete tutorial](https://yaccob.github.io/teds/tutorial.md).
 
 ## Development
 
