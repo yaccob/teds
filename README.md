@@ -126,7 +126,7 @@ Reports show complete test results with clean YAML formatting and clear message 
 
 ## Tutorial
 
-For a comprehensive step-by-step guide, see the [complete tutorial](https://github.com/yaccob/teds/blob/master/docs/tutorial.html).
+For a comprehensive step-by-step guide, see the [complete tutorial](https://yaccob.github.io/teds/tutorial.html).
 
 ## Development
 
