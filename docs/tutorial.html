@@ -849,7 +849,7 @@ teds generate '{"sample_schemas.yaml": {"paths": ["$.components.schemas.*"]}}'
 teds generate '{"api.yaml": {"paths": ["$.components.schemas.User", "$.components.schemas.Product"]}}'
 
 # With custom target file
-teds generate '{"schema.yaml": {"paths": ["$.$defs.*"], "target": "custom_tests.yaml"}}'</code></pre>
+teds generate '{"schema.yaml": {"paths": ["$[\"$defs\"].*"], "target": "custom_tests.yaml"}}'</code></pre>
 </div>
 </div>
 </div>
@@ -858,7 +858,7 @@ teds generate '{"schema.yaml": {"paths": ["$.$defs.*"], "target": "custom_tests.
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Simplified syntax for multiple paths
-teds generate '{"schema.yaml": ["$.components.schemas.*", "$.$defs.*"]}'</code></pre>
+teds generate '{"schema.yaml": ["$.components.schemas.*", "$[\"$defs\"].*"]}'</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -878,7 +878,7 @@ api.yaml:
 
 # Array indices and wildcards
 complex.yaml:
-  paths: ["$.$defs.*", "$.allOf[0]", "$.items[1]"]
+  paths: ["$[\"$defs\"].*", "$.allOf[0]", "$.items[1]"]
   target: "complex_tests.yaml"
 
 # Nested selections
@@ -1758,7 +1758,7 @@ teds verify user_generated.tests.yaml --in-place
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-09-23 00:24:30 +0200
+Last updated 2025-09-23 00:56:20 +0200
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
