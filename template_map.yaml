@@ -5,6 +5,12 @@ templates:
   - id: summary.html
     path: templates/summary.html.j2
     description: Simple HTML summary per spec with refs and counts
-  - id: comprehensive.adoc
-    path: templates/comprehensive.adoc.j2
-    description: Comprehensive AsciiDoc report with color-coded status, tabular layout, and schema coverage warnings
+  - id: default.adoc
+    path: templates/default.adoc.j2
+    description: Default AsciiDoc report with color-coded status, YAML payloads, and schema coverage warnings
+  - id: default.html
+    path: templates/default.html.j2
+    description: Default HTML report with AsciiDoc-inspired styling, YAML payloads, and responsive design
+  - id: default.md
+    path: templates/default.md.j2
+    description: Default Markdown report with emoji status indicators and simplified YAML payload display

@@ -1,0 +1,179 @@
+# TeDS Default Validation Report
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Executive Summary](#executive-summary)
+- [Detailed Results](#detailed-results)
+- [Appendix](#appendix)
+
+## Overview
+
+| Property | Value |
+|----------|-------|
+| Tool Version | teds {{ tool.version }} |
+| Specification Support | {{ tool.spec_supported }} |
+| Recommended Version | {{ tool.spec_recommended }} |
+| Generated | {{ timestamp }} |
+| Report File | {{ inputs[0].path }} |
+
+{% set doc = inputs[0].doc %}
+{% set success_count = 0 %}
+{% set warning_count = 0 %}
+{% set error_count = 0 %}
+{% set schema_warnings = [] %}
+
+## Executive Summary
+
+{% if doc.tests %}
+{# Use pre-computed counts from inputs[0].counts #}
+{% set success_count = inputs[0].counts.success %}
+{% set warning_count = inputs[0].counts.warning %}
+{% set error_count = inputs[0].counts.error %}
+
+{# Check for schema warnings and collect with proper anchors #}
+{% for ref, grp in doc.tests.items() %}
+  {% set valid_cases = (grp.valid or {}) %}
+  {% set invalid_cases = (grp.invalid or {}) %}
+  {% set ref_anchor = ref.replace('/', '-').replace('#', '-').replace('.', '-').replace('_', '-').lower() %}
+
+  {% if valid_cases|length == 0 %}
+    {% set _ = schema_warnings.append({'text': ref + " has no valid test cases", 'anchor': ref_anchor}) %}
+  {% endif %}
+  {% if invalid_cases|length == 0 %}
+    {% set _ = schema_warnings.append({'text': ref + " has no invalid test cases", 'anchor': ref_anchor}) %}
+  {% endif %}
+{% endfor %}
+
+This report analyzes **{{ doc.tests|length }}** schema(s) with a total of **{{ success_count + warning_count + error_count }}** test cases.
+
+### Results Summary
+
+| Status | Count | Description |
+|--------|-------|-------------|
+{% if success_count > 0 %}
+| ✅ **SUCCESS** | {{ success_count }} | Test cases passed as expected |
+{% endif %}
+{% if warning_count > 0 %}
+| ⚠️ **WARNING** | {{ warning_count }} | Test cases with warnings (review recommended) |
+{% endif %}
+{% if error_count > 0 %}
+| ❌ **ERROR** | {{ error_count }} | Test cases failed validation |
+{% endif %}
+{% if success_count + warning_count + error_count == 0 %}
+| ⚪ **NO RESULTS** | 0 | No test cases found |
+{% endif %}
+| **Total** | **{{ success_count + warning_count + error_count }}** | All test cases processed |
+
+{% if schema_warnings %}
+### Schema Coverage Warnings
+
+> **⚠️ Warning:** The following schemas have incomplete test coverage:
+>
+{% for warning in schema_warnings %}
+> - [{{ warning.text }}](#{{ warning.anchor }})
+{% endfor %}
+>
+> Consider adding both valid and invalid test cases for comprehensive schema validation.
+{% endif %}
+
+{% else %}
+> **⚠️ Caution:** No test cases found in the specification. Consider adding test cases to validate your schemas.
+{% endif %}
+
+## Detailed Results
+
+{% if doc.tests %}
+{% for ref, grp in doc.tests.items() %}
+{% set ref_anchor = ref.replace('/', '-').replace('#', '-').replace('.', '-').replace('_', '-').lower() %}
+### {{ ref }} <a id="{{ ref_anchor }}"></a>
+
+{% set valid_cases = (grp.valid or {}) %}
+{% set invalid_cases = (grp.invalid or {}) %}
+{% set total_cases = valid_cases|length + invalid_cases|length %}
+
+#### Schema Summary
+
+| Metric | Count |
+|--------|-------|
+| Valid Cases | {{ valid_cases|length }} |
+| Invalid Cases | {{ invalid_cases|length }} |
+| Total Cases | {{ total_cases }} |
+
+{% if valid_cases %}
+#### Valid Test Cases
+
+{% for case_name, case_data in valid_cases.items() %}
+##### `{{ case_name }}`
+
+**Status:** {% if case_data.result == "SUCCESS" %}✅ SUCCESS{% elif case_data.result == "WARNING" %}⚠️ WARNING{% elif case_data.result == "ERROR" %}❌ ERROR{% else %}⚪ UNKNOWN{% endif %}
+
+**Payload:**
+```yaml
+{{ case_data.payload | to_yaml }}
+```
+
+{% if case_data.message %}
+**Message:** {{ case_data.message }}
+{% endif %}
+
+---
+
+{% endfor %}
+{% endif %}
+
+{% if invalid_cases %}
+#### Invalid Test Cases
+
+{% for case_name, case_data in invalid_cases.items() %}
+##### `{{ case_name }}`
+
+**Status:** {% if case_data.result == "SUCCESS" %}✅ SUCCESS{% elif case_data.result == "WARNING" %}⚠️ WARNING{% elif case_data.result == "ERROR" %}❌ ERROR{% else %}⚪ UNKNOWN{% endif %}
+
+**Payload:**
+```yaml
+{{ case_data.payload | to_yaml }}
+```
+
+{% if case_data.message %}
+**Message:** {{ case_data.message }}
+{% endif %}
+
+---
+
+{% endfor %}
+{% endif %}
+
+{% if valid_cases|length == 0 and invalid_cases|length == 0 %}
+> **📝 Note:** No test cases defined for this schema. Consider adding both valid and invalid test cases.
+{% endif %}
+
+{% endfor %}
+{% endif %}
+
+## Appendix
+
+### Tool Information
+
+| Property | Value |
+|----------|-------|
+| TeDS Version | {{ tool.version }} |
+| Supported Spec Range | {{ tool.spec_supported }} |
+| Recommended Spec Version | {{ tool.spec_recommended }} |
+| Report Generation Time | {{ timestamp }} |
+
+### Report Scope
+
+This default report includes:
+
+- **Executive Summary** - High-level overview of validation results
+- **Schema Coverage Analysis** - Warnings for incomplete test coverage
+- **Detailed Results** - Complete breakdown of all test cases by schema
+- **Status Indicators** - Visual distinction between SUCCESS, WARNING, and ERROR states
+- **Structured Format** - Organized presentation for easy analysis
+
+For questions about this report or TeDS functionality, please refer to the TeDS documentation.
+
+---
+
+*This report was generated automatically by TeDS (Test-Driven Schema Development Tool).*
