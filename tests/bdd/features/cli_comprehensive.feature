@@ -167,3 +167,32 @@ Feature: TeDS CLI Comprehensive Testing
     When I run teds verify "bad.yaml"
     Then the command should exit with code 2
     And the error output should mention YAML parsing issues
+
+  # === GENERATED FILE VALIDATION SCENARIOS ===
+
+  Scenario: Generated files contain version field and are validatable
+    Given I have a schema file "validatable.yaml" with content:
+      """
+      type: object
+      properties:
+        name:
+          type: string
+        age:
+          type: integer
+      """
+    When I run teds generate "validatable.yaml#/"
+    Then the command should exit with code 0
+    And a test file "validatable.tests.yaml" should be created
+    And the generated file should contain version field "1.0.0"
+    And the generated file should be validatable with teds verify
+
+  Scenario: Generated files can be executed even when empty
+    Given I have a minimal schema file "minimal.yaml" with content:
+      """
+      type: string
+      """
+    When I run teds generate "minimal.yaml#/"
+    Then the command should exit with code 0
+    And a test file "minimal.tests.yaml" should be created
+    And the generated file should be executable with teds verify
+    And verification should complete successfully

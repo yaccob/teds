@@ -149,6 +149,17 @@ def create_generic_file(temp_workspace, filename, docstring):
     file_path.write_text(content, encoding="utf-8")
 
 
+@given(parsers.parse('I have a minimal schema file "{filename}" with content:'))
+def create_minimal_schema_file(temp_workspace, stored_files, filename, docstring):
+    """Create a minimal schema file."""
+    schema_path = temp_workspace / filename
+    # Ensure parent directory exists
+    schema_path.parent.mkdir(parents=True, exist_ok=True)
+    content = docstring.strip() if docstring else ""
+    schema_path.write_text(content, encoding="utf-8")
+    stored_files[filename] = schema_path
+
+
 @when(parsers.parse('I run teds verify "{spec_file}" with output level "{level}"'))
 def run_verify_with_output_level(temp_workspace, command_result, spec_file, level):
     """Run teds verify with specific output level."""
@@ -387,3 +398,63 @@ def check_yaml_parsing_error(command_result):
     yaml_error_indicators = ["yaml", "parse", "syntax", "scanner", "mapping"]
     found = any(indicator in stderr.lower() for indicator in yaml_error_indicators)
     assert found, f"No YAML parsing error indicators found in: {stderr}"
+
+
+@then(
+    parsers.parse(
+        'the generated file should contain version field "{expected_version}"'
+    )
+)
+def check_generated_file_has_version(temp_workspace, expected_version):
+    """Check that generated file contains the expected version field."""
+    test_files = list(temp_workspace.glob("*.tests.yaml"))
+    assert len(test_files) > 0, "No test files found"
+
+    test_file = test_files[0]
+    doc = load_yaml_file(test_file)
+
+    assert "version" in doc, f"Generated file missing version field: {doc.keys()}"
+    assert (
+        doc["version"] == expected_version
+    ), f"Expected version {expected_version}, got {doc['version']}"
+
+
+@then("the generated file should be validatable with teds verify")
+def check_generated_file_validatable(temp_workspace, command_result):
+    """Check that generated file can be validated with teds verify."""
+    test_files = list(temp_workspace.glob("*.tests.yaml"))
+    assert len(test_files) > 0, "No test files found"
+
+    test_file = test_files[0]
+    rc, out, err = run_cli(["verify", test_file.name], cwd=temp_workspace)
+
+    assert rc in [0, 1], f"Generated file validation failed with exit code {rc}: {err}"
+
+
+@then("the generated file should be executable with teds verify")
+def check_generated_file_executable(temp_workspace):
+    """Check that generated file can be executed with teds verify."""
+    test_files = list(temp_workspace.glob("*.tests.yaml"))
+    assert len(test_files) > 0, "No test files found"
+
+    test_file = test_files[0]
+    rc, out, err = run_cli(["verify", test_file.name], cwd=temp_workspace)
+
+    # Should not fail with hard error (exit code 2)
+    assert rc in [0, 1], f"Generated file execution failed with exit code {rc}: {err}"
+
+
+@then("verification should complete successfully")
+def check_verification_completes_successfully(temp_workspace):
+    """Check that verification completes without hard errors."""
+    test_files = list(temp_workspace.glob("*.tests.yaml"))
+    assert len(test_files) > 0, "No test files found"
+
+    test_file = test_files[0]
+    rc, out, err = run_cli(["verify", test_file.name], cwd=temp_workspace)
+
+    # Should complete successfully (0) or with validation issues (1), but not hard errors (2)
+    assert rc in [
+        0,
+        1,
+    ], f"Verification failed to complete: exit code {rc}, error: {err}"
