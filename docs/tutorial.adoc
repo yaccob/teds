@@ -235,7 +235,7 @@ teds generate '{"sample_schemas.yaml": {"paths": ["$.components.schemas.*"]}}'
 teds generate '{"api.yaml": {"paths": ["$.components.schemas.User", "$.components.schemas.Product"]}}'
 
 # With custom target file
-teds generate '{"schema.yaml": {"paths": ["$.$defs.*"], "target": "custom_tests.yaml"}}'
+teds generate '{"schema.yaml": {"paths": ["$[\"$defs\"].*"], "target": "custom_tests.yaml"}}'
 ----
 
 ===== Method 3: Simple List Format
@@ -243,7 +243,7 @@ teds generate '{"schema.yaml": {"paths": ["$.$defs.*"], "target": "custom_tests.
 [source,bash]
 ----
 # Simplified syntax for multiple paths
-teds generate '{"schema.yaml": ["$.components.schemas.*", "$.$defs.*"]}'
+teds generate '{"schema.yaml": ["$.components.schemas.*", "$[\"$defs\"].*"]}'
 ----
 
 **JSON Path Examples:**
@@ -262,7 +262,7 @@ api.yaml:
 
 # Array indices and wildcards
 complex.yaml:
-  paths: ["$.$defs.*", "$.allOf[0]", "$.items[1]"]
+  paths: ["$[\"$defs\"].*", "$.allOf[0]", "$.items[1]"]
   target: "complex_tests.yaml"
 
 # Nested selections
