@@ -8,6 +8,7 @@ Feature: TeDS CLI Comprehensive Testing
 
   # === VERIFY COMMAND SCENARIOS ===
 
+
   Scenario: Verify with warning output level shows format divergence
     Given I have a schema file "schema.yaml" with content:
       """
@@ -26,10 +27,22 @@ Feature: TeDS CLI Comprehensive Testing
       tests:
         schema.yaml#/components/schemas/Email:
           valid:
-            .components.schemas.Email.examples[0]:
+            valid_email:
               payload: alice@example.com
-              result: SUCCESS
-              from_examples: true
+            questionable_email:
+              payload: not-an-email
+          invalid:
+            explicit_invalid:
+              payload: not-an-email
+      """
+    When I run teds verify "spec.yaml" with output level "warning"
+    Then the command should exit with code 1
+    And the output should exactly match:
+      """
+      version: 1.0.0
+      tests:
+        schema.yaml#/components/schemas/Email:
+          valid:
             .components.schemas.Email.examples[1]:
               payload: not-an-email
               result: WARNING
@@ -38,18 +51,26 @@ Feature: TeDS CLI Comprehensive Testing
               - generated: |
                   Relies on JSON Schema 'format' assertion (format: email).
                   Validators that *enforce* 'format' will reject this instance.
+                  Consider enforcing the expected format by adding an explicit 'pattern' property to the schema.
+                code: format-divergence
+            questionable_email:
+              payload: not-an-email
+              result: WARNING
+              warnings:
+              - generated: |
+                  Relies on JSON Schema 'format' assertion (format: email).
+                  Validators that *enforce* 'format' will reject this instance.
+                  Consider enforcing the expected format by adding an explicit 'pattern' property to the schema.
                 code: format-divergence
           invalid:
-            explicit invalid:
+            explicit_invalid:
               payload: not-an-email
               result: ERROR
               message: |
                 UNEXPECTEDLY VALID
-                A validator that *ignores* 'format' accepted this instance.
+                A validator that *ignores* 'format' accepted this instance, while a strict validator (enforcing 'format') might reject it as desired (format: email).
+                Consider enforcing the expected format by adding an explicit 'pattern' property to the schema.
       """
-    When I run teds verify "spec.yaml" with output level "warning"
-    Then the command should exit with code 1
-    And the output should contain YAML content
 
   Scenario: CLI reports missing schema file error
     Given I have a test specification file "spec.yaml" with content:
