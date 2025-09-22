@@ -23,14 +23,14 @@ tests:
       missing timezone:
         payload: '2024-08-01T12:34:56'
         result: ERROR
-        message: |
+        message: |-
           UNEXPECTEDLY VALID
           A validator that *ignores* 'format' accepted this instance, while a strict validator (enforcing 'format') might reject it as desired (format: date-time).
           Consider enforcing the expected format by adding an explicit 'pattern' property to the schema.
       impossible date:
         payload: '2024-02-30T12:00:00Z'
         result: ERROR
-        message: |
+        message: |-
           UNEXPECTEDLY VALID
           A validator that *ignores* 'format' accepted this instance, while a strict validator (enforcing 'format') might reject it as desired (format: date-time).
           Consider enforcing the expected format by adding an explicit 'pattern' property to the schema.
