@@ -16,7 +16,7 @@
 | Tool Version | teds 0.1.dev13+g9e84ef6db.d20250920
 | Specification Support | 1.0-1.0
 | Recommended Version | 1.0
-| Generated | 2025-09-22T13:02:53.732385+02:00
+| Generated | 2025-09-22T13:44:59.992006+02:00
 | Report File | demo/sample_tests.yaml
 |===
 
@@ -96,8 +96,19 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 [.lead]
-This report analyzes *7* schema(s) with a total of *10* test cases.
+This report analyzes *10* schema(s) with a total of *50* test cases.
 
 === Results Summary
 
@@ -105,6 +116,8 @@ This report analyzes *7* schema(s) with a total of *10* test cases.
 |===
 | Status | Count | Description
 
+
+| [green]#✓ SUCCESS# | 40 | Test cases passed as expected
 
 
 | [yellow]#⚠ WARNING# | 3 | Test cases with warnings (review recommended)
@@ -114,30 +127,9 @@ This report analyzes *7* schema(s) with a total of *10* test cases.
 
 
 
-| *Total* | *10* | All test cases processed
+| *Total* | *50* | All test cases processed
 |===
 
-
-=== Schema Coverage Warnings
-
-[WARNING]
-====
-The following schemas have incomplete test coverage:
-
-
-* <<sample_schemas_yaml__components_schemas_Product,sample_schemas.yaml#/components/schemas/Product has no valid test cases>>
-
-* <<sample_schemas_yaml__components_schemas_Contact,sample_schemas.yaml#/components/schemas/Contact has no invalid test cases>>
-
-* <<sample_schemas_yaml__components_schemas_OrderLine,sample_schemas.yaml#/components/schemas/OrderLine has no invalid test cases>>
-
-* <<sample_schemas_yaml__components_schemas_URI,sample_schemas.yaml#/components/schemas/URI has no valid test cases>>
-
-* <<sample_schemas_yaml__components_schemas_DateISO,sample_schemas.yaml#/components/schemas/DateISO has no valid test cases>>
-
-
-Consider adding both valid and invalid test cases for comprehensive schema validation.
-====
 
 
 
@@ -158,9 +150,9 @@ Consider adding both valid and invalid test cases for comprehensive schema valid
 
 [cols="1,1"]
 |===
-| Valid Cases | 1
+| Valid Cases | 3
 | Invalid Cases | 1
-| Total Cases | 2
+| Total Cases | 4
 |===
 
 
@@ -169,6 +161,15 @@ Consider adding both valid and invalid test cases for comprehensive schema valid
 [cols="3,2,1,4"]
 |===
 | Test Case | Payload | Status | Details
+
+
+| `.components.schemas.Email.examples[0]`
+| `alice@example.com`
+
+| [green]#✓ SUCCESS#
+
+|
+SUCCESS
 
 
 | `.components.schemas.Email.examples[1]`
@@ -181,6 +182,15 @@ Consider adding both valid and invalid test cases for comprehensive schema valid
 WARNING: Relies on JSON Schema 'format' assertion (format: email).
 Validators that *enforce* 'format'...
 
+
+
+| `good email`
+| `alice@example.com`
+
+| [green]#✓ SUCCESS#
+
+|
+SUCCESS
 
 
 |===
@@ -222,9 +232,9 @@ A validator that *ignores* 'format' accepted this instance, while a strict...
 
 [cols="1,1"]
 |===
-| Valid Cases | 1
-| Invalid Cases | 1
-| Total Cases | 2
+| Valid Cases | 4
+| Invalid Cases | 4
+| Total Cases | 8
 |===
 
 
@@ -235,6 +245,15 @@ A validator that *ignores* 'format' accepted this instance, while a strict...
 | Test Case | Payload | Status | Details
 
 
+| `.components.schemas.User.examples[0]`
+| `{'id': '3fa85f64-5717-4562-b3fc-2c963f66afa6',...`
+
+| [green]#✓ SUCCESS#
+
+|
+SUCCESS
+
+
 | `.components.schemas.User.examples[1]`
 | `{'id': 'not-a-uuid', 'name': 'bob', 'email': 'x'}`
 
@@ -242,6 +261,24 @@ A validator that *ignores* 'format' accepted this instance, while a strict...
 
 |
 'not-a-uuid' is not a 'uuid'
+
+
+| `minimal valid user`
+| `{'id': '3fa85f64-5717-4562-b3fc-2c963f66afa6',...`
+
+| [green]#✓ SUCCESS#
+
+|
+SUCCESS
+
+
+| `parse as JSON string`
+| `{"id":"3fa85f64-5717-4562-b3fc-2c963f66afa6","n...`
+
+| [green]#✓ SUCCESS#
+
+|
+SUCCESS
 
 
 |===
@@ -255,14 +292,275 @@ A validator that *ignores* 'format' accepted this instance, while a strict...
 | Test Case | Payload | Status | Details
 
 
+| `missing required prop`
+| `{'id': '3fa85f64-5717-4562-b3fc-2c963f66afa6',...`
+
+| [green]#✓ SUCCESS#
+
+|
+'email' is a required property
+
+
+| `additional property`
+| `{'id': '3fa85f64-5717-4562-b3fc-2c963f66afa6',...`
+
+| [green]#✓ SUCCESS#
+
+|
+Additional properties are not allowed ('extra' was unexpected)
+
+
 | `bad uuid`
-| `{'id': 'not-a-uuid', 'name': 'Alice Example', 'email': 'alice@example.com'}`
+| `{'id': 'not-a-uuid', 'name': 'Alice Example',...`
 
 | [red]#✗ ERROR#
 
 |
 UNEXPECTEDLY VALID
 A validator that *ignores* 'format' accepted this instance, while a strict...
+
+
+| `bad name pattern`
+| `{'id': '3fa85f64-5717-4562-b3fc-2c963f66afa6',...`
+
+| [green]#✓ SUCCESS#
+
+|
+'alice example' does not match '^[A-Z][a-zA-Z]+(?: [A-Z][a-zA-Z]+)*$'
+
+
+|===
+
+
+
+
+
+
+[[sample_schemas_yaml__components_schemas_Identifier]]
+=== sample_schemas.yaml#/components/schemas/Identifier
+
+
+
+
+
+==== Schema Summary
+
+[cols="1,1"]
+|===
+| Valid Cases | 4
+| Invalid Cases | 2
+| Total Cases | 6
+|===
+
+
+==== Valid Test Cases
+
+[cols="3,2,1,4"]
+|===
+| Test Case | Payload | Status | Details
+
+
+| `.components.schemas.Identifier.examples[0]`
+| `AB-123`
+
+| [green]#✓ SUCCESS#
+
+|
+SUCCESS
+
+
+| `.components.schemas.Identifier.examples[1]`
+| `99`
+
+| [green]#✓ SUCCESS#
+
+|
+SUCCESS
+
+
+| `AB-777`
+| ``
+
+| [green]#✓ SUCCESS#
+
+|
+SUCCESS
+
+
+| `forty-two`
+| `42`
+
+| [green]#✓ SUCCESS#
+
+|
+SUCCESS
+
+
+|===
+
+
+
+==== Invalid Test Cases
+
+[cols="3,2,1,4"]
+|===
+| Test Case | Payload | Status | Details
+
+
+| `zero not allowed`
+| `0`
+
+| [green]#✓ SUCCESS#
+
+|
+0 is not valid under any of the given schemas
+
+
+| `wrong string pattern`
+| `A-1`
+
+| [green]#✓ SUCCESS#
+
+|
+'A-1' is not valid under any of the given schemas
+
+
+|===
+
+
+
+
+
+
+[[sample_schemas_yaml__components_schemas_Color]]
+=== sample_schemas.yaml#/components/schemas/Color
+
+
+
+
+
+==== Schema Summary
+
+[cols="1,1"]
+|===
+| Valid Cases | 2
+| Invalid Cases | 1
+| Total Cases | 3
+|===
+
+
+==== Valid Test Cases
+
+[cols="3,2,1,4"]
+|===
+| Test Case | Payload | Status | Details
+
+
+| `.components.schemas.Color.examples[0]`
+| `green`
+
+| [green]#✓ SUCCESS#
+
+|
+SUCCESS
+
+
+| `simple enum ok`
+| `red`
+
+| [green]#✓ SUCCESS#
+
+|
+SUCCESS
+
+
+|===
+
+
+
+==== Invalid Test Cases
+
+[cols="3,2,1,4"]
+|===
+| Test Case | Payload | Status | Details
+
+
+| `not in enum`
+| `yellow`
+
+| [green]#✓ SUCCESS#
+
+|
+'yellow' is not one of ['red', 'green', 'blue']
+
+
+|===
+
+
+
+
+
+
+[[sample_schemas_yaml__components_schemas_Regexy]]
+=== sample_schemas.yaml#/components/schemas/Regexy
+
+
+
+
+
+==== Schema Summary
+
+[cols="1,1"]
+|===
+| Valid Cases | 2
+| Invalid Cases | 1
+| Total Cases | 3
+|===
+
+
+==== Valid Test Cases
+
+[cols="3,2,1,4"]
+|===
+| Test Case | Payload | Status | Details
+
+
+| `.components.schemas.Regexy.examples[0]`
+| `abc12`
+
+| [green]#✓ SUCCESS#
+
+|
+SUCCESS
+
+
+| `regex ok`
+| `abc12`
+
+| [green]#✓ SUCCESS#
+
+|
+SUCCESS
+
+
+|===
+
+
+
+==== Invalid Test Cases
+
+[cols="3,2,1,4"]
+|===
+| Test Case | Payload | Status | Details
+
+
+| `uppercase not allowed`
+| `AB123`
+
+| [green]#✓ SUCCESS#
+
+|
+'AB123' does not match '^[a-z]{3}\\d{2}$'
 
 
 |===
@@ -283,11 +581,47 @@ A validator that *ignores* 'format' accepted this instance, while a strict...
 
 [cols="1,1"]
 |===
-| Valid Cases | 0
-| Invalid Cases | 1
-| Total Cases | 1
+| Valid Cases | 3
+| Invalid Cases | 2
+| Total Cases | 5
 |===
 
+
+==== Valid Test Cases
+
+[cols="3,2,1,4"]
+|===
+| Test Case | Payload | Status | Details
+
+
+| `.components.schemas.Product.examples[0]`
+| `{'sku': 'SKU1234', 'price': 12.5, 'tags':...`
+
+| [green]#✓ SUCCESS#
+
+|
+SUCCESS
+
+
+| `full product`
+| `{'sku': 'SKU1234', 'price': 12.5, 'tags':...`
+
+| [green]#✓ SUCCESS#
+
+|
+SUCCESS
+
+
+| `json string`
+| `{"sku":"SKU9999","price":0,"tags":[{"key":"env"...`
+
+| [green]#✓ SUCCESS#
+
+|
+SUCCESS
+
+
+|===
 
 
 
@@ -298,8 +632,17 @@ A validator that *ignores* 'format' accepted this instance, while a strict...
 | Test Case | Payload | Status | Details
 
 
+| `negative price`
+| `{'sku': 'SKU1234', 'price': -1}`
+
+| [green]#✓ SUCCESS#
+
+|
+-1 is less than the minimum of 0
+
+
 | `duplicate tags`
-| `{'sku': 'SKU1234', 'price': 10, 'tags': [{'key': 'env', 'value': 'prod'}, {'key': 'env', 'value': 'prod'}]}`
+| `{'sku': 'SKU1234', 'price': 10, 'tags':...`
 
 | [yellow]#⚠ WARNING#
 
@@ -327,9 +670,9 @@ WARNING:
 
 [cols="1,1"]
 |===
-| Valid Cases | 2
-| Invalid Cases | 0
-| Total Cases | 2
+| Valid Cases | 5
+| Invalid Cases | 1
+| Total Cases | 6
 |===
 
 
@@ -340,8 +683,26 @@ WARNING:
 | Test Case | Payload | Status | Details
 
 
+| `.components.schemas.Contact.examples[0]`
+| `{'email': 'someone@example.com'}`
+
+| [green]#✓ SUCCESS#
+
+|
+SUCCESS
+
+
+| `.components.schemas.Contact.examples[1]`
+| `{'phone': '+49 621 1234567'}`
+
+| [green]#✓ SUCCESS#
+
+|
+SUCCESS
+
+
 | `.components.schemas.Contact.examples[2]`
-| `{'email': 'someone@example.com', 'phone': '+49 621 1234567'}`
+| `{'email': 'someone@example.com', 'phone': '+49...`
 
 | [red]#✗ ERROR#
 
@@ -360,9 +721,36 @@ WARNING:
 
 
 
+| `parse json string`
+| `{"phone":"+4369912345678"}`
+
+| [green]#✓ SUCCESS#
+
+|
+SUCCESS
+
+
 |===
 
 
+
+==== Invalid Test Cases
+
+[cols="3,2,1,4"]
+|===
+| Test Case | Payload | Status | Details
+
+
+| `mixed variants`
+| `{'email': 'someone@example.com', 'phone': '+49...`
+
+| [green]#✓ SUCCESS#
+
+|
+{'email': 'someone@example.com', 'phone': '+49 621 1234567'} is not valid under any of the given schemas
+
+
+|===
 
 
 
@@ -380,9 +768,9 @@ WARNING:
 
 [cols="1,1"]
 |===
-| Valid Cases | 1
-| Invalid Cases | 0
-| Total Cases | 1
+| Valid Cases | 6
+| Invalid Cases | 3
+| Total Cases | 9
 |===
 
 
@@ -393,8 +781,26 @@ WARNING:
 | Test Case | Payload | Status | Details
 
 
+| `.components.schemas.OrderLine.examples[0]`
+| `{'sku': 'SKU1234', 'unitPrice': 19.99, 'quantity': 2}`
+
+| [green]#✓ SUCCESS#
+
+|
+SUCCESS
+
+
+| `.components.schemas.OrderLine.examples[1]`
+| `{'bundleId': 'B-42', 'items': [{'sku': 'SKU9',...`
+
+| [green]#✓ SUCCESS#
+
+|
+SUCCESS
+
+
 | `.components.schemas.OrderLine.examples[2]`
-| `{'sku': 'SKU1', 'unitPrice': 10, 'quantity': 1, 'items': [{'sku': 'SKU2', 'quantity': 1}]}`
+| `{'sku': 'SKU1', 'unitPrice': 10, 'quantity':...`
 
 | [red]#✗ ERROR#
 
@@ -402,9 +808,72 @@ WARNING:
 {'sku': 'SKU1', 'unitPrice': 10, 'quantity': 1, 'items': [{'sku': 'SKU2', 'quantity': 1}]} is...
 
 
+| `priced ok`
+| `{'sku': 'SKU1234', 'unitPrice': 19.99, 'quantity': 2}`
+
+| [green]#✓ SUCCESS#
+
+|
+SUCCESS
+
+
+| `bundled ok`
+| `{'bundleId': 'B-42', 'items': [{'sku': 'SKU9',...`
+
+| [green]#✓ SUCCESS#
+
+|
+SUCCESS
+
+
+| `priced via json string`
+| `{"sku":"SKU7777","unitPrice":0,"quantity":1}`
+
+| [green]#✓ SUCCESS#
+
+|
+SUCCESS
+
+
 |===
 
 
+
+==== Invalid Test Cases
+
+[cols="3,2,1,4"]
+|===
+| Test Case | Payload | Status | Details
+
+
+| `mixed properties`
+| `{'sku': 'SKU1', 'unitPrice': 10, 'quantity':...`
+
+| [green]#✓ SUCCESS#
+
+|
+{'sku': 'SKU1', 'unitPrice': 10, 'quantity': 1, 'items': [{'sku': 'SKU2', 'quantity': 1}]} is...
+
+
+| `missing required priced`
+| `{'sku': 'SKU9999'}`
+
+| [green]#✓ SUCCESS#
+
+|
+{'sku': 'SKU9999'} is not valid under any of the given schemas
+
+
+| `wrong types`
+| `{'sku': 'SKU1234', 'unitPrice': 10, 'quantity': 0}`
+
+| [green]#✓ SUCCESS#
+
+|
+{'sku': 'SKU1234', 'unitPrice': 10, 'quantity': 0} is not valid under any of the given schemas
+
+
+|===
 
 
 
@@ -422,11 +891,38 @@ WARNING:
 
 [cols="1,1"]
 |===
-| Valid Cases | 0
+| Valid Cases | 2
 | Invalid Cases | 1
-| Total Cases | 1
+| Total Cases | 3
 |===
 
+
+==== Valid Test Cases
+
+[cols="3,2,1,4"]
+|===
+| Test Case | Payload | Status | Details
+
+
+| `.components.schemas.URI.examples[0]`
+| `https://example.com`
+
+| [green]#✓ SUCCESS#
+
+|
+SUCCESS
+
+
+| `good uri`
+| `https://example.com`
+
+| [green]#✓ SUCCESS#
+
+|
+SUCCESS
+
+
+|===
 
 
 
@@ -465,11 +961,38 @@ A validator that *ignores* 'format' accepted this instance, while a strict...
 
 [cols="1,1"]
 |===
-| Valid Cases | 0
+| Valid Cases | 2
 | Invalid Cases | 1
-| Total Cases | 1
+| Total Cases | 3
 |===
 
+
+==== Valid Test Cases
+
+[cols="3,2,1,4"]
+|===
+| Test Case | Payload | Status | Details
+
+
+| `.components.schemas.DateISO.examples[0]`
+| `2025-08-31`
+
+| [green]#✓ SUCCESS#
+
+|
+SUCCESS
+
+
+| `good date`
+| `2025-08-31`
+
+| [green]#✓ SUCCESS#
+
+|
+SUCCESS
+
+
+|===
 
 
 
@@ -507,7 +1030,7 @@ A validator that *ignores* 'format' accepted this instance, while a strict...
 | TeDS Version | 0.1.dev13+g9e84ef6db.d20250920
 | Supported Spec Range | 1.0-1.0
 | Recommended Spec Version | 1.0
-| Report Generation Time | 2025-09-22T13:02:53.732385+02:00
+| Report Generation Time | 2025-09-22T13:44:59.992006+02:00
 |===
 
 === Report Scope
