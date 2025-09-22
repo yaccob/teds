@@ -121,7 +121,7 @@ No test cases found in the specification. Consider adding test cases to validate
 
 [cols="3,2,1,4"]
 |===
-| Test Case | Payload | Status | Details
+| Test Case | Payload | Status | Message
 
 {% for case_name, case_data in valid_cases.items() %}
 | `{{ case_name }}`
@@ -138,15 +138,7 @@ a| [source,yaml]
 {% else %}
 | [gray]#○ UNKNOWN#
 {% endif %}
-| {% if case_data.warnings %}
-{% for warning in case_data.warnings %}
-WARNING: {{ warning.generated | truncate(100) }}
-{% endfor %}
-{% elif case_data.message %}
-{{ case_data.message | truncate(100) }}
-{% else %}
-{{ case_data.result }}
-{% endif %}
+| {% if case_data.message %}{{ case_data.message }}{% endif %}
 {% endfor %}
 |===
 {% endif %}
@@ -156,7 +148,7 @@ WARNING: {{ warning.generated | truncate(100) }}
 
 [cols="3,2,1,4"]
 |===
-| Test Case | Payload | Status | Details
+| Test Case | Payload | Status | Message
 
 {% for case_name, case_data in invalid_cases.items() %}
 | `{{ case_name }}`
@@ -173,15 +165,7 @@ a| [source,yaml]
 {% else %}
 | [gray]#○ UNKNOWN#
 {% endif %}
-| {% if case_data.warnings %}
-{% for warning in case_data.warnings %}
-WARNING: {{ warning.generated | truncate(100) }}
-{% endfor %}
-{% elif case_data.message %}
-{{ case_data.message | truncate(100) }}
-{% else %}
-{{ case_data.result }}
-{% endif %}
+| {% if case_data.message %}{{ case_data.message }}{% endif %}
 {% endfor %}
 |===
 {% endif %}
