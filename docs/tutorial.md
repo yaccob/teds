@@ -119,6 +119,37 @@ Run the test again - the warning should disappear.
 
 ## Chapter 2: Generating Tests from Existing Schemas
 
+### Key-as-Payload: Quick Testing without Payload Field
+
+TeDS offers a powerful shortcut: when the `payload` field is missing, the test case **key** is automatically parsed as YAML/JSON and used as the payload:
+
+```yaml
+version: "1.0.0"
+tests:
+  user_age.yaml#/:
+    valid:
+      "25": {description: "Valid adult age"}
+      "0": {description: "Minimum age"}
+      "150": {description: "Maximum realistic age"}
+    invalid:
+      "-1": {}          # Negative age (no description needed)
+      "151": {}         # Too old
+      '"not-a-number"': {}  # String instead of number
+      "null": {}        # Null value
+      "25.5": {}        # Float instead of integer
+```
+
+**Key advantages:**
+- **Compact**: Perfect for testing primitive values
+- **Quick**: No need to write `payload:` for simple cases
+- **Clear**: Test key shows exactly what's being tested
+
+**Parsing rules:**
+- `"42"` → number 42
+- `"null"` → null value
+- `'"hello"'` → string "hello" (note the nested quotes)
+- `'{"name": "test"}'` → object with name property
+
 ### Working with the Demo Schema
 
 Explore the demo schema:
@@ -407,6 +438,20 @@ tests:
 
 ## Chapter 5: Report Generation and CI Integration
 
+### Available Report Templates
+
+```bash
+# List all available templates
+teds verify tests.yaml --list-templates
+
+# Available built-in templates:
+# - default.html: Full HTML with syntax highlighting
+# - default.md: Markdown with emoji indicators
+# - default.adoc: AsciiDoc with color coding
+# - summary.html: Compact HTML overview
+# - summary.md: Brief Markdown summary
+```
+
 ### Generate Professional Reports
 
 ```bash
@@ -418,6 +463,17 @@ teds verify sample_tests.yaml --report default.md
 
 # Generate AsciiDoc report
 teds verify sample_tests.yaml --report default.adoc
+
+# Generate compact summary
+teds verify sample_tests.yaml --report summary.md
+```
+
+### Custom Output Paths
+
+```bash
+# Specify custom output filenames
+teds verify tests.yaml --report default.html=my_report.html
+teds verify tests.yaml --report summary.md=project_summary.md
 ```
 
 ### Understanding Report Content
@@ -427,6 +483,19 @@ Reports include:
 - **Schema Coverage Warnings**: Schemas missing valid or invalid tests
 - **Detailed Results**: Complete breakdown by schema with YAML payloads
 - **Color-coded Status**: Visual distinction between SUCCESS, WARNING, ERROR
+
+### Output Level Filtering
+
+```bash
+# Show only errors (CI-friendly)
+teds verify tests.yaml --output-level error
+
+# Show warnings and errors (default)
+teds verify tests.yaml --output-level warning
+
+# Show everything including successes
+teds verify tests.yaml --output-level all
+```
 
 ### CI Integration
 
@@ -478,21 +547,119 @@ teds verify spec.yaml --allow-network
 TEDS_NETWORK_TIMEOUT=10 teds verify spec.yaml --allow-network
 ```
 
-### Payload Parsing
+### Parse Payload: String-to-Object Conversion
 
-For complex payloads, use JSON strings:
+Use `parse_payload: true` to parse string payloads as YAML/JSON before validation:
 
 ```yaml
 tests:
   schema.yaml#/User:
     valid:
-      complex_user:
+      complex_from_string:
         description: "User from JSON string"
         parse_payload: true
         payload: '{"id":"123","name":"Alice","email":"alice@example.com"}'
+
+      api_response_format:
+        description: "Testing JSON strings within YAML (common in API responses)"
+        parse_payload: true
+        payload: '{"user": {"profile": {"name": "Bob", "settings": {"theme": "dark"}}}}'
 ```
 
-## Chapter 7: Best Practices and Common Patterns
+**When to use:**
+- Complex objects as JSON strings (e.g., from API responses)
+- Testing JSON strings that come from external systems
+- When you need to test string-encoded JSON data
+
+**Important**: When `parse_payload: true`, the payload must be a string that contains valid YAML/JSON.
+
+### Template Variables for Custom Output Paths
+
+Control where generated test files are created using template variables:
+
+```bash
+# Available template variables
+teds generate schema.yaml --target-template "{base}.{pointer}.custom.yaml"
+
+# Variables:
+# {file}     - schema.yaml
+# {base}     - schema
+# {ext}      - yaml
+# {dir}      - directory path
+# {pointer}  - components+schemas (sanitized)
+# {index}    - 1, 2, 3... (for multiple targets)
+```
+
+### Configuration Files for Complex Generation
+
+Use YAML configuration files for complex generation scenarios:
+
+```yaml
+# generation-config.yaml
+api_spec.yaml:
+  paths: ["/components/schemas", "/components/responses"]
+  target: "api_validation.tests.yaml"
+
+legacy_schema.yaml: ["/definitions"]
+```
+
+```bash
+teds generate @generation-config.yaml
+```
+
+### Warning System
+
+Tests can include user warnings and TeDS generates system warnings:
+
+```yaml
+tests:
+  schema.yaml#/Email:
+    valid:
+      deprecated_format:
+        payload: "user@company.co.uk"
+        warnings: ["This email format will be deprecated in v2.0"]
+```
+
+**System warnings** appear automatically for format divergence issues (when different validators disagree about `format` constraints).
+
+## Chapter 7: Environment Configuration and Exit Codes
+
+### Environment Variables
+
+Configure TeDS behavior via environment variables:
+
+```bash
+# Network settings
+export TEDS_NETWORK_TIMEOUT=10        # seconds (default: 5)
+export TEDS_NETWORK_MAX_BYTES=10485760 # bytes (default: 5MB)
+
+# Use in commands
+teds verify remote_specs.yaml --allow-network
+```
+
+### Exit Codes for CI Integration
+
+TeDS uses semantic exit codes for automation:
+
+- **0**: All tests passed
+- **1**: Some tests failed (ERROR results)
+- **2**: Hard failures (file not found, invalid YAML, etc.)
+
+```bash
+# CI script example
+if teds verify tests/*.yaml --output-level error; then
+  echo "✅ All schema contracts validated"
+else
+  exit_code=$?
+  case $exit_code in
+    1) echo "❌ Schema validation failures found" ;;
+    2) echo "🚨 Configuration or file errors" ;;
+  esac
+  exit $exit_code
+fi
+```
+
+## Chapter 8: Best Practices and Common Patterns
 
 ### Test Organization
 
@@ -568,7 +735,7 @@ properties:
 # For minLength: 3, test "", "ab", "abc", "abcd"
 ```
 
-## Chapter 8: Roundtrip Workflow - Edit and Reuse Verification Output
+## Chapter 9: Roundtrip Workflow - Edit and Reuse Verification Output
 
 One of TeDS's powerful features is **roundtrip capability**: verification output can be edited and reused as input, especially when combined with the `--in-place` flag.
 
@@ -640,6 +807,5 @@ TeDS helps you catch schema issues early and maintain high-quality API contracts
 ## Next Steps
 
 - Explore example directories for more patterns
-- Read the [Schema Testing Patterns](schema-patterns.md) guide
 - Set up TeDS in your CI pipeline
 - Contribute test cases for edge cases you discover
