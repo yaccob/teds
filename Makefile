@@ -1,4 +1,4 @@
-.PHONY: help test test-unit test-cli test-schema test-full coverage dev-install test-package package clean check-clean release-patch release-minor release-major check-branch pr-ready create-pr pr-status merge-pr
+.PHONY: help test test-unit test-cli test-schema test-full coverage dev-install test-package package clean check-clean release-patch release-minor release-major check-branch pr-ready create-pr pr-status merge-pr docs docs-html docs-clean
 .DEFAULT_GOAL := help
 
 help: ## Show this help message
@@ -137,3 +137,20 @@ pr-status: ## Check current PR status
 merge-pr: ## Merge PR after all checks pass (auto-merge with squash)
 	@echo "🔄 Auto-merging PR with squash..."
 	gh pr merge --auto --squash
+
+# Documentation
+docs-html: ## Generate HTML documentation with fixed TOC from AsciiDoc
+	@echo "📖 Generating HTML documentation..."
+	@asciidoctor docs/tutorial.adoc -o docs/tutorial-with-fixed-toc.html
+	@echo "🎨 Embedding custom CSS for fixed TOC..."
+	@sed -i.bak '/<style>/r docs/tutorial-style.css' docs/tutorial-with-fixed-toc.html
+	@rm -f docs/tutorial-with-fixed-toc.html.bak
+	@echo "✅ Generated: docs/tutorial-with-fixed-toc.html"
+	@echo "   Features: Fixed left sidebar TOC, modern styling, responsive design"
+
+docs-clean: ## Clean generated documentation files
+	@echo "🧹 Cleaning generated documentation..."
+	@rm -f docs/tutorial-with-fixed-toc.html
+	@echo "✅ Cleaned generated documentation files"
+
+docs: docs-html ## Generate all documentation (default: HTML with fixed TOC)
