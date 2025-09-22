@@ -276,3 +276,36 @@ def check_generated_file_validatable(temp_workspace, command_result):
     rc, out, err = run_cli(["verify", test_file.name], cwd=temp_workspace)
 
     assert rc in [0, 1], f"Generated file validation failed with exit code {rc}: {err}"
+
+
+@then(parsers.parse("the output should exactly match:"))
+def check_output_exactly_matches(command_result, docstring):
+    """Check that output exactly matches expected YAML structure (semantic comparison)."""
+    from io import StringIO
+
+    from ruamel.yaml import YAML
+
+    actual_output = command_result["stdout"]
+    expected_yaml = docstring.strip()
+
+    # Parse both YAML strings to Python objects for semantic comparison
+    yaml = YAML(typ="safe")
+
+    try:
+        actual_data = yaml.load(StringIO(actual_output))
+    except Exception as e:
+        raise AssertionError(
+            f"Failed to parse actual output as YAML: {e}\nOutput was: {actual_output}"
+        ) from e
+
+    try:
+        expected_data = yaml.load(StringIO(expected_yaml))
+    except Exception as e:
+        raise AssertionError(
+            f"Failed to parse expected YAML: {e}\nExpected was: {expected_yaml}"
+        ) from e
+
+    # Semantic comparison - ignores formatting, indentation, quoting style
+    assert (
+        actual_data == expected_data
+    ), f"YAML content mismatch:\nActual: {actual_data}\nExpected: {expected_data}"
