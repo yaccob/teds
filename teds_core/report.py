@@ -46,8 +46,19 @@ def _compute_counts(doc: dict[str, Any]) -> dict[str, int]:
 def _render_jinja_str(
     template_key: str, template_text: str, context: dict[str, Any]
 ) -> str:
-    import yaml
+    import io
+
     from jinja2 import DictLoader, Environment, select_autoescape
+
+    from .yamlio import yaml_dumper
+
+    def strip_document_end_marker(s):
+        """Remove YAML document end markers for cleaner template output."""
+        if s.endswith("...\n"):
+            return s[:-4]
+        elif s.endswith("..."):
+            return s[:-3]
+        return s
 
     def to_yaml(data):
         """Convert data to YAML format with nice formatting."""
@@ -56,9 +67,11 @@ def _render_jinja_str(
         # Check for Jinja2 Undefined objects
         if hasattr(data, "_undefined_name"):
             return "undefined"
-        return yaml.dump(
-            data, default_flow_style=False, indent=2, allow_unicode=True
-        ).rstrip()
+
+        # Use the project's configured YAML dumper with transform to remove document end markers
+        output = io.StringIO()
+        yaml_dumper.dump(data, output, transform=strip_document_end_marker)
+        return output.getvalue().rstrip()
 
     autoescape = select_autoescape(enabled_extensions=("html", "htm"))
     env = Environment(
