@@ -1,164 +1,645 @@
-# TeDS CLI Tutorial — Step‑by‑Step
+# TeDS Tutorial — Test-Driven Schema Development
 
-This hands‑on tutorial guides you through TeDS (Test‑Driven Schema Development). You will:
+Learn TeDS through hands-on examples. This tutorial builds from basic verification to advanced schema testing patterns using real examples from the project.
 
-- Install and run the CLI
-- Verify schema behavior using testspecs
-- Generate tests from schema references
-- Tighten schemas based on failing cases and warnings
-- Use in‑place updates and control output for CI
+## Prerequisites
 
-Prerequisites:
 - Python 3.10+
-- A terminal (any shell works)
-- Optional: virtualenv
+- Basic understanding of JSON Schema
+- Familiarity with YAML
 
-If you are following along inside this repository, the `demo/` directory contains sample schemas and testspecs used below.
+## Setup
 
-## 1) Setup
+### Standard Installation (Recommended)
 
-- Create a virtual environment (per your OS/shell, see Python’s venv docs) and install dependencies:
-  - `python3 -m venv .venv && . .venv/bin/activate` (POSIX example)
-  - `pip install -r requirements.txt`
-- Verify the CLI is available:
-  - `teds --version`
+```bash
+# Install from PyPI
+pip install teds
 
-Expected output example:
-```
-teds X.Y.Z (testspec major: N)
+# Verify installation
+teds --version
 ```
 
-## 2) Start here: two ways to begin
+Expected output: `teds X.Y.Z (spec supported: 1.0-1.0; recommended: 1.0)`
 
-Pick the path that matches your situation:
+### Development Installation (Alternative)
 
-- No schema yet (greenfield): start test‑driven
-  - Write a small testspec that captures intent (valid/invalid examples) for a schema you’re about to design.
-  - Create a minimal schema stub (e.g., type/object with a field) or evolve an empty file.
-  - Run verification; iterate on the schema until the expectations pass.
+```bash
+# Clone and setup for development
+git clone <repository>
+cd <project-directory>
+python3 -m venv .venv && . .venv/bin/activate
+pip install -r requirements.txt
 
-- Existing schema (brownfield): seed tests from the schema and extend
-  - Use `teds generate` to scaffold tests from `examples` under the relevant JSON Pointer(s).
-  - Extend with explicit edge cases (invalid values, boundaries, enums).
-  - Run verification; refine schema where expectations fail or warnings suggest tightening.
+# Verify installation
+./teds.py --version
+```
 
-Both flows converge: you maintain a testspec next to your schema, use `teds verify` in CI, and evolve schemas safely.
+## Chapter 1: Your First Test Specification
 
-## 3) Verify schema behavior with a testspec
+### Understanding the Problem
 
-The verifier uses your testspec to check that the schema accepts what it should and rejects what it must. It resolves referenced schemas, runs validations, and prints normalized results. Try it with the demo spec:
+Consider this simple schema for a user email:
 
-- `teds verify demo/sample_tests.yaml`
+```yaml
+# user_email.yaml
+type: string
+format: email
+```
 
-Notes:
-- Exit codes: 0 (success), 1 (any case has result ERROR), 2 (hard failure: I/O/YAML/spec invalid/schema resolution/version gate).
-- Control verbosity with `--output-level all|warning|error`.
+How do you know it actually validates emails correctly? Let's test it.
 
-Filter to only errors:
-- `teds verify demo/sample_tests.yaml --output-level error`
+### Create Your First Testspec
 
-Write results back into the same file (in‑place writes only the `tests` section, preserving top‑level metadata like `version`):
-- `teds verify demo/sample_tests.yaml -i`
+Create `user_email.tests.yaml`:
 
-## 4) Generate tests from schemas
+```yaml
+version: "1.0.0"
+tests:
+  user_email.yaml#/:
+    valid:
+      simple_email:
+        description: "Basic valid email"
+        payload: "alice@example.com"
+      email_with_subdomain:
+        description: "Email with subdomain"
+        payload: "bob@mail.company.com"
+    invalid:
+      missing_at:
+        description: "Email without @ symbol"
+        payload: "alice.example.com"
+      missing_domain:
+        description: "Email without domain"
+        payload: "alice@"
+```
 
-TeDS can scaffold tests from the examples in your schemas. Point it at a JSON Pointer under a schema file. Each direct child becomes a test group.
+### Run Your First Verification
 
-Basics:
-- `teds generate path/to/schema.yaml` → uses root pointer `#/` and writes `{base}.tests.yaml` next to the schema.
-- `teds generate path/to/schema.yaml#/components/schemas` → writes `{base}.components+schemas.tests.yaml`.
+```bash
+teds verify user_email.tests.yaml
+```
 
-Try it with the demo:
-- `teds generate demo/sample_schemas.yaml` → writes `demo/sample_schemas.tests.yaml`
+*Note: Use `./teds.py` instead of `teds` if you're using the development installation.*
 
-Target control (literal path or template):
-- Directory target (default filename appended):
-  - `teds generate demo/sample_schemas.yaml#/=specs/`
-- Template with sanitized pointer:
-  - `teds generate demo/sample_schemas.yaml#/components/schemas=specs/{base}.{pointer}.tests.yaml`
+You'll see output like:
+```
+version: 1.0.0
+tests:
+  user_email.yaml#/:
+    valid:
+      simple_email:
+        payload: alice@example.com
+        result: SUCCESS
+      email_with_subdomain:
+        payload: bob@mail.company.com
+        result: SUCCESS
+    invalid:
+      missing_at:
+        payload: alice.example.com
+        result: WARNING
+        message: |
+          UNEXPECTEDLY VALID
+          A validator that *ignores* 'format' accepted this instance...
+```
 
-Tips:
-- If your file has a single root of interest, prefer a short literal target (e.g., `{base}.test.yaml`) to avoid long filenames with `{pointer}`.
+### Understanding the Warning
 
-## 5) Extend tests with explicit cases
+The `WARNING` tells us that `format: email` isn't enforced by all validators. Some accept `alice.example.com` as valid, others reject it. This is a real-world issue!
 
-Open the generated testspec and add focused cases under each schema ref. Example snippet:
+**Fix it by tightening the schema:**
+
+```yaml
+# user_email.yaml (improved)
+type: string
+format: email
+pattern: '^[^@]+@[^@]+\.[^@]+$'  # Basic email pattern
+```
+
+Run the test again - the warning should disappear.
+
+## Chapter 2: Generating Tests from Existing Schemas
+
+### Working with the Demo Schema
+
+Explore the demo schema:
+
+```bash
+cat demo/sample_schemas.yaml
+```
+
+This contains multiple schema definitions with examples. Let's generate tests from them.
+
+### Generate Tests from Schema Examples
+
+The `generate` command creates test cases from schema definitions using two different addressing methods:
+
+#### JSON Pointer (Default Method)
+
+**JSON Pointer** uses the `#/path/to/element` format and points to a specific location in the document. **TeDS generates tests for the schemas found directly under the specified path**.
+
+```bash
+# Generate tests for schemas directly under components/schemas
+# This will find and process schema definitions at this level
+teds generate sample_schemas.yaml#/components/schemas
+
+# Generate tests for properties directly under User schema
+# This processes the properties defined at this level
+teds generate sample_schemas.yaml#/components/schemas/User/properties
+
+# Generate tests for a single specific schema
+# This processes only the Email schema itself
+teds generate sample_schemas.yaml#/components/schemas/Email
+```
+
+**How JSON Pointer works:**
+- Points to exactly one location in the document
+- TeDS processes schemas found directly at that location
+- No wildcards needed - the tool looks at the direct children of the specified path
+
+#### JSON Path (Alternative Method)
+
+**JSON Path** uses CSS-like selector syntax and requires **explicit wildcards** to select multiple elements:
+
+```bash
+# Select ALL schemas under components/schemas (equivalent to JSON Pointer above)
+teds generate sample_schemas.yaml --json-path '$.components.schemas.*'
+
+# Select specific schemas by name pattern
+teds generate sample_schemas.yaml --json-path '$.components.schemas[User,Email,Product]'
+
+# Select schemas at any level that match a pattern
+teds generate sample_schemas.yaml --json-path '$..schemas[?(@.type=="object")]'
+```
+
+**Key differences:**
+- **JSON Pointer**: `#/components/schemas` → finds schemas directly at this location
+- **JSON Path**: `$.components.schemas.*` → requires `*` wildcard to select multiple items
+
+#### Practical Examples
+
+```bash
+# GOOD: Generate from schema container - finds schemas directly under this path
+teds generate api_spec.yaml#/components/schemas
+
+# GOOD: Generate from specific properties - processes properties at this level
+teds generate api_spec.yaml#/components/schemas/User/properties
+
+# AVOID: Single schema without properties - limited test generation
+# teds generate api_spec.yaml#/components/schemas/User
+
+# Reading paths from file
+echo "api_spec.yaml#/components/schemas" > schema_refs.txt
+teds generate --from-file schema_refs.txt
+```
+
+This creates `api_spec.components+schemas.tests.yaml` with test cases derived from the `examples` in each schema found at the specified location.
+
+### Inspect Generated Tests
+
+```bash
+cat api_spec.components+schemas.tests.yaml
+```
+
+Notice:
+- Valid cases are created from schema `examples`
+- Test cases are marked with `from_examples: true`
+- No invalid cases are generated (you add these manually)
+
+### Extend with Manual Test Cases
+
+Edit the generated file to add negative cases:
+
+```yaml
+# Add to existing generated file
+tests:
+  api_spec.yaml#/components/schemas/Email:
+    valid:
+      # ... generated cases here ...
+    invalid:
+      not_an_email:
+        description: "String without email format"
+        payload: "not-an-email"
+      empty_string:
+        description: "Empty string"
+        payload: ""
+```
+
+## Chapter 3: Advanced Schema Testing Patterns
+
+### Testing Object Schemas with additionalProperties
+
+```yaml
+# schemas/user.yaml
+type: object
+additionalProperties: false
+required: [id, name, email]
+properties:
+  id:
+    type: string
+    format: uuid
+  name:
+    type: string
+    minLength: 1
+  email:
+    type: string
+    format: email
+```
+
+Test it thoroughly:
+
+```yaml
+# user.tests.yaml
+version: "1.0.0"
+tests:
+  schemas/user.yaml#/:
+    valid:
+      complete_user:
+        description: "User with all required fields"
+        payload:
+          id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          name: "Alice Example"
+          email: "alice@example.com"
+    invalid:
+      missing_email:
+        description: "Missing required email field"
+        payload:
+          id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          name: "Alice Example"
+      extra_field:
+        description: "Additional property not allowed"
+        payload:
+          id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          name: "Alice Example"
+          email: "alice@example.com"
+          age: 25  # This should be rejected
+      invalid_uuid:
+        description: "Invalid UUID format"
+        payload:
+          id: "not-a-uuid"
+          name: "Alice Example"
+          email: "alice@example.com"
+```
+
+### Testing Boundary Conditions
+
+For numeric constraints, test the boundaries:
+
+```yaml
+# schemas/age.yaml
+type: integer
+minimum: 0
+maximum: 150
+```
+
+```yaml
+# age.tests.yaml
+version: "1.0.0"
+tests:
+  schemas/age.yaml#/:
+    valid:
+      minimum_age:
+        description: "Minimum valid age"
+        payload: 0
+      maximum_age:
+        description: "Maximum valid age"
+        payload: 150
+      typical_age:
+        description: "Typical age"
+        payload: 25
+    invalid:
+      negative_age:
+        description: "Below minimum"
+        payload: -1
+      too_old:
+        description: "Above maximum"
+        payload: 151
+      not_integer:
+        description: "Not an integer"
+        payload: 25.5
+```
+
+### Testing Enums
+
+```yaml
+# schemas/status.yaml
+type: string
+enum: ["draft", "published", "archived"]
+```
+
+```yaml
+# status.tests.yaml
+version: "1.0.0"
+tests:
+  schemas/status.yaml#/:
+    valid:
+      draft_status:
+        payload: "draft"
+      published_status:
+        payload: "published"
+      archived_status:
+        payload: "archived"
+    invalid:
+      wrong_case:
+        description: "Wrong case should be rejected"
+        payload: "Draft"
+      unknown_status:
+        description: "Status not in enum"
+        payload: "deleted"
+      empty_string:
+        description: "Empty string not in enum"
+        payload: ""
+```
+
+## Chapter 4: Working with Complex Schemas
+
+### Testing oneOf Compositions
+
+```yaml
+# schemas/contact.yaml
+oneOf:
+  - type: object
+    required: [email]
+    properties:
+      email:
+        type: string
+        format: email
+  - type: object
+    required: [phone]
+    properties:
+      phone:
+        type: string
+        pattern: '^\+[1-9]\d{1,14}$'  # E.164 format
+```
+
+```yaml
+# contact.tests.yaml
+version: "1.0.0"
+tests:
+  schemas/contact.yaml#/:
+    valid:
+      email_contact:
+        description: "Contact with email only"
+        payload:
+          email: "alice@example.com"
+      phone_contact:
+        description: "Contact with phone only"
+        payload:
+          phone: "+1234567890"
+    invalid:
+      both_fields:
+        description: "Both email and phone (should fail oneOf)"
+        payload:
+          email: "alice@example.com"
+          phone: "+1234567890"
+      neither_field:
+        description: "Neither email nor phone"
+        payload:
+          name: "Alice"
+      invalid_email:
+        description: "Invalid email format"
+        payload:
+          email: "not-an-email"
+      invalid_phone:
+        description: "Invalid phone format"
+        payload:
+          phone: "123"  # Too short for E.164
+```
+
+## Chapter 5: Report Generation and CI Integration
+
+### Generate Professional Reports
+
+```bash
+# Generate HTML report
+teds verify sample_tests.yaml --report default.html
+
+# Generate Markdown report
+teds verify sample_tests.yaml --report default.md
+
+# Generate AsciiDoc report
+teds verify sample_tests.yaml --report default.adoc
+```
+
+### Understanding Report Content
+
+Reports include:
+- **Executive Summary**: High-level test results with counts
+- **Schema Coverage Warnings**: Schemas missing valid or invalid tests
+- **Detailed Results**: Complete breakdown by schema with YAML payloads
+- **Color-coded Status**: Visual distinction between SUCCESS, WARNING, ERROR
+
+### CI Integration
+
+```bash
+# CI-friendly: only show errors
+teds verify tests/**/*.yaml --output-level error
+
+# Exit code handling
+if teds verify tests/**/*.yaml --output-level error; then
+  echo "All schema tests passed!"
+else
+  case $? in
+    1) echo "Some tests failed - review ERROR cases" ;;
+    2) echo "Hard failure - check configuration/schemas" ;;
+  esac
+fi
+```
+
+### In-Place Updates
+
+Keep test files clean and normalized:
+
+```bash
+# Update test files with results
+teds verify my_tests.yaml --in-place
+
+# This updates only the 'tests' section, preserving version and comments
+```
+
+## Chapter 6: Advanced Features
+
+### Using Multiple Test Files
+
+```bash
+# Verify multiple specifications
+teds verify user.tests.yaml product.tests.yaml order.tests.yaml
+
+# Generate reports for multiple files
+teds verify tests/*.yaml --report default.html
+```
+
+### Network Access for Remote Schemas
+
+```bash
+# Enable network access for remote $ref resolution
+teds verify spec.yaml --allow-network
+
+# With custom timeouts
+TEDS_NETWORK_TIMEOUT=10 teds verify spec.yaml --allow-network
+```
+
+### Payload Parsing
+
+For complex payloads, use JSON strings:
 
 ```yaml
 tests:
-  demo/sample_schemas.yaml#/components/schemas/Email:
+  schema.yaml#/User:
     valid:
-      "simple":
-        payload: alice@example.com
-    invalid:
-      "missing at":
-        payload: alice.example.com
+      complex_user:
+        description: "User from JSON string"
+        parse_payload: true
+        payload: '{"id":"123","name":"Alice","email":"alice@example.com"}'
 ```
 
-Run verification:
-- `teds verify demo/sample_schemas.tests.yaml`
+## Chapter 7: Best Practices and Common Patterns
 
-Interpret results:
-- SUCCESS: schema accepted valid cases and rejected invalid ones.
-- WARNING: successful case with warnings attached (see below).
-- ERROR: expectation failed (e.g., invalid instance was accepted or valid instance was rejected).
+### Test Organization
 
-## 6) Understand and act on warnings
+```
+project/
+├── schemas/
+│   ├── user.yaml
+│   ├── product.yaml
+│   └── order.yaml
+├── tests/
+│   ├── user.tests.yaml
+│   ├── product.tests.yaml
+│   └── order.tests.yaml
+└── docs/
+    └── api-validation-report.html
+```
 
-TeDS flags fragile situations, especially around JSON Schema `format`.
+### Naming Conventions
 
-- Generated warning (code `format-divergence`): instance is valid per non‑strict validators, but strict validators that enforce `format` would reject it.
-- Recommendation: make acceptance deterministic by adding an explicit `pattern` in the schema to encode the intended format.
+- Use descriptive test case names: `valid_email_with_subdomain` vs `test1`
+- Include purpose in descriptions: `"Email without @ symbol should be rejected"`
+- Group related schemas in the same test file when logical
 
-Workflow:
-1. See WARNING with `code: format-divergence` in output
-2. Tighten schema (e.g., add `pattern` for `email`)
-3. Re‑run `teds verify` — the warning should disappear if the pattern matches your intent
+### Version Management
 
-Notes:
-- Warnings do not change the overall exit code to 2, but they elevate a case result to WARNING and are shown at `--output-level warning|all`.
+- Always specify `version: "1.0.0"` in testspecs
+- Keep testspecs in version control alongside schemas
+- Use `--in-place` updates to maintain clean, reviewable diffs
 
-## 7) Use in‑place and output control for CI
+### Schema Evolution
 
-- In‑place normalization keeps specs tidy and reviewable:
-  - `teds verify your.tests.yaml -i`
-- CI‑friendly filtering:
-  - `--output-level error` to show only blocking failures
-- Exit codes enable gating:
-  - 0 → pass, 1 → failing expectations, 2 → hard failure (treat as infrastructure error)
+When updating schemas:
 
-## 8) Network access (optional)
+1. **First** add new test cases that capture the intended behavior
+2. **Then** update the schema to satisfy the new tests
+3. **Finally** run all tests to ensure no regressions
 
-By default, only local `file://` refs are resolved.
+### Common Pitfalls
 
-- Enable HTTP/HTTPS `$ref`s if needed:
-  - `teds verify spec.yaml --allow-network`
-  - `teds generate schema.yaml#/path --allow-network`
-- Limits and overrides:
-  - Timeout and max bytes per resource (defaults: 5s, 5MiB). Override via CLI flags `--network-timeout`, `--network-max-bytes` or env `TEDS_NETWORK_TIMEOUT`, `TEDS_NETWORK_MAX_BYTES`.
-- Recommendation for CI: keep network disabled for reproducibility; if enabling, pin versions/URLs.
+**Format vs Pattern Issues**: If you see unexpected `WARNING` or `ERROR` results related to `format` constraints (like `format: email`, `format: date-time`, etc.), this is **not a TeDS tool problem**. Different JSON Schema validators handle `format` differently - some enforce it strictly, others treat it as advisory. This is a known JSON Schema ecosystem issue. Use `pattern` for strict validation:
 
-## 9) Versioning and compatibility
+```yaml
+# Weak - format may not be enforced by all validators
+type: string
+format: email
 
-- Tool uses Semantic Versioning; `teds --version` prints tool version and supported testspec major.
-- Testspecs require `version: MAJOR.MINOR.PATCH` at top‑level. The tool enforces MAJOR equality and MINOR ≤ supported.
-- On mismatch: exit 2 and no write with a clear message.
+# Strong - pattern ensures consistent validation across validators
+type: string
+format: email
+pattern: '^[^@]+@[^@]+\.[^@]+$'
+```
 
-## 10) Troubleshooting
+**additionalProperties**: Always be explicit:
 
-- Exit code 2 and error about schema/ref: check paths, JSON Pointers, and whether network is required (add `--allow-network` if using remote refs).
-- Duplicate key error when parsing YAML: remove or fix duplicate mapping keys; the loader is strict by design.
-- Generated files not where expected: review mapping `REF[=TARGET]`, relative targets resolve next to the schema file.
+```yaml
+# Ambiguous - might allow extra properties
+type: object
+properties:
+  name: {type: string}
 
-## 11) Next steps
+# Clear - extra properties forbidden
+type: object
+additionalProperties: false
+properties:
+  name: {type: string}
+```
 
-- Add targeted boundary and enum cases (N−1/N/N+1, casing variants) to document and lock intent.
-- Integrate into CI: run `teds verify **/*.tests.yaml --output-level error` and use exit code for gating.
-- Keep specs close to schemas for reviewability; use in‑place updates (`-i`) to normalize.
+**Boundary Testing**: Test edge cases:
 
-## References and prior art
+```yaml
+# For minimum: 1, test 0, 1, 2
+# For maximum: 100, test 99, 100, 101
+# For minLength: 3, test "", "ab", "abc", "abcd"
+```
 
-- Python jsonschema `format` validation and `FormatChecker`: https://python-jsonschema.readthedocs.io/en/stable/validate/#validating-formats
-- RFC 3339 `date-time` profile: https://www.rfc-editor.org/rfc/rfc3339
-- E.164 phone number guidance: https://stackoverflow.com/questions/6478875/regular-expression-matching-e-164-formatted-phone-numbers
-- JSON Schema `additionalProperties`: https://json-schema.org/understanding-json-schema/reference/object.html#additional-properties
+## Chapter 8: Roundtrip Workflow - Edit and Reuse Verification Output
+
+One of TeDS's powerful features is **roundtrip capability**: verification output can be edited and reused as input, especially when combined with the `--in-place` flag.
+
+### Basic Roundtrip Workflow
+
+```bash
+# 1. Run verification and save output
+teds verify my_tests.yaml > verification_results.yaml
+
+# 2. Edit the results file to add new test cases or modify existing ones
+# (The output format is valid TeDS input format)
+
+# 3. Use edited results as new input
+teds verify verification_results.yaml --in-place
+```
+
+### Practical Example: Expanding Test Coverage
+
+```bash
+# Start with basic tests
+teds verify user.tests.yaml --in-place
+
+# This updates user.tests.yaml with results. Now you can:
+# 1. Add more test cases directly to user.tests.yaml
+# 2. Copy successful patterns to new test sections
+# 3. Incrementally build comprehensive test suites
+
+# Re-run verification to validate new additions
+teds verify user.tests.yaml --in-place
+```
+
+### Advanced Roundtrip Pattern
+
+```bash
+# Generate initial tests from schema
+teds generate schemas.yaml#/components/schemas > user_generated.tests.yaml
+
+# Add manual test cases to generated file
+# (Edit user_generated.tests.yaml to add invalid cases)
+
+# Verify and clean up with in-place updates
+teds verify user_generated.tests.yaml --in-place
+
+# The file is now a clean, validated test specification
+# ready for version control and CI integration
+```
+
+### Benefits of Roundtrip Workflow
+
+- **Iterative Development**: Build test suites incrementally
+- **Clean Output**: `--in-place` normalizes formatting and removes temporary fields
+- **Version Control Friendly**: Consistent file format for meaningful diffs
+- **Team Collaboration**: Share test results that others can extend and modify
+
+## Conclusion
+
+You now know how to:
+
+- Create comprehensive test specifications for JSON Schemas
+- Generate initial tests from schema examples using JSON Pointer syntax
+- Test complex scenarios like oneOf, boundaries, and formats
+- Generate professional validation reports
+- Integrate TeDS into CI/CD pipelines
+- Use roundtrip workflows for iterative test development
+- Follow best practices for maintainable schema testing
+
+TeDS helps you catch schema issues early and maintain high-quality API contracts. Use it to build confidence in your schema definitions and create living documentation for your APIs.
+
+## Next Steps
+
+- Explore example directories for more patterns
+- Read the [Schema Testing Patterns](schema-patterns.md) guide
+- Set up TeDS in your CI pipeline
+- Contribute test cases for edge cases you discover
