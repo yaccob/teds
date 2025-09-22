@@ -125,9 +125,9 @@ No test cases found in the specification. Consider adding test cases to validate
 
 {% for case_name, case_data in valid_cases.items() %}
 | `{{ case_name }}`
-a| [source,json]
+a| [source,yaml]
 ----
-{{ case_data.payload | tojson(2) if case_data.payload is defined else "undefined" }}
+{{ case_data.payload | to_yaml }}
 ----
 {% if case_data.result == "SUCCESS" %}
 | [green]#✓ SUCCESS#
@@ -160,9 +160,9 @@ WARNING: {{ warning.generated | truncate(100) }}
 
 {% for case_name, case_data in invalid_cases.items() %}
 | `{{ case_name }}`
-a| [source,json]
+a| [source,yaml]
 ----
-{{ case_data.payload | tojson(2) if case_data.payload is defined else "undefined" }}
+{{ case_data.payload | to_yaml }}
 ----
 {% if case_data.result == "SUCCESS" %}
 | [green]#✓ SUCCESS#

@@ -46,12 +46,28 @@ def _compute_counts(doc: dict[str, Any]) -> dict[str, int]:
 def _render_jinja_str(
     template_key: str, template_text: str, context: dict[str, Any]
 ) -> str:
+    import yaml
     from jinja2 import DictLoader, Environment, select_autoescape
+
+    def to_yaml(data):
+        """Convert data to YAML format with nice formatting."""
+        if data is None:
+            return "undefined"
+        # Check for Jinja2 Undefined objects
+        if hasattr(data, "_undefined_name"):
+            return "undefined"
+        return yaml.dump(
+            data, default_flow_style=False, indent=2, allow_unicode=True
+        ).rstrip()
 
     autoescape = select_autoescape(enabled_extensions=("html", "htm"))
     env = Environment(
         loader=DictLoader({template_key: template_text}), autoescape=autoescape
     )
+
+    # Add custom YAML filter
+    env.filters["to_yaml"] = to_yaml
+
     tmpl = env.get_template(template_key)
     return tmpl.render(**context)
 
