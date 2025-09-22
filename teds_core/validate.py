@@ -111,7 +111,6 @@ class ValidatorStrategy:
                 "UNEXPECTEDLY VALID",
                 f"A validator that *ignores* 'format' accepted this instance, while a strict validator (enforcing 'format') might reject it as desired{fmts_str}.",
                 _pattern_advice(),
-                "",
             ]
             return "\n".join(err_lines)
         return "UNEXPECTEDLY VALID"
