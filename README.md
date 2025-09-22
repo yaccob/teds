@@ -131,6 +131,10 @@ For a comprehensive step-by-step guide, see the [complete tutorial](https://yacc
 ## Development
 
 ```bash
+# Clone repository
+git clone https://github.com/yaccob/teds.git
+cd teds
+
 # Setup
 python3 -m venv .venv && . .venv/bin/activate
 pip install -r requirements.txt
