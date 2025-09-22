@@ -208,8 +208,8 @@ def report_handles_all_types(test_context):
     # Should contain all our different payload types
     assert "42" in report_content  # integer
     assert "test string" in report_content  # string
-    # Pretty-printed JSON object (multiline format)
-    assert '"id": 123' in report_content  # object with pretty-print formatting
+    # YAML formatted object (multiline format)
+    assert "id: 123" in report_content  # object with YAML formatting
 
 
 @then("no \"object of type 'int' has no len()\" error should occur")
