@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeDS Default Validation Report</title>
+    <style>
+        /* AsciiDoc-inspired styling */
+        body {
+            font-family: "Noto Serif", "DejaVu Serif", serif;
+            line-height: 1.6;
+            color: #222;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: "Open Sans", "DejaVu Sans", sans-serif;
+            font-weight: 600;
+            line-height: 1.2;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            color: #ba3925;
+        }
+
+        h1 { font-size: 2.2em; border-bottom: 3px solid #ba3925; padding-bottom: 0.3em; }
+        h2 { font-size: 1.8em; border-bottom: 2px solid #ddd; padding-bottom: 0.2em; }
+        h3 { font-size: 1.4em; }
+        h4 { font-size: 1.1em; }
+
+        .lead {
+            font-size: 1.2em;
+            color: #555;
+            margin: 1em 0;
+            font-style: italic;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1em 0;
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #f5f5f5;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .status-success { color: #28a745; font-weight: bold; }
+        .status-warning { color: #ffc107; font-weight: bold; }
+        .status-error { color: #dc3545; font-weight: bold; }
+        .status-unknown { color: #6c757d; font-weight: bold; }
+
+        .admonition {
+            padding: 1em;
+            margin: 1em 0;
+            border-left: 4px solid;
+            background: #f8f9fa;
+        }
+
+        .admonition.warning {
+            border-left-color: #ffc107;
+            background: #fff3cd;
+        }
+
+        .admonition.caution {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .admonition.note {
+            border-left-color: #17a2b8;
+            background: #d1ecf1;
+        }
+
+        .code-block {
+            background: #f8f8f8;
+            border: 1px solid #e1e1e8;
+            border-radius: 4px;
+            padding: 0.75em;
+            font-family: "Liberation Mono", Consolas, monospace;
+            font-size: 0.9em;
+            line-height: 1.4;
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        code {
+            font-family: "Liberation Mono", Consolas, monospace;
+            background: #f8f8f8;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+
+        .anchor {
+            color: #ba3925;
+            text-decoration: none;
+        }
+
+        .footer {
+            margin-top: 3em;
+            padding-top: 1em;
+            border-top: 1px solid #ddd;
+            color: #777;
+            font-style: italic;
+            text-align: center;
+        }
+
+        .toc {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 1em;
+            margin: 1em 0;
+            border-radius: 4px;
+        }
+
+        .toc h3 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .toc ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .toc li {
+            margin: 0.3em 0;
+        }
+
+        .toc a {
+            color: #ba3925;
+            text-decoration: none;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="teds-default-validation-report">TeDS Default Validation Report</h1>
+
+    <div class="toc">
+        <h3>Table of Contents</h3>
+        <ul>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#executive-summary">Executive Summary</a></li>
+            <li><a href="#detailed-results">Detailed Results</a></li>
+            <li><a href="#appendix">Appendix</a></li>
+        </ul>
+    </div>
+
+    <h2 id="overview">Overview</h2>
+
+    <table>
+        <tbody>
+            <tr><th>Tool Version</th><td>teds 0.1.dev13+g9e84ef6db.d20250920</td></tr>
+            <tr><th>Specification Support</th><td>1.0-1.0</td></tr>
+            <tr><th>Recommended Version</th><td>1.0</td></tr>
+            <tr><th>Generated</th><td>2025-09-22T15:26:35.621611+02:00</td></tr>
+            <tr><th>Report File</th><td>demo/sample_tests.yaml</td></tr>
+        </tbody>
+    </table>
+
+
+
+
+
+
+
+    <h2 id="executive-summary">Executive Summary</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <p class="lead">
+        This report analyzes <strong>10</strong> schema(s) with a total of <strong>50</strong> test cases.
+    </p>
+
+    <h3>Results Summary</h3>
+
+    <table>
+        <thead>
+            <tr><th>Status</th><th>Count</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+
+            <tr><td class="status-success">✓ SUCCESS</td><td>40</td><td>Test cases passed as expected</td></tr>
+
+
+            <tr><td class="status-warning">⚠ WARNING</td><td>3</td><td>Test cases with warnings (review recommended)</td></tr>
+
+
+            <tr><td class="status-error">✗ ERROR</td><td>7</td><td>Test cases failed validation</td></tr>
+
+
+            <tr><td><strong>Total</strong></td><td><strong>50</strong></td><td>All test cases processed</td></tr>
+        </tbody>
+    </table>
+
+
+
+
+
+    <h2 id="detailed-results">Detailed Results</h2>
+
+
+
+
+    <h3 id="sample_schemas_yaml__components_schemas_Email">sample_schemas.yaml#/components/schemas/Email</h3>
+
+
+
+
+
+    <h4>Schema Summary</h4>
+
+    <table>
+        <tbody>
+            <tr><th>Valid Cases</th><td>3</td></tr>
+            <tr><th>Invalid Cases</th><td>1</td></tr>
+            <tr><th>Total Cases</th><td>4</td></tr>
+        </tbody>
+    </table>
+
+
+    <h4>Valid Test Cases</h4>
+
+    <table>
+        <thead>
+            <tr><th>Test Case</th><th>Payload</th><th>Status</th><th>Message</th></tr>
+        </thead>
+        <tbody>
+
+            <tr>
+                <td><code>.components.schemas.Email.examples[0]</code></td>
+                <td><div class="code-block">alice@example.com</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td><code>.components.schemas.Email.examples[1]</code></td>
+                <td><div class="code-block">not-an-email</div></td>
+                <td>
+
+                    <span class="status-warning">⚠ WARNING</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td><code>good email</code></td>
+                <td><div class="code-block">alice@example.com</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+        </tbody>
+    </table>
+
+
+
+    <h4>Invalid Test Cases</h4>
+
+    <table>
+        <thead>
+            <tr><th>Test Case</th><th>Payload</th><th>Status</th><th>Message</th></tr>
+        </thead>
+        <tbody>
+
+            <tr>
+                <td><code>not an email</code></td>
+                <td><div class="code-block">not-an-email</div></td>
+                <td>
+
+                    <span class="status-error">✗ ERROR</span>
+
+                </td>
+                <td>UNEXPECTEDLY VALID
+A validator that *ignores* 'format' accepted this instance, while a strict validator (enforcing 'format') might reject it as desired (format: email).
+Consider enforcing the expected format by adding an explicit 'pattern' property to the schema.</td>
+            </tr>
+
+        </tbody>
+    </table>
+
+
+
+
+
+
+    <h3 id="sample_schemas_yaml__components_schemas_User">sample_schemas.yaml#/components/schemas/User</h3>
+
+
+
+
+
+    <h4>Schema Summary</h4>
+
+    <table>
+        <tbody>
+            <tr><th>Valid Cases</th><td>4</td></tr>
+            <tr><th>Invalid Cases</th><td>4</td></tr>
+            <tr><th>Total Cases</th><td>8</td></tr>
+        </tbody>
+    </table>
+
+
+    <h4>Valid Test Cases</h4>
+
+    <table>
+        <thead>
+            <tr><th>Test Case</th><th>Payload</th><th>Status</th><th>Message</th></tr>
+        </thead>
+        <tbody>
+
+            <tr>
+                <td><code>.components.schemas.User.examples[0]</code></td>
+                <td><div class="code-block">id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+name: Alice Example
+email: alice@example.com</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td><code>.components.schemas.User.examples[1]</code></td>
+                <td><div class="code-block">id: not-a-uuid
+name: bob
+email: x</div></td>
+                <td>
+
+                    <span class="status-error">✗ ERROR</span>
+
+                </td>
+                <td>'not-a-uuid' is not a 'uuid'</td>
+            </tr>
+
+            <tr>
+                <td><code>minimal valid user</code></td>
+                <td><div class="code-block">id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+name: Alice Example
+email: alice@example.com</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td><code>parse as JSON string</code></td>
+                <td><div class="code-block">'{"id":"3fa85f64-5717-4562-b3fc-2c963f66afa6","name":"Bob Builder","email":"bob@example.com"}'</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+        </tbody>
+    </table>
+
+
+
+    <h4>Invalid Test Cases</h4>
+
+    <table>
+        <thead>
+            <tr><th>Test Case</th><th>Payload</th><th>Status</th><th>Message</th></tr>
+        </thead>
+        <tbody>
+
+            <tr>
+                <td><code>missing required prop</code></td>
+                <td><div class="code-block">id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+name: Alice Example</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td>'email' is a required property</td>
+            </tr>
+
+            <tr>
+                <td><code>additional property</code></td>
+                <td><div class="code-block">id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+name: Alice Example
+email: alice@example.com
+extra: nope</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td>Additional properties are not allowed ('extra' was unexpected)</td>
+            </tr>
+
+            <tr>
+                <td><code>bad uuid</code></td>
+                <td><div class="code-block">id: not-a-uuid
+name: Alice Example
+email: alice@example.com</div></td>
+                <td>
+
+                    <span class="status-error">✗ ERROR</span>
+
+                </td>
+                <td>UNEXPECTEDLY VALID
+A validator that *ignores* 'format' accepted this instance, while a strict validator (enforcing 'format') might reject it as desired (format: uuid).
+Consider enforcing the expected format by adding an explicit 'pattern' property to the schema.</td>
+            </tr>
+
+            <tr>
+                <td><code>bad name pattern</code></td>
+                <td><div class="code-block">id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+name: alice example
+email: alice@example.com</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td>'alice example' does not match '^[A-Z][a-zA-Z]+(?: [A-Z][a-zA-Z]+)*$'</td>
+            </tr>
+
+        </tbody>
+    </table>
+
+
+
+
+
+
+    <h3 id="sample_schemas_yaml__components_schemas_Identifier">sample_schemas.yaml#/components/schemas/Identifier</h3>
+
+
+
+
+
+    <h4>Schema Summary</h4>
+
+    <table>
+        <tbody>
+            <tr><th>Valid Cases</th><td>4</td></tr>
+            <tr><th>Invalid Cases</th><td>2</td></tr>
+            <tr><th>Total Cases</th><td>6</td></tr>
+        </tbody>
+    </table>
+
+
+    <h4>Valid Test Cases</h4>
+
+    <table>
+        <thead>
+            <tr><th>Test Case</th><th>Payload</th><th>Status</th><th>Message</th></tr>
+        </thead>
+        <tbody>
+
+            <tr>
+                <td><code>.components.schemas.Identifier.examples[0]</code></td>
+                <td><div class="code-block">AB-123</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td><code>.components.schemas.Identifier.examples[1]</code></td>
+                <td><div class="code-block">99</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td><code>AB-777</code></td>
+                <td><div class="code-block">undefined</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td><code>forty-two</code></td>
+                <td><div class="code-block">42</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+        </tbody>
+    </table>
+
+
+
+    <h4>Invalid Test Cases</h4>
+
+    <table>
+        <thead>
+            <tr><th>Test Case</th><th>Payload</th><th>Status</th><th>Message</th></tr>
+        </thead>
+        <tbody>
+
+            <tr>
+                <td><code>zero not allowed</code></td>
+                <td><div class="code-block">0</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td>0 is not valid under any of the given schemas</td>
+            </tr>
+
+            <tr>
+                <td><code>wrong string pattern</code></td>
+                <td><div class="code-block">A-1</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td>'A-1' is not valid under any of the given schemas</td>
+            </tr>
+
+        </tbody>
+    </table>
+
+
+
+
+
+
+    <h3 id="sample_schemas_yaml__components_schemas_Color">sample_schemas.yaml#/components/schemas/Color</h3>
+
+
+
+
+
+    <h4>Schema Summary</h4>
+
+    <table>
+        <tbody>
+            <tr><th>Valid Cases</th><td>2</td></tr>
+            <tr><th>Invalid Cases</th><td>1</td></tr>
+            <tr><th>Total Cases</th><td>3</td></tr>
+        </tbody>
+    </table>
+
+
+    <h4>Valid Test Cases</h4>
+
+    <table>
+        <thead>
+            <tr><th>Test Case</th><th>Payload</th><th>Status</th><th>Message</th></tr>
+        </thead>
+        <tbody>
+
+            <tr>
+                <td><code>.components.schemas.Color.examples[0]</code></td>
+                <td><div class="code-block">green</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td><code>simple enum ok</code></td>
+                <td><div class="code-block">red</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+        </tbody>
+    </table>
+
+
+
+    <h4>Invalid Test Cases</h4>
+
+    <table>
+        <thead>
+            <tr><th>Test Case</th><th>Payload</th><th>Status</th><th>Message</th></tr>
+        </thead>
+        <tbody>
+
+            <tr>
+                <td><code>not in enum</code></td>
+                <td><div class="code-block">yellow</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td>'yellow' is not one of ['red', 'green', 'blue']</td>
+            </tr>
+
+        </tbody>
+    </table>
+
+
+
+
+
+
+    <h3 id="sample_schemas_yaml__components_schemas_Regexy">sample_schemas.yaml#/components/schemas/Regexy</h3>
+
+
+
+
+
+    <h4>Schema Summary</h4>
+
+    <table>
+        <tbody>
+            <tr><th>Valid Cases</th><td>2</td></tr>
+            <tr><th>Invalid Cases</th><td>1</td></tr>
+            <tr><th>Total Cases</th><td>3</td></tr>
+        </tbody>
+    </table>
+
+
+    <h4>Valid Test Cases</h4>
+
+    <table>
+        <thead>
+            <tr><th>Test Case</th><th>Payload</th><th>Status</th><th>Message</th></tr>
+        </thead>
+        <tbody>
+
+            <tr>
+                <td><code>.components.schemas.Regexy.examples[0]</code></td>
+                <td><div class="code-block">abc12</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td><code>regex ok</code></td>
+                <td><div class="code-block">abc12</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+        </tbody>
+    </table>
+
+
+
+    <h4>Invalid Test Cases</h4>
+
+    <table>
+        <thead>
+            <tr><th>Test Case</th><th>Payload</th><th>Status</th><th>Message</th></tr>
+        </thead>
+        <tbody>
+
+            <tr>
+                <td><code>uppercase not allowed</code></td>
+                <td><div class="code-block">AB123</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td>'AB123' does not match '^[a-z]{3}\\d{2}$'</td>
+            </tr>
+
+        </tbody>
+    </table>
+
+
+
+
+
+
+    <h3 id="sample_schemas_yaml__components_schemas_Product">sample_schemas.yaml#/components/schemas/Product</h3>
+
+
+
+
+
+    <h4>Schema Summary</h4>
+
+    <table>
+        <tbody>
+            <tr><th>Valid Cases</th><td>3</td></tr>
+            <tr><th>Invalid Cases</th><td>2</td></tr>
+            <tr><th>Total Cases</th><td>5</td></tr>
+        </tbody>
+    </table>
+
+
+    <h4>Valid Test Cases</h4>
+
+    <table>
+        <thead>
+            <tr><th>Test Case</th><th>Payload</th><th>Status</th><th>Message</th></tr>
+        </thead>
+        <tbody>
+
+            <tr>
+                <td><code>.components.schemas.Product.examples[0]</code></td>
+                <td><div class="code-block">sku: SKU1234
+price: 12.5
+tags:
+- key: env
+  value: prod
+color: red</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td><code>full product</code></td>
+                <td><div class="code-block">sku: SKU1234
+price: 12.5
+tags:
+- key: env
+  value: prod
+color: blue</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td><code>json string</code></td>
+                <td><div class="code-block">'{"sku":"SKU9999","price":0,"tags":[{"key":"env","value":"prod"}],"color":"green"}'</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+        </tbody>
+    </table>
+
+
+
+    <h4>Invalid Test Cases</h4>
+
+    <table>
+        <thead>
+            <tr><th>Test Case</th><th>Payload</th><th>Status</th><th>Message</th></tr>
+        </thead>
+        <tbody>
+
+            <tr>
+                <td><code>negative price</code></td>
+                <td><div class="code-block">sku: SKU1234
+price: -1</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td>-1 is less than the minimum of 0</td>
+            </tr>
+
+            <tr>
+                <td><code>duplicate tags</code></td>
+                <td><div class="code-block">sku: SKU1234
+price: 10
+tags:
+- key: env
+  value: prod
+- key: env
+  value: prod</div></td>
+                <td>
+
+                    <span class="status-warning">⚠ WARNING</span>
+
+                </td>
+                <td>[{'key': 'env', 'value': 'prod'}, {'key': 'env', 'value': 'prod'}] has non-unique elements</td>
+            </tr>
+
+        </tbody>
+    </table>
+
+
+
+
+
+
+    <h3 id="sample_schemas_yaml__components_schemas_Contact">sample_schemas.yaml#/components/schemas/Contact</h3>
+
+
+
+
+
+    <h4>Schema Summary</h4>
+
+    <table>
+        <tbody>
+            <tr><th>Valid Cases</th><td>5</td></tr>
+            <tr><th>Invalid Cases</th><td>1</td></tr>
+            <tr><th>Total Cases</th><td>6</td></tr>
+        </tbody>
+    </table>
+
+
+    <h4>Valid Test Cases</h4>
+
+    <table>
+        <thead>
+            <tr><th>Test Case</th><th>Payload</th><th>Status</th><th>Message</th></tr>
+        </thead>
+        <tbody>
+
+            <tr>
+                <td><code>.components.schemas.Contact.examples[0]</code></td>
+                <td><div class="code-block">email: someone@example.com</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td><code>.components.schemas.Contact.examples[1]</code></td>
+                <td><div class="code-block">phone: +49 621 1234567</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td><code>.components.schemas.Contact.examples[2]</code></td>
+                <td><div class="code-block">email: someone@example.com
+phone: +49 621 1234567</div></td>
+                <td>
+
+                    <span class="status-error">✗ ERROR</span>
+
+                </td>
+                <td>{'email': 'someone@example.com', 'phone': '+49 621 1234567'} is not valid under any of the given schemas</td>
+            </tr>
+
+            <tr>
+                <td><code>email contact</code></td>
+                <td><div class="code-block">email: someone@example.com</div></td>
+                <td>
+
+                    <span class="status-warning">⚠ WARNING</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td><code>parse json string</code></td>
+                <td><div class="code-block">'{"phone":"+4369912345678"}'</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+        </tbody>
+    </table>
+
+
+
+    <h4>Invalid Test Cases</h4>
+
+    <table>
+        <thead>
+            <tr><th>Test Case</th><th>Payload</th><th>Status</th><th>Message</th></tr>
+        </thead>
+        <tbody>
+
+            <tr>
+                <td><code>mixed variants</code></td>
+                <td><div class="code-block">email: someone@example.com
+phone: +49 621 1234567</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td>{'email': 'someone@example.com', 'phone': '+49 621 1234567'} is not valid under any of the given schemas</td>
+            </tr>
+
+        </tbody>
+    </table>
+
+
+
+
+
+
+    <h3 id="sample_schemas_yaml__components_schemas_OrderLine">sample_schemas.yaml#/components/schemas/OrderLine</h3>
+
+
+
+
+
+    <h4>Schema Summary</h4>
+
+    <table>
+        <tbody>
+            <tr><th>Valid Cases</th><td>6</td></tr>
+            <tr><th>Invalid Cases</th><td>3</td></tr>
+            <tr><th>Total Cases</th><td>9</td></tr>
+        </tbody>
+    </table>
+
+
+    <h4>Valid Test Cases</h4>
+
+    <table>
+        <thead>
+            <tr><th>Test Case</th><th>Payload</th><th>Status</th><th>Message</th></tr>
+        </thead>
+        <tbody>
+
+            <tr>
+                <td><code>.components.schemas.OrderLine.examples[0]</code></td>
+                <td><div class="code-block">sku: SKU1234
+unitPrice: 19.99
+quantity: 2</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td><code>.components.schemas.OrderLine.examples[1]</code></td>
+                <td><div class="code-block">bundleId: B-42
+items:
+- sku: SKU9
+  quantity: 1</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td><code>.components.schemas.OrderLine.examples[2]</code></td>
+                <td><div class="code-block">sku: SKU1
+unitPrice: 10
+quantity: 1
+items:
+- sku: SKU2
+  quantity: 1</div></td>
+                <td>
+
+                    <span class="status-error">✗ ERROR</span>
+
+                </td>
+                <td>{'sku': 'SKU1', 'unitPrice': 10, 'quantity': 1, 'items': [{'sku': 'SKU2', 'quantity': 1}]} is not valid under any of the given schemas</td>
+            </tr>
+
+            <tr>
+                <td><code>priced ok</code></td>
+                <td><div class="code-block">sku: SKU1234
+unitPrice: 19.99
+quantity: 2</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td><code>bundled ok</code></td>
+                <td><div class="code-block">bundleId: B-42
+items:
+- sku: SKU9
+  quantity: 1</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td><code>priced via json string</code></td>
+                <td><div class="code-block">'{"sku":"SKU7777","unitPrice":0,"quantity":1}'</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+        </tbody>
+    </table>
+
+
+
+    <h4>Invalid Test Cases</h4>
+
+    <table>
+        <thead>
+            <tr><th>Test Case</th><th>Payload</th><th>Status</th><th>Message</th></tr>
+        </thead>
+        <tbody>
+
+            <tr>
+                <td><code>mixed properties</code></td>
+                <td><div class="code-block">sku: SKU1
+unitPrice: 10
+quantity: 1
+items:
+- sku: SKU2
+  quantity: 1</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td>{'sku': 'SKU1', 'unitPrice': 10, 'quantity': 1, 'items': [{'sku': 'SKU2', 'quantity': 1}]} is not valid under any of the given schemas</td>
+            </tr>
+
+            <tr>
+                <td><code>missing required priced</code></td>
+                <td><div class="code-block">sku: SKU9999</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td>{'sku': 'SKU9999'} is not valid under any of the given schemas</td>
+            </tr>
+
+            <tr>
+                <td><code>wrong types</code></td>
+                <td><div class="code-block">sku: SKU1234
+unitPrice: 10
+quantity: 0</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td>{'sku': 'SKU1234', 'unitPrice': 10, 'quantity': 0} is not valid under any of the given schemas</td>
+            </tr>
+
+        </tbody>
+    </table>
+
+
+
+
+
+
+    <h3 id="sample_schemas_yaml__components_schemas_URI">sample_schemas.yaml#/components/schemas/URI</h3>
+
+
+
+
+
+    <h4>Schema Summary</h4>
+
+    <table>
+        <tbody>
+            <tr><th>Valid Cases</th><td>2</td></tr>
+            <tr><th>Invalid Cases</th><td>1</td></tr>
+            <tr><th>Total Cases</th><td>3</td></tr>
+        </tbody>
+    </table>
+
+
+    <h4>Valid Test Cases</h4>
+
+    <table>
+        <thead>
+            <tr><th>Test Case</th><th>Payload</th><th>Status</th><th>Message</th></tr>
+        </thead>
+        <tbody>
+
+            <tr>
+                <td><code>.components.schemas.URI.examples[0]</code></td>
+                <td><div class="code-block">https://example.com</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td><code>good uri</code></td>
+                <td><div class="code-block">https://example.com</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+        </tbody>
+    </table>
+
+
+
+    <h4>Invalid Test Cases</h4>
+
+    <table>
+        <thead>
+            <tr><th>Test Case</th><th>Payload</th><th>Status</th><th>Message</th></tr>
+        </thead>
+        <tbody>
+
+            <tr>
+                <td><code>not a uri</code></td>
+                <td><div class="code-block">not a uri</div></td>
+                <td>
+
+                    <span class="status-error">✗ ERROR</span>
+
+                </td>
+                <td>UNEXPECTEDLY VALID
+A validator that *ignores* 'format' accepted this instance, while a strict validator (enforcing 'format') might reject it as desired (format: uri).
+Consider enforcing the expected format by adding an explicit 'pattern' property to the schema.</td>
+            </tr>
+
+        </tbody>
+    </table>
+
+
+
+
+
+
+    <h3 id="sample_schemas_yaml__components_schemas_DateISO">sample_schemas.yaml#/components/schemas/DateISO</h3>
+
+
+
+
+
+    <h4>Schema Summary</h4>
+
+    <table>
+        <tbody>
+            <tr><th>Valid Cases</th><td>2</td></tr>
+            <tr><th>Invalid Cases</th><td>1</td></tr>
+            <tr><th>Total Cases</th><td>3</td></tr>
+        </tbody>
+    </table>
+
+
+    <h4>Valid Test Cases</h4>
+
+    <table>
+        <thead>
+            <tr><th>Test Case</th><th>Payload</th><th>Status</th><th>Message</th></tr>
+        </thead>
+        <tbody>
+
+            <tr>
+                <td><code>.components.schemas.DateISO.examples[0]</code></td>
+                <td><div class="code-block">'2025-08-31'</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td><code>good date</code></td>
+                <td><div class="code-block">'2025-08-31'</div></td>
+                <td>
+
+                    <span class="status-success">✓ SUCCESS</span>
+
+                </td>
+                <td></td>
+            </tr>
+
+        </tbody>
+    </table>
+
+
+
+    <h4>Invalid Test Cases</h4>
+
+    <table>
+        <thead>
+            <tr><th>Test Case</th><th>Payload</th><th>Status</th><th>Message</th></tr>
+        </thead>
+        <tbody>
+
+            <tr>
+                <td><code>not a date</code></td>
+                <td><div class="code-block">31-12-2025</div></td>
+                <td>
+
+                    <span class="status-error">✗ ERROR</span>
+
+                </td>
+                <td>UNEXPECTEDLY VALID
+A validator that *ignores* 'format' accepted this instance, while a strict validator (enforcing 'format') might reject it as desired (format: date).
+Consider enforcing the expected format by adding an explicit 'pattern' property to the schema.</td>
+            </tr>
+
+        </tbody>
+    </table>
+
+
+
+
+
+
+
+    <h2 id="appendix">Appendix</h2>
+
+    <h3>Tool Information</h3>
+
+    <table>
+        <tbody>
+            <tr><th>TeDS Version</th><td>0.1.dev13+g9e84ef6db.d20250920</td></tr>
+            <tr><th>Supported Spec Range</th><td>1.0-1.0</td></tr>
+            <tr><th>Recommended Spec Version</th><td>1.0</td></tr>
+            <tr><th>Report Generation Time</th><td>2025-09-22T15:26:35.621611+02:00</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Report Scope</h3>
+
+    <p>This default report includes:</p>
+
+    <ul>
+        <li><strong>Executive Summary</strong> - High-level overview of validation results</li>
+        <li><strong>Schema Coverage Analysis</strong> - Warnings for incomplete test coverage</li>
+        <li><strong>Detailed Results</strong> - Complete breakdown of all test cases by schema</li>
+        <li><strong>Color-coded Status Indicators</strong> - Visual distinction between SUCCESS, WARNING, and ERROR states</li>
+        <li><strong>Tabular Format</strong> - Structured presentation for easy analysis</li>
+    </ul>
+
+    <p>For questions about this report or TeDS functionality, please refer to the TeDS documentation.</p>
+
+    <div class="footer">
+        <p>This report was generated automatically by TeDS (Test-Driven Schema Development Tool).</p>
+    </div>
+
+</body>
+</html>
