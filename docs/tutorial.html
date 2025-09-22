@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.23">
+<title>TeDS Tutorial — Test-Driven Schema Development</title>
+<style>
+
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/github.min.css">
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<h1>TeDS Tutorial — Test-Driven Schema Development</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_prerequisites">1. Prerequisites</a></li>
+<li><a href="#_setup">2. Setup</a>
+<ul class="sectlevel2">
+<li><a href="#_standard_installation_recommended">2.1. Standard Installation (Recommended)</a></li>
+<li><a href="#_development_installation_alternative">2.2. Development Installation (Alternative)</a></li>
+</ul>
+</li>
+<li><a href="#_chapter_1_your_first_test_specification">3. Chapter 1: Your First Test Specification</a>
+<ul class="sectlevel2">
+<li><a href="#_understanding_the_problem">3.1. Understanding the Problem</a></li>
+<li><a href="#_create_your_first_testspec">3.2. Create Your First Testspec</a></li>
+<li><a href="#_run_your_first_verification">3.3. Run Your First Verification</a></li>
+<li><a href="#_understanding_the_warning">3.4. Understanding the Warning</a></li>
+</ul>
+</li>
+<li><a href="#_chapter_2_generating_tests_from_existing_schemas">4. Chapter 2: Generating Tests from Existing Schemas</a>
+<ul class="sectlevel2">
+<li><a href="#_key_as_payload_quick_testing_without_payload_field">4.1. Key-as-Payload: Quick Testing without Payload Field</a></li>
+<li><a href="#_working_with_the_demo_schema">4.2. Working with the Demo Schema</a></li>
+<li><a href="#_generate_tests_from_schema_examples">4.3. Generate Tests from Schema Examples</a>
+<ul class="sectlevel3">
+<li><a href="#_json_pointer_default_method">4.3.1. JSON Pointer (Default Method)</a></li>
+<li><a href="#_json_path_alternative_method">4.3.2. JSON Path (Alternative Method)</a></li>
+<li><a href="#_practical_examples">4.3.3. Practical Examples</a></li>
+</ul>
+</li>
+<li><a href="#_inspect_generated_tests">4.4. Inspect Generated Tests</a></li>
+<li><a href="#_extend_with_manual_test_cases">4.5. Extend with Manual Test Cases</a></li>
+</ul>
+</li>
+<li><a href="#_chapter_3_advanced_schema_testing_patterns">5. Chapter 3: Advanced Schema Testing Patterns</a>
+<ul class="sectlevel2">
+<li><a href="#_testing_object_schemas_with_additionalproperties">5.1. Testing Object Schemas with additionalProperties</a></li>
+<li><a href="#_testing_boundary_conditions">5.2. Testing Boundary Conditions</a></li>
+<li><a href="#_testing_enums">5.3. Testing Enums</a></li>
+</ul>
+</li>
+<li><a href="#_chapter_4_working_with_complex_schemas">6. Chapter 4: Working with Complex Schemas</a>
+<ul class="sectlevel2">
+<li><a href="#_testing_oneof_compositions">6.1. Testing oneOf Compositions</a></li>
+</ul>
+</li>
+<li><a href="#_chapter_5_report_generation_and_ci_integration">7. Chapter 5: Report Generation and CI Integration</a>
+<ul class="sectlevel2">
+<li><a href="#_available_report_templates">7.1. Available Report Templates</a></li>
+<li><a href="#_generate_professional_reports">7.2. Generate Professional Reports</a></li>
+<li><a href="#_custom_output_paths">7.3. Custom Output Paths</a></li>
+<li><a href="#_understanding_report_content">7.4. Understanding Report Content</a></li>
+<li><a href="#_output_level_filtering">7.5. Output Level Filtering</a></li>
+<li><a href="#_ci_integration">7.6. CI Integration</a></li>
+<li><a href="#_in_place_updates">7.7. In-Place Updates</a></li>
+</ul>
+</li>
+<li><a href="#_chapter_6_advanced_features">8. Chapter 6: Advanced Features</a>
+<ul class="sectlevel2">
+<li><a href="#_using_multiple_test_files">8.1. Using Multiple Test Files</a></li>
+<li><a href="#_network_access_for_remote_schemas">8.2. Network Access for Remote Schemas</a></li>
+<li><a href="#_parse_payload_string_to_object_conversion">8.3. Parse Payload: String-to-Object Conversion</a></li>
+<li><a href="#_template_variables_for_custom_output_paths">8.4. Template Variables for Custom Output Paths</a>
+<ul class="sectlevel3">
+<li><a href="#_pointer_sanitization_with_plus_signs">8.4.1. Pointer Sanitization with Plus Signs</a></li>
+</ul>
+</li>
+<li><a href="#_configuration_files_for_complex_generation">8.5. Configuration Files for Complex Generation</a></li>
+<li><a href="#_warning_system">8.6. Warning System</a></li>
+</ul>
+</li>
+<li><a href="#_chapter_7_environment_configuration_and_exit_codes">9. Chapter 7: Environment Configuration and Exit Codes</a>
+<ul class="sectlevel2">
+<li><a href="#_environment_variables">9.1. Environment Variables</a></li>
+<li><a href="#_exit_codes_for_ci_integration">9.2. Exit Codes for CI Integration</a></li>
+</ul>
+</li>
+<li><a href="#_chapter_8_best_practices_and_common_patterns">10. Chapter 8: Best Practices and Common Patterns</a>
+<ul class="sectlevel2">
+<li><a href="#_test_organization">10.1. Test Organization</a></li>
+<li><a href="#_naming_conventions">10.2. Naming Conventions</a></li>
+<li><a href="#_version_management">10.3. Version Management</a></li>
+<li><a href="#_schema_evolution">10.4. Schema Evolution</a></li>
+<li><a href="#_common_pitfalls">10.5. Common Pitfalls</a></li>
+</ul>
+</li>
+<li><a href="#_chapter_9_roundtrip_workflow_edit_and_reuse_verification_output">11. Chapter 9: Roundtrip Workflow - Edit and Reuse Verification Output</a>
+<ul class="sectlevel2">
+<li><a href="#_basic_roundtrip_workflow">11.1. Basic Roundtrip Workflow</a></li>
+<li><a href="#_practical_example_expanding_test_coverage">11.2. Practical Example: Expanding Test Coverage</a></li>
+<li><a href="#_advanced_roundtrip_pattern">11.3. Advanced Roundtrip Pattern</a></li>
+<li><a href="#_benefits_of_roundtrip_workflow">11.4. Benefits of Roundtrip Workflow</a></li>
+</ul>
+</li>
+<li><a href="#_conclusion">12. Conclusion</a></li>
+<li><a href="#_next_steps">13. Next Steps</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Learn TeDS through hands-on examples. This tutorial builds from basic verification to advanced schema testing patterns using real examples from the project.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_prerequisites"><a class="link" href="#_prerequisites">1. Prerequisites</a></h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Python 3.10+</p>
+</li>
+<li>
+<p>Basic understanding of JSON Schema</p>
+</li>
+<li>
+<p>Familiarity with YAML</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_setup"><a class="link" href="#_setup">2. Setup</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_standard_installation_recommended"><a class="link" href="#_standard_installation_recommended">2.1. Standard Installation (Recommended)</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Install from PyPI
+pip install teds
+
+# Verify installation
+teds --version</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Expected output: <code>teds X.Y.Z (spec supported: 1.0-1.0; recommended: 1.0)</code></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_development_installation_alternative"><a class="link" href="#_development_installation_alternative">2.2. Development Installation (Alternative)</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Clone and setup for development
+git clone &lt;repository&gt;
+cd &lt;project-directory&gt;
+python3 -m venv .venv &amp;&amp; . .venv/bin/activate
+pip install -r requirements.txt
+
+# Verify installation
+./teds.py --version</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_chapter_1_your_first_test_specification"><a class="link" href="#_chapter_1_your_first_test_specification">3. Chapter 1: Your First Test Specification</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_understanding_the_problem"><a class="link" href="#_understanding_the_problem">3.1. Understanding the Problem</a></h3>
+<div class="paragraph">
+<p>Consider this simple schema for a user email:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># user_email.yaml
+type: string
+format: email</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>How do you know it actually validates emails correctly? Let&#8217;s test it.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_create_your_first_testspec"><a class="link" href="#_create_your_first_testspec">3.2. Create Your First Testspec</a></h3>
+<div class="paragraph">
+<p>Create <code>user_email.tests.yaml</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">version: "1.0.0"
+tests:
+  user_email.yaml#/:
+    valid:
+      simple_email:
+        description: "Basic valid email"
+        payload: "alice@example.com"
+      email_with_subdomain:
+        description: "Email with subdomain"
+        payload: "bob@mail.company.com"
+    invalid:
+      missing_at:
+        description: "Email without @ symbol"
+        payload: "alice.example.com"
+      missing_domain:
+        description: "Email without domain"
+        payload: "alice@"</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_run_your_first_verification"><a class="link" href="#_run_your_first_verification">3.3. Run Your First Verification</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">teds verify user_email.tests.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Note: Use <code>./teds.py</code> instead of <code>teds</code> if you&#8217;re using the development installation.</strong></p>
+</div>
+<div class="paragraph">
+<p>You&#8217;ll see output like:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">version: 1.0.0
+tests:
+  user_email.yaml#/:
+    valid:
+      simple_email:
+        payload: alice@example.com
+        result: SUCCESS
+      email_with_subdomain:
+        payload: bob@mail.company.com
+        result: SUCCESS
+    invalid:
+      missing_at:
+        payload: alice.example.com
+        result: WARNING
+        message: |
+          UNEXPECTEDLY VALID
+          A validator that *ignores* 'format' accepted this instance...</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_understanding_the_warning"><a class="link" href="#_understanding_the_warning">3.4. Understanding the Warning</a></h3>
+<div class="paragraph">
+<p>The <code>WARNING</code> tells us that <code>format: email</code> isn&#8217;t enforced by all validators. Some accept <code>alice.example.com</code> as valid, others reject it. This is a real-world issue!</p>
+</div>
+<div class="paragraph">
+<p><strong>Fix it by tightening the schema:</strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># user_email.yaml (improved)
+type: string
+format: email
+pattern: '^[^@]+@[^@]+\.[^@]+$'  # Basic email pattern</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Run the test again - the warning should disappear.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_chapter_2_generating_tests_from_existing_schemas"><a class="link" href="#_chapter_2_generating_tests_from_existing_schemas">4. Chapter 2: Generating Tests from Existing Schemas</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_key_as_payload_quick_testing_without_payload_field"><a class="link" href="#_key_as_payload_quick_testing_without_payload_field">4.1. Key-as-Payload: Quick Testing without Payload Field</a></h3>
+<div class="paragraph">
+<p>TeDS offers a powerful shortcut: when the <code>payload</code> field is missing, the test case <strong>key</strong> is automatically parsed as YAML/JSON and used as the payload:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">version: "1.0.0"
+tests:
+  user_age.yaml#/:
+    valid:
+      "25": {description: "Valid adult age"}
+      "0": {description: "Minimum age"}
+      "150": {description: "Maximum realistic age"}
+    invalid:
+      "-1": {}          # Negative age (no description needed)
+      "151": {}         # Too old
+      '"not-a-number"': {}  # String instead of number
+      "null": {}        # Null value
+      "25.5": {}        # Float instead of integer</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Key advantages:</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Compact</strong>: Perfect for testing primitive values</p>
+</li>
+<li>
+<p><strong>Quick</strong>: No need to write <code>payload:</code> for simple cases</p>
+</li>
+<li>
+<p><strong>Clear</strong>: Test key shows exactly what&#8217;s being tested</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>Parsing rules:</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>"42"</code> → number 42</p>
+</li>
+<li>
+<p><code>"null"</code> → null value</p>
+</li>
+<li>
+<p><code>'"hello"'</code> → string "hello" (note the nested quotes)</p>
+</li>
+<li>
+<p><code>'{"name": "test"}'</code> → object with name property</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_working_with_the_demo_schema"><a class="link" href="#_working_with_the_demo_schema">4.2. Working with the Demo Schema</a></h3>
+<div class="paragraph">
+<p>Explore the demo schema:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cat demo/sample_schemas.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This contains multiple schema definitions with examples. Let&#8217;s generate tests from them.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_generate_tests_from_schema_examples"><a class="link" href="#_generate_tests_from_schema_examples">4.3. Generate Tests from Schema Examples</a></h3>
+<div class="paragraph">
+<p>The <code>generate</code> command creates test cases from schema definitions using two different addressing methods:</p>
+</div>
+<div class="sect3">
+<h4 id="_json_pointer_default_method"><a class="link" href="#_json_pointer_default_method">4.3.1. JSON Pointer (Default Method)</a></h4>
+<div class="paragraph">
+<p><strong>JSON Pointer</strong> uses the <code>#/path/to/element</code> format and points to a specific location in the document. <strong>TeDS generates tests for the schemas found directly under the specified path</strong>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Generate tests for schemas directly under components/schemas
+# This will find and process schema definitions at this level
+teds generate sample_schemas.yaml#/components/schemas
+
+# Generate tests for properties directly under User schema
+# This processes the properties defined at this level
+teds generate sample_schemas.yaml#/components/schemas/User/properties
+
+# Generate tests for a single specific schema
+# This processes only the Email schema itself
+teds generate sample_schemas.yaml#/components/schemas/Email</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>How JSON Pointer works:</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Points to exactly one location in the document</p>
+</li>
+<li>
+<p>TeDS processes schemas found directly at that location</p>
+</li>
+<li>
+<p>No wildcards needed - the tool looks at the direct children of the specified path</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_json_path_alternative_method"><a class="link" href="#_json_path_alternative_method">4.3.2. JSON Path (Alternative Method)</a></h4>
+<div class="paragraph">
+<p><strong>JSON Path</strong> uses CSS-like selector syntax and requires <strong>explicit wildcards</strong> to select multiple elements:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Select ALL schemas under components/schemas (equivalent to JSON Pointer above)
+teds generate sample_schemas.yaml --json-path '$.components.schemas.*'
+
+# Select specific schemas by name pattern
+teds generate sample_schemas.yaml --json-path '$.components.schemas[User,Email,Product]'
+
+# Select schemas at any level that match a pattern
+teds generate sample_schemas.yaml --json-path '$..schemas[?(@.type=="object")]'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Key differences:</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>JSON Pointer</strong>: <code>#/components/schemas</code> → finds schemas directly at this location</p>
+</li>
+<li>
+<p><strong>JSON Path</strong>: <code>$.components.schemas.<strong></code> → requires <code></strong></code> wildcard to select multiple items</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_practical_examples"><a class="link" href="#_practical_examples">4.3.3. Practical Examples</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># GOOD: Generate from schema container - finds schemas directly under this path
+teds generate api_spec.yaml#/components/schemas
+
+# GOOD: Generate from specific properties - processes properties at this level
+teds generate api_spec.yaml#/components/schemas/User/properties
+
+# AVOID: Single schema without properties - limited test generation
+# teds generate api_spec.yaml#/components/schemas/User
+
+# Reading paths from file
+echo "api_spec.yaml#/components/schemas" &gt; schema_refs.txt
+teds generate --from-file schema_refs.txt</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This creates <code>api_spec.components+schemas.tests.yaml</code> with test cases derived from the <code>examples</code> in each schema found at the specified location.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_inspect_generated_tests"><a class="link" href="#_inspect_generated_tests">4.4. Inspect Generated Tests</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cat api_spec.components+schemas.tests.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Notice:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Valid cases are created from schema <code>examples</code></p>
+</li>
+<li>
+<p>Test cases are marked with <code>from_examples: true</code></p>
+</li>
+<li>
+<p>No invalid cases are generated (you add these manually)</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_extend_with_manual_test_cases"><a class="link" href="#_extend_with_manual_test_cases">4.5. Extend with Manual Test Cases</a></h3>
+<div class="paragraph">
+<p>Edit the generated file to add negative cases:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># Add to existing generated file
+tests:
+  api_spec.yaml#/components/schemas/Email:
+    valid:
+      # ... generated cases here ...
+    invalid:
+      not_an_email:
+        description: "String without email format"
+        payload: "not-an-email"
+      empty_string:
+        description: "Empty string"
+        payload: ""</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_chapter_3_advanced_schema_testing_patterns"><a class="link" href="#_chapter_3_advanced_schema_testing_patterns">5. Chapter 3: Advanced Schema Testing Patterns</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_testing_object_schemas_with_additionalproperties"><a class="link" href="#_testing_object_schemas_with_additionalproperties">5.1. Testing Object Schemas with additionalProperties</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># schemas/user.yaml
+type: object
+additionalProperties: false
+required: [id, name, email]
+properties:
+  id:
+    type: string
+    format: uuid
+  name:
+    type: string
+    minLength: 1
+  email:
+    type: string
+    format: email</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Test it thoroughly:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># user.tests.yaml
+version: "1.0.0"
+tests:
+  schemas/user.yaml#/:
+    valid:
+      complete_user:
+        description: "User with all required fields"
+        payload:
+          id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          name: "Alice Example"
+          email: "alice@example.com"
+    invalid:
+      missing_email:
+        description: "Missing required email field"
+        payload:
+          id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          name: "Alice Example"
+      extra_field:
+        description: "Additional property not allowed"
+        payload:
+          id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          name: "Alice Example"
+          email: "alice@example.com"
+          age: 25  # This should be rejected
+      invalid_uuid:
+        description: "Invalid UUID format"
+        payload:
+          id: "not-a-uuid"
+          name: "Alice Example"
+          email: "alice@example.com"</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_testing_boundary_conditions"><a class="link" href="#_testing_boundary_conditions">5.2. Testing Boundary Conditions</a></h3>
+<div class="paragraph">
+<p>For numeric constraints, test the boundaries:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># schemas/age.yaml
+type: integer
+minimum: 0
+maximum: 150</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># age.tests.yaml
+version: "1.0.0"
+tests:
+  schemas/age.yaml#/:
+    valid:
+      minimum_age:
+        description: "Minimum valid age"
+        payload: 0
+      maximum_age:
+        description: "Maximum valid age"
+        payload: 150
+      typical_age:
+        description: "Typical age"
+        payload: 25
+    invalid:
+      negative_age:
+        description: "Below minimum"
+        payload: -1
+      too_old:
+        description: "Above maximum"
+        payload: 151
+      not_integer:
+        description: "Not an integer"
+        payload: 25.5</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_testing_enums"><a class="link" href="#_testing_enums">5.3. Testing Enums</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># schemas/status.yaml
+type: string
+enum: ["draft", "published", "archived"]</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># status.tests.yaml
+version: "1.0.0"
+tests:
+  schemas/status.yaml#/:
+    valid:
+      draft_status:
+        payload: "draft"
+      published_status:
+        payload: "published"
+      archived_status:
+        payload: "archived"
+    invalid:
+      wrong_case:
+        description: "Wrong case should be rejected"
+        payload: "Draft"
+      unknown_status:
+        description: "Status not in enum"
+        payload: "deleted"
+      empty_string:
+        description: "Empty string not in enum"
+        payload: ""</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_chapter_4_working_with_complex_schemas"><a class="link" href="#_chapter_4_working_with_complex_schemas">6. Chapter 4: Working with Complex Schemas</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_testing_oneof_compositions"><a class="link" href="#_testing_oneof_compositions">6.1. Testing oneOf Compositions</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># schemas/contact.yaml
+oneOf:
+  - type: object
+    required: [email]
+    properties:
+      email:
+        type: string
+        format: email
+  - type: object
+    required: [phone]
+    properties:
+      phone:
+        type: string
+        pattern: '^\+[1-9]\d{1,14}$'  # E.164 format</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># contact.tests.yaml
+version: "1.0.0"
+tests:
+  schemas/contact.yaml#/:
+    valid:
+      email_contact:
+        description: "Contact with email only"
+        payload:
+          email: "alice@example.com"
+      phone_contact:
+        description: "Contact with phone only"
+        payload:
+          phone: "+1234567890"
+    invalid:
+      both_fields:
+        description: "Both email and phone (should fail oneOf)"
+        payload:
+          email: "alice@example.com"
+          phone: "+1234567890"
+      neither_field:
+        description: "Neither email nor phone"
+        payload:
+          name: "Alice"
+      invalid_email:
+        description: "Invalid email format"
+        payload:
+          email: "not-an-email"
+      invalid_phone:
+        description: "Invalid phone format"
+        payload:
+          phone: "123"  # Too short for E.164</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_chapter_5_report_generation_and_ci_integration"><a class="link" href="#_chapter_5_report_generation_and_ci_integration">7. Chapter 5: Report Generation and CI Integration</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_available_report_templates"><a class="link" href="#_available_report_templates">7.1. Available Report Templates</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># List all available templates
+teds verify tests.yaml --list-templates
+
+# Available built-in templates:
+# - default.html: Full HTML with syntax highlighting
+# - default.md: Markdown with emoji indicators
+# - default.adoc: AsciiDoc with color coding
+# - summary.html: Compact HTML overview
+# - summary.md: Brief Markdown summary</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_generate_professional_reports"><a class="link" href="#_generate_professional_reports">7.2. Generate Professional Reports</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Generate HTML report
+teds verify sample_tests.yaml --report default.html
+
+# Generate Markdown report
+teds verify sample_tests.yaml --report default.md
+
+# Generate AsciiDoc report
+teds verify sample_tests.yaml --report default.adoc
+
+# Generate compact summary
+teds verify sample_tests.yaml --report summary.md</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_custom_output_paths"><a class="link" href="#_custom_output_paths">7.3. Custom Output Paths</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Specify custom output filenames
+teds verify tests.yaml --report default.html=my_report.html
+teds verify tests.yaml --report summary.md=project_summary.md</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_understanding_report_content"><a class="link" href="#_understanding_report_content">7.4. Understanding Report Content</a></h3>
+<div class="paragraph">
+<p>Reports include:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Executive Summary</strong>: High-level test results with counts</p>
+</li>
+<li>
+<p><strong>Schema Coverage Warnings</strong>: Schemas missing valid or invalid tests</p>
+</li>
+<li>
+<p><strong>Detailed Results</strong>: Complete breakdown by schema with YAML payloads</p>
+</li>
+<li>
+<p><strong>Color-coded Status</strong>: Visual distinction between SUCCESS, WARNING, ERROR</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_output_level_filtering"><a class="link" href="#_output_level_filtering">7.5. Output Level Filtering</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Show only errors (CI-friendly)
+teds verify tests.yaml --output-level error
+
+# Show warnings and errors (default)
+teds verify tests.yaml --output-level warning
+
+# Show everything including successes
+teds verify tests.yaml --output-level all</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_ci_integration"><a class="link" href="#_ci_integration">7.6. CI Integration</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># CI-friendly: only show errors
+teds verify tests/**/*.yaml --output-level error
+
+# Exit code handling
+if teds verify tests/**/*.yaml --output-level error; then
+  echo "All schema tests passed!"
+else
+  case $? in
+    1) echo "Some tests failed - review ERROR cases" ;;
+    2) echo "Hard failure - check configuration/schemas" ;;
+  esac
+fi</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_in_place_updates"><a class="link" href="#_in_place_updates">7.7. In-Place Updates</a></h3>
+<div class="paragraph">
+<p>Keep test files clean and normalized:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Update test files with results
+teds verify my_tests.yaml --in-place
+
+# This updates only the 'tests' section, preserving version and comments</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_chapter_6_advanced_features"><a class="link" href="#_chapter_6_advanced_features">8. Chapter 6: Advanced Features</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_using_multiple_test_files"><a class="link" href="#_using_multiple_test_files">8.1. Using Multiple Test Files</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Verify multiple specifications
+teds verify user.tests.yaml product.tests.yaml order.tests.yaml
+
+# Generate reports for multiple files
+teds verify tests/*.yaml --report default.html</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_network_access_for_remote_schemas"><a class="link" href="#_network_access_for_remote_schemas">8.2. Network Access for Remote Schemas</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Enable network access for remote $ref resolution
+teds verify spec.yaml --allow-network
+
+# With custom timeouts
+TEDS_NETWORK_TIMEOUT=10 teds verify spec.yaml --allow-network</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_parse_payload_string_to_object_conversion"><a class="link" href="#_parse_payload_string_to_object_conversion">8.3. Parse Payload: String-to-Object Conversion</a></h3>
+<div class="paragraph">
+<p>Use <code>parse_payload: true</code> to parse string payloads as YAML/JSON before validation:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">tests:
+  schema.yaml#/User:
+    valid:
+      complex_from_string:
+        description: "User from JSON string"
+        parse_payload: true
+        payload: '{"id":"123","name":"Alice","email":"alice@example.com"}'
+
+      api_response_format:
+        description: "Testing JSON strings within YAML (common in API responses)"
+        parse_payload: true
+        payload: '{"user": {"profile": {"name": "Bob", "settings": {"theme": "dark"}}}}'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>When to use:</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Complex objects as JSON strings (e.g., from API responses)</p>
+</li>
+<li>
+<p>Testing JSON strings that come from external systems</p>
+</li>
+<li>
+<p>When you need to test string-encoded JSON data</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>Important</strong>: When <code>parse_payload: true</code>, the payload must be a string that contains valid YAML/JSON.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_template_variables_for_custom_output_paths"><a class="link" href="#_template_variables_for_custom_output_paths">8.4. Template Variables for Custom Output Paths</a></h3>
+<div class="paragraph">
+<p>Control where generated test files are created using template variables:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Available template variables (JSON Pointer only - not JSON Path)
+teds generate schema.yaml#/components/schemas --target-template "{base}.{pointer}.custom.yaml"
+
+# Variables:
+# {file}     - schema.yaml
+# {base}     - schema
+# {ext}      - yaml
+# {dir}      - directory path
+# {pointer}  - components+schemas (sanitized)
+# {index}    - 1, 2, 3... (for multiple targets)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Important</strong>: Template variables only work with JSON Pointer syntax (<code>#/path</code>), not with JSON Path (<code>--json-path</code>).</p>
+</div>
+<div class="sect3">
+<h4 id="_pointer_sanitization_with_plus_signs"><a class="link" href="#_pointer_sanitization_with_plus_signs">8.4.1. Pointer Sanitization with Plus Signs</a></h4>
+<div class="paragraph">
+<p>The <code>{pointer}</code> variable automatically converts JSON Pointer slashes to plus signs for safe filenames:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># JSON Pointer: #/components/schemas/User
+# Sanitized:    components+schemas+User
+teds generate api.yaml#/components/schemas/User
+# Creates: api.components+schemas+User.tests.yaml
+
+# JSON Pointer: #/$defs/Address
+# Sanitized:    $defs+Address
+teds generate schema.yaml#/$defs/Address
+# Creates: schema.$defs+Address.tests.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Why sanitization?</strong> Slashes (<code>/</code>) are directory separators in file systems, so <code>components/schemas/User</code> would create subdirectories. The plus sign (<code>+</code>) replacement ensures the entire pointer becomes part of the filename, keeping all generated files in the same directory while preserving the hierarchical information from the JSON Pointer.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_configuration_files_for_complex_generation"><a class="link" href="#_configuration_files_for_complex_generation">8.5. Configuration Files for Complex Generation</a></h3>
+<div class="paragraph">
+<p>Use YAML configuration files for complex generation scenarios:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># generation-config.yaml
+api_spec.yaml:
+  paths: ["/components/schemas", "/components/responses"]
+  target: "api_validation.tests.yaml"
+
+legacy_schema.yaml: ["/definitions"]</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">teds generate @generation-config.yaml</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_warning_system"><a class="link" href="#_warning_system">8.6. Warning System</a></h3>
+<div class="paragraph">
+<p>Tests can include user warnings and TeDS generates system warnings:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">tests:
+  schema.yaml#/Email:
+    valid:
+      deprecated_format:
+        payload: "user@company.co.uk"
+        warnings: ["This email format will be deprecated in v2.0"]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>System warnings</strong> appear automatically for format divergence issues (when different validators disagree about <code>format</code> constraints).</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_chapter_7_environment_configuration_and_exit_codes"><a class="link" href="#_chapter_7_environment_configuration_and_exit_codes">9. Chapter 7: Environment Configuration and Exit Codes</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_environment_variables"><a class="link" href="#_environment_variables">9.1. Environment Variables</a></h3>
+<div class="paragraph">
+<p>Configure TeDS behavior via environment variables:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Network settings
+export TEDS_NETWORK_TIMEOUT=10        # seconds (default: 5)
+export TEDS_NETWORK_MAX_BYTES=10485760 # bytes (default: 5MB)
+
+# Use in commands
+teds verify remote_specs.yaml --allow-network</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_exit_codes_for_ci_integration"><a class="link" href="#_exit_codes_for_ci_integration">9.2. Exit Codes for CI Integration</a></h3>
+<div class="paragraph">
+<p>TeDS uses semantic exit codes for automation:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>0</strong>: All tests passed</p>
+</li>
+<li>
+<p><strong>1</strong>: Some tests failed (ERROR results)</p>
+</li>
+<li>
+<p><strong>2</strong>: Hard failures (file not found, invalid YAML, etc.)</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># CI script example
+if teds verify tests/*.yaml --output-level error; then
+  echo "✅ All schema contracts validated"
+else
+  exit_code=$?
+  case $exit_code in
+    1) echo "❌ Schema validation failures found" ;;
+    2) echo "🚨 Configuration or file errors" ;;
+  esac
+  exit $exit_code
+fi</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_chapter_8_best_practices_and_common_patterns"><a class="link" href="#_chapter_8_best_practices_and_common_patterns">10. Chapter 8: Best Practices and Common Patterns</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_test_organization"><a class="link" href="#_test_organization">10.1. Test Organization</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">project/
+├── schemas/
+│   ├── user.yaml
+│   ├── product.yaml
+│   └── order.yaml
+├── tests/
+│   ├── user.tests.yaml
+│   ├── product.tests.yaml
+│   └── order.tests.yaml
+└── docs/
+    └── api-validation-report.html</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_naming_conventions"><a class="link" href="#_naming_conventions">10.2. Naming Conventions</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Use descriptive test case names: <code>valid_email_with_subdomain</code> vs <code>test1</code></p>
+</li>
+<li>
+<p>Include purpose in descriptions: <code>"Email without @ symbol should be rejected"</code></p>
+</li>
+<li>
+<p>Group related schemas in the same test file when logical</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_version_management"><a class="link" href="#_version_management">10.3. Version Management</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Always specify <code>version: "1.0.0"</code> in testspecs</p>
+</li>
+<li>
+<p>Keep testspecs in version control alongside schemas</p>
+</li>
+<li>
+<p>Use <code>--in-place</code> updates to maintain clean, reviewable diffs</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_schema_evolution"><a class="link" href="#_schema_evolution">10.4. Schema Evolution</a></h3>
+<div class="paragraph">
+<p>When updating schemas:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>First</strong> add new test cases that capture the intended behavior</p>
+</li>
+<li>
+<p><strong>Then</strong> update the schema to satisfy the new tests</p>
+</li>
+<li>
+<p><strong>Finally</strong> run all tests to ensure no regressions</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_common_pitfalls"><a class="link" href="#_common_pitfalls">10.5. Common Pitfalls</a></h3>
+<div class="paragraph">
+<p><strong>Format vs Pattern Issues</strong>: If you see unexpected <code>WARNING</code> or <code>ERROR</code> results related to <code>format</code> constraints (like <code>format: email</code>, <code>format: date-time</code>, etc.), this is <strong>not a TeDS tool problem</strong>. Different JSON Schema validators handle <code>format</code> differently - some enforce it strictly, others treat it as advisory. This is a known JSON Schema ecosystem issue. Use <code>pattern</code> for strict validation:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># Weak - format may not be enforced by all validators
+type: string
+format: email
+
+# Strong - pattern ensures consistent validation across validators
+type: string
+format: email
+pattern: '^[^@]+@[^@]+\.[^@]+$'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>additionalProperties</strong>: Always be explicit:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># Ambiguous - might allow extra properties
+type: object
+properties:
+  name: {type: string}
+
+# Clear - extra properties forbidden
+type: object
+additionalProperties: false
+properties:
+  name: {type: string}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Boundary Testing</strong>: Test edge cases:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># For minimum: 1, test 0, 1, 2
+# For maximum: 100, test 99, 100, 101
+# For minLength: 3, test "", "ab", "abc", "abcd"</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_chapter_9_roundtrip_workflow_edit_and_reuse_verification_output"><a class="link" href="#_chapter_9_roundtrip_workflow_edit_and_reuse_verification_output">11. Chapter 9: Roundtrip Workflow - Edit and Reuse Verification Output</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>One of TeDS&#8217;s powerful features is <strong>roundtrip capability</strong>: verification output can be edited and reused as input, especially when combined with the <code>--in-place</code> flag.</p>
+</div>
+<div class="sect2">
+<h3 id="_basic_roundtrip_workflow"><a class="link" href="#_basic_roundtrip_workflow">11.1. Basic Roundtrip Workflow</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># 1. Run verification and save output
+teds verify my_tests.yaml &gt; verification_results.yaml
+
+# 2. Edit the results file to add new test cases or modify existing ones
+# (The output format is valid TeDS input format)
+
+# 3. Use edited results as new input
+teds verify verification_results.yaml --in-place</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_practical_example_expanding_test_coverage"><a class="link" href="#_practical_example_expanding_test_coverage">11.2. Practical Example: Expanding Test Coverage</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Start with basic tests
+teds verify user.tests.yaml --in-place
+
+# This updates user.tests.yaml with results. Now you can:
+# 1. Add more test cases directly to user.tests.yaml
+# 2. Copy successful patterns to new test sections
+# 3. Incrementally build comprehensive test suites
+
+# Re-run verification to validate new additions
+teds verify user.tests.yaml --in-place</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_advanced_roundtrip_pattern"><a class="link" href="#_advanced_roundtrip_pattern">11.3. Advanced Roundtrip Pattern</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Generate initial tests from schema
+teds generate schemas.yaml#/components/schemas &gt; user_generated.tests.yaml
+
+# Add manual test cases to generated file
+# (Edit user_generated.tests.yaml to add invalid cases)
+
+# Verify and clean up with in-place updates
+teds verify user_generated.tests.yaml --in-place
+
+# The file is now a clean, validated test specification
+# ready for version control and CI integration</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_benefits_of_roundtrip_workflow"><a class="link" href="#_benefits_of_roundtrip_workflow">11.4. Benefits of Roundtrip Workflow</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Iterative Development</strong>: Build test suites incrementally</p>
+</li>
+<li>
+<p><strong>Clean Output</strong>: <code>--in-place</code> normalizes formatting and removes temporary fields</p>
+</li>
+<li>
+<p><strong>Version Control Friendly</strong>: Consistent file format for meaningful diffs</p>
+</li>
+<li>
+<p><strong>Team Collaboration</strong>: Share test results that others can extend and modify</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion"><a class="link" href="#_conclusion">12. Conclusion</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You now know how to:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Create comprehensive test specifications for JSON Schemas</p>
+</li>
+<li>
+<p>Generate initial tests from schema examples using JSON Pointer syntax</p>
+</li>
+<li>
+<p>Test complex scenarios like oneOf, boundaries, and formats</p>
+</li>
+<li>
+<p>Generate professional validation reports</p>
+</li>
+<li>
+<p>Integrate TeDS into CI/CD pipelines</p>
+</li>
+<li>
+<p>Use roundtrip workflows for iterative test development</p>
+</li>
+<li>
+<p>Follow best practices for maintainable schema testing</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>TeDS helps you catch schema issues early and maintain high-quality API contracts. Use it to build confidence in your schema definitions and create living documentation for your APIs.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_next_steps"><a class="link" href="#_next_steps">13. Next Steps</a></h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Explore example directories for more patterns</p>
+</li>
+<li>
+<p>Set up TeDS in your CI pipeline</p>
+</li>
+<li>
+<p>Contribute test cases for edge cases you discover</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2025-09-22 22:33:06 +0200
+</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
+<script>
+if (!hljs.initHighlighting.called) {
+  hljs.initHighlighting.called = true
+  ;[].slice.call(document.querySelectorAll('pre.highlight > code[data-lang]')).forEach(function (el) { hljs.highlightBlock(el) })
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,232 @@
+/* Custom CSS for TeDS Tutorial with Fixed Sidebar TOC */
+
+/* Base styling for better readability */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* Layout: Fixed TOC sidebar with scrollable content */
+body.toc2.toc-left {
+    padding-left: 0;
+}
+
+/* Fixed TOC Sidebar */
+#toc.toc2 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 300px;
+    height: 100vh;
+    overflow-y: auto;
+    background: #f8f9fa;
+    border-right: 1px solid #e9ecef;
+    padding: 20px;
+    box-sizing: border-box;
+    z-index: 1000;
+    font-size: 14px;
+}
+
+/* TOC title styling */
+#toctitle {
+    font-weight: 600;
+    font-size: 16px;
+    color: #495057;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #007bff;
+}
+
+/* TOC list styling */
+#toc ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin: 5px 0;
+}
+
+#toc .sectlevel2, #toc .sectlevel3 {
+    padding-left: 15px;
+}
+
+#toc .sectlevel3 {
+    padding-left: 30px;
+}
+
+/* TOC link styling */
+#toc a {
+    color: #495057;
+    text-decoration: none;
+    display: block;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+#toc a:hover {
+    background: #e9ecef;
+    color: #007bff;
+}
+
+#toc a:active, #toc a.active {
+    background: #007bff;
+    color: white;
+}
+
+/* Main content area */
+#content {
+    margin-left: 320px;
+    padding: 40px;
+    max-width: 900px;
+}
+
+/* Header styling */
+#header {
+    margin-left: 320px;
+    padding: 40px 40px 20px 40px;
+    border-bottom: 1px solid #e9ecef;
+    background: white;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+#header h1 {
+    margin: 0;
+    color: #212529;
+    font-size: 2.5rem;
+    font-weight: 300;
+}
+
+/* Section styling */
+.sect1, .sect2, .sect3 {
+    margin-bottom: 2rem;
+}
+
+.sect1 > h2, .sect2 > h3, .sect3 > h4 {
+    color: #495057;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 0.5rem;
+    margin-top: 2rem;
+}
+
+/* Code blocks */
+.listingblock .content {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 16px;
+    overflow-x: auto;
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* Inline code */
+code {
+    background: #f1f3f4;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+    font-size: 0.9em;
+    color: #d73a49;
+}
+
+/* Notes and warnings */
+.admonitionblock {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    border-left: 4px solid #007bff;
+    background: #f8f9fa;
+    border-radius: 0 6px 6px 0;
+}
+
+.admonitionblock.warning {
+    border-left-color: #ffc107;
+    background: #fff3cd;
+}
+
+.admonitionblock.important {
+    border-left-color: #dc3545;
+    background: #f8d7da;
+}
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+}
+
+th, td {
+    border: 1px solid #e9ecef;
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    background: #f8f9fa;
+    font-weight: 600;
+}
+
+/* Links */
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+    #toc.toc2 {
+        width: 250px;
+    }
+
+    #content, #header {
+        margin-left: 270px;
+    }
+}
+
+@media (max-width: 768px) {
+    #toc.toc2 {
+        position: static;
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    #content, #header {
+        margin-left: 0;
+        padding: 20px;
+    }
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Print styles */
+@media print {
+    #toc.toc2 {
+        position: static;
+        width: 100%;
+        height: auto;
+        page-break-after: always;
+    }
+
+    #content, #header {
+        margin-left: 0;
+    }
+}
