@@ -68,13 +68,19 @@ class VerifyCommand(Command):
 
     def _handle_report_mode(self, args: argparse.Namespace) -> int:
         """Handle verification with report generation."""
-        # Parse TEMPLATE_ID or TEMPLATE_ID=OUTFILE
-        report_arg = args.report
-        tpl_id, out_override = (
-            ([*report_arg.split("=", 1), None])[:2]
-            if "=" in report_arg
-            else (report_arg, None)
-        )
+        try:
+            # Parse TEMPLATE_ID or TEMPLATE_ID=OUTFILE
+            report_arg = args.report
+            tpl_id, out_override = (
+                ([*report_arg.split("=", 1), None])[:2]
+                if "=" in report_arg
+                else (report_arg, None)
+            )
+        except Exception:
+            import traceback
+
+            traceback.print_exc(file=sys.stderr)
+            return 2
 
         from .report import resolve_template, run_report_per_spec
 
@@ -84,35 +90,40 @@ class VerifyCommand(Command):
             print(str(e), file=sys.stderr)
             return 2
 
-        pairs, rc = run_report_per_spec(
-            [Path(s) for s in args.spec], tpl_id, args.output_level
-        )
-        multi = len(pairs) > 1
+        try:
+            pairs, rc = run_report_per_spec(
+                [Path(s) for s in args.spec], tpl_id, args.output_level
+            )
+            multi = len(pairs) > 1
 
-        for sp, content in pairs:
-            if out_override:
-                if multi:
-                    print(
-                        "Explicit output path is only supported with a single SPEC",
-                        file=sys.stderr,
+            for sp, content in pairs:
+                if out_override:
+                    if multi:
+                        print(
+                            "Explicit output path is only supported with a single SPEC",
+                            file=sys.stderr,
+                        )
+                        return 2
+                    out_path = Path(out_override)
+                else:
+                    base = sp.stem
+                    # Extract extension from template name, default to .md
+                    tpl_parts = tpl_id.split(".")
+                    ext = f".{tpl_parts[-1]}" if len(tpl_parts) > 1 else ".md"
+                    tbase = tpl_parts[0]
+                    name = (
+                        f"{base}.report{ext}"
+                        if not multi
+                        else f"{base}.{tbase}.report{ext}"
                     )
-                    return 2
-                out_path = Path(out_override)
-            else:
-                base = sp.stem
-                # Extract extension from template name, default to .md
-                tpl_parts = tpl_id.split(".")
-                ext = f".{tpl_parts[-1]}" if len(tpl_parts) > 1 else ".md"
-                tbase = tpl_parts[0]
-                name = (
-                    f"{base}.report{ext}"
-                    if not multi
-                    else f"{base}.{tbase}.report{ext}"
-                )
-                out_path = sp.parent / name
+                    out_path = sp.parent / name
+                out_path.parent.mkdir(parents=True, exist_ok=True)
+                out_path.write_text(content, encoding="utf-8")
+        except Exception:
+            import traceback
 
-            out_path.parent.mkdir(parents=True, exist_ok=True)
-            out_path.write_text(content, encoding="utf-8")
+            traceback.print_exc(file=sys.stderr)
+            return 2
 
         return rc
 
