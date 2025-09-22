@@ -586,10 +586,10 @@ teds --version</code></pre>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Clone and setup for development
-git clone &lt;repository&gt;
-cd &lt;project-directory&gt;
+git clone https://github.com/yaccob/teds.git
+cd teds
 python3 -m venv .venv &amp;&amp; . .venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements.txt -r requirements-dev.txt
 
 # Verify installation
 ./teds.py --version</code></pre>
@@ -1703,7 +1703,7 @@ teds verify user_generated.tests.yaml --in-place
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-09-22 22:50:45 +0200
+Last updated 2025-09-22 23:59:50 +0200
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
