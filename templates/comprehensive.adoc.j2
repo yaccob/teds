@@ -125,7 +125,10 @@ No test cases found in the specification. Consider adding test cases to validate
 
 {% for case_name, case_data in valid_cases.items() %}
 | `{{ case_name }}`
-| `{{ case_data.payload | tojson if case_data.payload is defined else "undefined" | truncate(80) }}`
+a| [source,json]
+----
+{{ case_data.payload | tojson(2) if case_data.payload is defined else "undefined" }}
+----
 {% if case_data.result == "SUCCESS" %}
 | [green]#✓ SUCCESS#
 {% elif case_data.result == "WARNING" %}
@@ -157,7 +160,10 @@ WARNING: {{ warning.generated | truncate(100) }}
 
 {% for case_name, case_data in invalid_cases.items() %}
 | `{{ case_name }}`
-| `{{ case_data.payload | tojson if case_data.payload is defined else "undefined" | truncate(80) }}`
+a| [source,json]
+----
+{{ case_data.payload | tojson(2) if case_data.payload is defined else "undefined" }}
+----
 {% if case_data.result == "SUCCESS" %}
 | [green]#✓ SUCCESS#
 {% elif case_data.result == "WARNING" %}
