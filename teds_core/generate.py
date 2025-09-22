@@ -11,6 +11,7 @@ from ruamel.yaml.comments import CommentedMap
 
 from .errors import TedsError
 from .refs import collect_examples, join_fragment, resolve_schema_node
+from .version import RECOMMENDED_TESTSPEC_VERSION
 from .yamlio import yaml_dumper, yaml_loader
 
 
@@ -32,6 +33,11 @@ def generate_exact_node(node_ref: str, testspec_path: Path) -> None:
             ) from e
     else:
         doc = {}
+
+    # Ensure version field is present for new documents
+    if "version" not in doc:
+        doc["version"] = RECOMMENDED_TESTSPEC_VERSION
+
     tests = doc.get("tests")
     if not isinstance(tests, dict):
         tests = {}
@@ -77,6 +83,11 @@ def generate_from(parent_ref: str, testspec_path: Path) -> None:
             ) from e
     else:
         doc = {}
+
+    # Ensure version field is present for new documents
+    if "version" not in doc:
+        doc["version"] = RECOMMENDED_TESTSPEC_VERSION
+
     tests = doc.get("tests")
     if not isinstance(tests, dict):
         tests = {}
