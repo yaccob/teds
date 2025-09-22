@@ -215,6 +215,32 @@ def test_new_feature():
 
 **Key principle:** Tests should verify that the implementation works correctly, not that it fails as expected. Tests define the contract/specification that the code must fulfill.
 
+## 🚨 MANDATORY TDD WORKFLOW
+
+**ALWAYS follow this exact sequence - NO EXCEPTIONS:**
+
+1. **Test First (ALWAYS)**: Write the test that describes the desired functionality
+2. **Test Must Fail**: Run the test to verify it fails (due to missing implementation)
+3. **Implement Fix**: Write only the production code needed to make the test pass
+4. **Test Must Pass**: Verify the test now passes
+5. **NEVER Modify Test**: Once implementation is done, NEVER change the test
+
+**This is non-negotiable TDD and must be followed permanently.**
+
+**Example workflow:**
+```bash
+# 1. Write failing test
+pytest tests/unit/test_new_feature.py::test_my_feature -v  # Must fail
+
+# 2. Implement fix in production code
+# Edit the actual implementation files
+
+# 3. Verify test passes
+pytest tests/unit/test_new_feature.py::test_my_feature -v  # Must pass
+
+# 4. NEVER touch the test again
+```
+
 ## Recent Development History
 
 **Major features completed:**
