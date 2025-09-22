@@ -285,3 +285,49 @@ class TestJsonPathExactBehavior:
         assert set(result_wildcard) == set(
             expected_wildcard
         ), f"Explicit wildcard should iterate, got: {result_wildcard}"
+
+    def test_path_resolution_with_subdirectory_schema(self, tmp_path: Path):
+        """Test path resolution with schemas in subdirectories.
+
+        When schemas are in subdirectories, generated references should use
+        relative paths from the schema file location.
+        """
+        # Create subdirectory with schema
+        sub = tmp_path / "schemas"
+        sub.mkdir()
+        schema = sub / "api.yaml"
+        schema.write_text(
+            """
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        name:
+          type: string
+          examples: ["John"]
+        age:
+          type: integer
+          examples: [25]
+""",
+            encoding="utf-8",
+        )
+
+        # Test JSONPath expressions with schema in subdirectory
+        result = expand_jsonpath_expressions(
+            schema,
+            [
+                "$.components.schemas.User.properties",
+                "$.components.schemas.User.properties.name",
+            ],
+        )
+
+        # Should generate relative paths from schema file location
+        expected = [
+            "api.yaml#/components/schemas/User/properties",
+            "api.yaml#/components/schemas/User/properties/name",
+        ]
+
+        assert set(result) == set(
+            expected
+        ), f"Expected relative paths {expected}, got: {result}"

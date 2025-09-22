@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import re
 import sys
 from pathlib import Path
@@ -20,6 +21,52 @@ def _ensure_group(group: Any) -> dict[str, Any]:
     return group
 
 
+def generate_exact_node(node_ref: str, testspec_path: Path) -> None:
+    """Generate a test for the exact referenced node without expanding children."""
+    if testspec_path.exists():
+        try:
+            doc = yaml_loader.load(testspec_path.read_text(encoding="utf-8")) or {}
+        except Exception as e:
+            raise TedsError(
+                f"Failed to read or create testspec: {testspec_path}\n  error: {type(e).__name__}: {e}"
+            ) from e
+    else:
+        doc = {}
+    tests = doc.get("tests")
+    if not isinstance(tests, dict):
+        tests = {}
+        doc["tests"] = tests
+
+    base_dir = testspec_path.parent
+
+    # Create test only for the exact referenced node (no children expansion)
+    group = _ensure_group(tests.get(node_ref))
+    tests[node_ref] = group
+
+    # Add examples if available
+    ex_list = collect_examples(base_dir, node_ref)
+    if ex_list:
+        vm = group.get("valid")
+        if not isinstance(vm, dict):
+            vm = CommentedMap()
+        elif not isinstance(vm, CommentedMap):
+            vm = CommentedMap(vm)
+
+        missing = [(ek, ep) for ek, ep in ex_list if ek not in vm]
+        for ek, ep in reversed(missing):
+            vm.insert(0, ek, {"payload": ep, "from_examples": True})
+
+        group["valid"] = vm
+
+    try:
+        with testspec_path.open("w", encoding="utf-8") as fh:
+            yaml_dumper.dump(doc, fh)
+    except Exception as e:
+        raise TedsError(
+            f"Failed to write testspec: {testspec_path}\n  error: {type(e).__name__}: {e}"
+        ) from e
+
+
 def generate_from(parent_ref: str, testspec_path: Path) -> None:
     if testspec_path.exists():
         try:
@@ -36,12 +83,33 @@ def generate_from(parent_ref: str, testspec_path: Path) -> None:
         doc["tests"] = tests
 
     base_dir = testspec_path.parent
+
+    # Try to resolve the schema reference
     try:
         parent_node, parent_frag = resolve_schema_node(base_dir, parent_ref)
-    except Exception as e:
-        raise TedsError(
-            f"Failed to resolve parent schema ref: {parent_ref}\n  base_dir: {base_dir}\n  error: {type(e).__name__}: {e}"
-        ) from e
+    except Exception as first_error:
+        # If the reference is relative and fails, try to find the schema file
+        file_part = parent_ref.split("#")[0]
+        if not Path(file_part).is_absolute():
+            # Search for the schema file in the directory tree
+            schema_path = _find_schema_file(base_dir, file_part)
+            if schema_path:
+                # Update base_dir to the schema's directory and try again
+                base_dir = schema_path.parent
+                try:
+                    parent_node, parent_frag = resolve_schema_node(base_dir, parent_ref)
+                except Exception as second_error:
+                    raise TedsError(
+                        f"Failed to resolve parent schema ref: {parent_ref}\n  base_dir: {base_dir}\n  error: {type(second_error).__name__}: {second_error}"
+                    ) from second_error
+            else:
+                raise TedsError(
+                    f"Failed to resolve parent schema ref: {parent_ref}\n  base_dir: {base_dir}\n  error: {type(first_error).__name__}: {first_error}"
+                ) from first_error
+        else:
+            raise TedsError(
+                f"Failed to resolve parent schema ref: {parent_ref}\n  base_dir: {base_dir}\n  error: {type(first_error).__name__}: {first_error}"
+            ) from first_error
     file_part, _, _ = parent_ref.partition("#")
     if not isinstance(parent_node, dict):
         try:
@@ -53,6 +121,7 @@ def generate_from(parent_ref: str, testspec_path: Path) -> None:
             ) from e
         return
 
+    # Create tests for children of the referenced node (standard behavior)
     for child_key in parent_node:
         child_fragment = join_fragment(parent_frag, child_key)
         child_ref = f"{file_part}#/{child_fragment}"
@@ -194,6 +263,25 @@ def validate_jsonpath_expression(expr: str) -> None:
             raise TedsError(f"Invalid JsonPath expression: {expr}")
 
 
+def _find_schema_file(base_dir: Path, filename: str) -> Path | None:
+    """Find a schema file by searching in subdirectories.
+
+    Searches for the file starting from base_dir and walking through subdirectories.
+    Returns the first match found, or None if not found.
+    """
+    # First check current directory
+    candidate = base_dir / filename
+    if candidate.exists():
+        return candidate
+
+    # Search in subdirectories
+    for root, _dirs, files in os.walk(base_dir):
+        if filename in files:
+            return Path(root) / filename
+
+    return None
+
+
 def expand_jsonpath_expressions(source_file: Path, expressions: list[str]) -> list[str]:
     """Expand JsonPath expressions to concrete JSON Pointer references.
 
@@ -215,9 +303,8 @@ def expand_jsonpath_expressions(source_file: Path, expressions: list[str]) -> li
         if "#" in expr:
             file_part, fragment = expr.split("#", 1)
             if "*" not in fragment:
-                # No wildcards, use as-is
-                expanded.append(expr)
-                continue
+                # No wildcards - append wildcard for backward compatibility (children expansion)
+                expr = f"{file_part}#{fragment}/*" if fragment else f"{file_part}#/*"
 
             # Convert JSON Pointer to JsonPath format for expansion
             jsonpath_expr = fragment.lstrip("/")
@@ -332,13 +419,13 @@ def generate_from_source_config(
 
         # Determine target file
         if source_config["target"]:
-            # Explicit target with possible {base} template resolution
+            # Explicit target: relative to cwd (standard CLI behavior)
             target_name = source_config["target"].replace("{base}", source_file.stem)
+            target_path = base_dir / target_name
         else:
-            # Default: {base}.tests.yaml
+            # Default: {base}.tests.yaml next to schema file
             target_name = f"{source_file.stem}.tests.yaml"
-
-        target_path = base_dir / target_name
+            target_path = source_file.parent / target_name
 
         # Expand JsonPath expressions for this source
         expanded_refs = expand_jsonpath_expressions(source_file, source_config["paths"])
@@ -360,9 +447,9 @@ def generate_from_source_config(
                 seen.add(ref)
                 unique_refs.append(ref)
 
-        # Generate tests for each unique reference
+        # Generate tests for each unique reference (exact nodes only, no children expansion)
         for ref in unique_refs:
             try:
-                generate_from(ref, target_path)
+                generate_exact_node(ref, target_path)
             except Exception as e:
                 print(f"Warning: Failed to generate from '{ref}': {e}", file=sys.stderr)

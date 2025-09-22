@@ -29,3 +29,43 @@ components:
     # Should contain direct children A and B groups
     keys = list(doc["tests"].keys())
     assert any(str(schema) in k for k in keys)
+
+
+def test_generate_from_with_relative_reference_in_subdirectory(tmp_path: Path):
+    """Test generate_from() with relative schema reference in subdirectory."""
+    # Create schema in subdirectory
+    subdir = tmp_path / "schemas"
+    subdir.mkdir()
+    schema = subdir / "api.yaml"
+    schema.write_text(
+        """
+$defs:
+  User:
+    type: object
+    properties:
+      name:
+        type: string
+        examples: ["John"]
+""",
+        encoding="utf-8",
+    )
+
+    # Create testspec file in project root
+    testspec = tmp_path / "api.tests.yaml"
+
+    # Should successfully resolve relative reference and generate tests
+    generate_from("api.yaml#/$defs/User/properties/name", testspec)
+
+    # Verify testspec was created and contains expected content
+    assert testspec.exists()
+    doc = load_yaml_file(testspec)
+    assert "tests" in doc
+    tests = doc["tests"]
+
+    # generate_from() creates tests for children of the referenced node
+    expected_tests = [
+        "api.yaml#/$defs/User/properties/name/type",
+        "api.yaml#/$defs/User/properties/name/examples",
+    ]
+    for expected_test in expected_tests:
+        assert expected_test in tests
