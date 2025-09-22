@@ -1,0 +1,14 @@
+version: "1.0.0"
+tests:
+  public_schemas.yaml#/components/schemas/EmailContact:
+    valid:
+      example ok:
+        payload:
+          email: alice@example.com
+    # Missing invalid cases
+  public_schemas.yaml#/components/schemas/ISODateTime:
+    invalid:
+      missing timezone:
+        payload: "2024-08-01T12:34:56"
+    # Missing valid cases
+  public_schemas.yaml#/components/schemas/CurrencyAmount: {}
