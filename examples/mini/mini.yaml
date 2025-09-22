@@ -1,0 +1,14 @@
+$defs:
+  something:
+    type: string
+    pattern: '^something.*$'
+    examples:
+      - "something"
+      - "something else"
+schemas:
+  something:
+    type: string
+    pattern: '^something.*$'
+    examples:
+      - "something"
+      - "something else"

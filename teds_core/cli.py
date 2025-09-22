@@ -142,10 +142,43 @@ class GenerateCommand(Command):
                     generate_from_source_config(config, base_dir)
                 else:
                     # Backward compatibility: JSON Pointer string
-                    pairs = _plan_pairs([mapping_str])
-                    for ref, outp in pairs:
-                        outp.parent.mkdir(parents=True, exist_ok=True)
-                        generate_from(ref, outp)
+                    # Use the old generate_from system for children expansion
+                    ref_str, target = _split_ref(mapping_str)
+
+                    # Use the old system with children expansion
+                    if target:
+                        # Parse ref to get components for template expansion
+                        file_part, pointer = _parse_ref(ref_str)
+                        # Expand templates in target path
+                        expanded_target = _expand_target_template(
+                            target, file_part, pointer
+                        )
+                        target_path = Path(expanded_target)
+
+                        # If target ends with /, treat as directory and use default filename
+                        if target.endswith("/"):
+                            base = Path(file_part).stem
+                            default_name = _default_filename(base, pointer)
+                            target_path = target_path / default_name
+
+                        abs_ref_str = (
+                            ref_str  # Use original ref when target is specified
+                        )
+                    else:
+                        file_part, pointer = _parse_ref(ref_str)
+                        base = Path(file_part).stem
+                        # Use absolute path to avoid double directory resolution
+                        if Path(file_part).is_absolute():
+                            schema_dir = Path(file_part).parent
+                            abs_ref_str = ref_str
+                        else:
+                            schema_dir = Path.cwd() / Path(file_part).parent
+                            # Convert relative ref to absolute ref for generate_from
+                            abs_file_part = str(Path.cwd() / file_part)
+                            abs_ref_str = f"{abs_file_part}#{pointer}"
+                        target_path = schema_dir / _default_filename(base, pointer)
+
+                    generate_from(abs_ref_str, target_path)
         except TedsError as e:
             print(str(e), file=sys.stderr)
             return 2
@@ -236,15 +269,59 @@ def _tokens_for_mapping(file_part: str, pointer: str, out_index: int) -> dict:
     }
 
 
-def _default_filename(base: str, pointer: str) -> str:
+def _default_filename(base: str, pointer: str, exact_ref: bool = False) -> str:
+    if exact_ref:
+        # For exact references, always use base filename
+        return f"{base}.tests.yaml"
+
     pointer_raw = pointer.lstrip("/")
     if not pointer_raw:
         return f"{base}.tests.yaml"
     return f"{base}.{_sanitize(pointer_raw)}.tests.yaml"
 
 
+def _expand_target_template(target: str, file_part: str, pointer: str) -> str:
+    """Expand template variables in target path."""
+    import urllib.parse
+
+    file_path = Path(file_part)
+    base = file_path.stem
+    ext = file_path.suffix.lstrip(".")
+    file_name = file_path.name
+    dir_name = str(file_path.parent) if file_path.parent != Path(".") else ""
+
+    pointer_raw = pointer.lstrip("/")
+    pointer_sanitized = _sanitize(pointer_raw)
+    pointer_strict = urllib.parse.quote(pointer_raw, safe="")
+
+    # Template variables
+    variables = {
+        "base": base,
+        "ext": ext,
+        "file": file_name,
+        "dir": dir_name,
+        "pointer": pointer_sanitized,
+        "pointer_raw": pointer_raw,
+        "pointer_strict": pointer_strict,
+        "index": "1",  # Single ref, so index is always 1
+    }
+
+    # Expand templates
+    expanded = target
+    for var, value in variables.items():
+        expanded = expanded.replace(f"{{{var}}}", value)
+
+    return expanded
+
+
 def _plan_pairs(mappings: list[str]) -> list[tuple[str, Path]]:
     pairs: list[tuple[str, Path]] = []
+
+    # Check if this is a single exact reference (for exact node behavior)
+    is_single_exact = (
+        len(mappings) == 1 and "#" in mappings[0] and "*" not in mappings[0]
+    )
+
     for i, m in enumerate(mappings, start=1):
         ref_str, target = _split_ref(m)
         file_part, pointer = _parse_ref(ref_str)
@@ -253,7 +330,9 @@ def _plan_pairs(mappings: list[str]) -> list[tuple[str, Path]]:
         schema_dir = Path(file_part).resolve().parent
 
         if target is None:
-            out_path = schema_dir / _default_filename(toks["base"], pointer)
+            out_path = schema_dir / _default_filename(
+                toks["base"], pointer, exact_ref=is_single_exact
+            )
         else:
             target_fmt = target.format(**toks) if "{" in target else target
             base_target = Path(target_fmt)
@@ -261,7 +340,9 @@ def _plan_pairs(mappings: list[str]) -> list[tuple[str, Path]]:
                 base_target if base_target.is_absolute() else (schema_dir / base_target)
             )
             if target_fmt.endswith(os.sep) or path.is_dir():
-                out_path = path / _default_filename(toks["base"], pointer)
+                out_path = path / _default_filename(
+                    toks["base"], pointer, exact_ref=is_single_exact
+                )
             else:
                 out_path = path
 
