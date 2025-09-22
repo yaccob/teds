@@ -5,3 +5,6 @@ templates:
   - id: summary.html
     path: templates/summary.html.j2
     description: Simple HTML summary per spec with refs and counts
+  - id: comprehensive.adoc
+    path: templates/comprehensive.adoc.j2
+    description: Comprehensive AsciiDoc report with color-coded status, tabular layout, and schema coverage warnings

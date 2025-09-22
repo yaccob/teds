@@ -78,6 +78,8 @@ def resolve_template(template_id: str) -> tuple[str, str, str]:
 
 
 def build_context(inputs: Iterable[ReportInput]) -> dict[str, Any]:
+    from datetime import datetime
+
     ins = list(inputs)
     totals = {"success": 0, "warning": 0, "error": 0, "specs": len(ins)}
     for ri in ins:
@@ -94,6 +96,7 @@ def build_context(inputs: Iterable[ReportInput]) -> dict[str, Any]:
             for ri in ins
         ],
         "totals": totals,
+        "timestamp": datetime.now().astimezone().isoformat(),
     }
 
 
