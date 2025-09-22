@@ -1,0 +1,17 @@
+version: 1.0.0
+tests:
+  sample_schemas.yaml#/components/schemas/User:
+    valid:
+      .components.schemas.User.examples[0]:
+        payload:
+          id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+          name: Alice Example
+          email: alice@example.com
+        from_examples: true
+      .components.schemas.User.examples[1]:
+        payload:
+          id: not-a-uuid
+          name: bob
+          email: x
+        from_examples: true
+    invalid:
