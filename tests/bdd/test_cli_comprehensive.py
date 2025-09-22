@@ -53,69 +53,6 @@ def create_test_spec_file(temp_workspace, stored_files, filename, docstring):
     stored_files[filename] = spec_path
 
 
-@given("I have the same schema and specification files as above")
-def reuse_previous_files():
-    """Placeholder for reusing previously created files."""
-    pass
-
-
-@given(parsers.parse('I have a valid schema file "{filename}"'))
-def create_valid_schema(temp_workspace, stored_files, filename):
-    """Create a valid schema file."""
-    schema_path = temp_workspace / filename
-    content = """
-components:
-  schemas:
-    User:
-      type: object
-      properties:
-        name:
-          type: string
-        email:
-          type: string
-          format: email
-      required: [name, email]
-"""
-    schema_path.write_text(content.strip(), encoding="utf-8")
-    stored_files[filename] = schema_path
-
-
-@given(
-    parsers.parse(
-        'I have a test specification file "{filename}" that references the schema'
-    )
-)
-def create_spec_referencing_schema(temp_workspace, stored_files, filename):
-    """Create a test specification that references a schema."""
-    spec_path = temp_workspace / filename
-    content = """
-version: "1.0.0"
-tests:
-  schema.yaml#/components/schemas/User:
-    valid:
-      - name: "John"
-        email: "john@example.com"
-    invalid:
-      - name: 123
-"""
-    spec_path.write_text(content.strip(), encoding="utf-8")
-    stored_files[filename] = spec_path
-
-
-@given(parsers.parse('I have a directory "{dirname}"'))
-def create_directory(temp_workspace, dirname):
-    """Create a directory."""
-    dir_path = temp_workspace / dirname
-    dir_path.mkdir(parents=True, exist_ok=True)
-
-
-@given(parsers.parse('I have a subdirectory "{dirname}"'))
-def create_subdirectory(temp_workspace, dirname):
-    """Create a subdirectory."""
-    subdir_path = temp_workspace / dirname
-    subdir_path.mkdir(parents=True, exist_ok=True)
-
-
 @given(parsers.parse('I have a config file "{filename}" with content:'))
 def create_config_file(temp_workspace, stored_files, filename, docstring):
     """Create a configuration file."""
@@ -125,39 +62,12 @@ def create_config_file(temp_workspace, stored_files, filename, docstring):
     stored_files[filename] = config_path
 
 
-@given("I have a schema file with basic content")
-def create_basic_schema(temp_workspace, stored_files):
-    """Create a basic schema file."""
-    schema_path = temp_workspace / "schema.yaml"
-    content = """
-type: object
-properties:
-  name:
-    type: string
-  value:
-    type: integer
-"""
-    schema_path.write_text(content.strip(), encoding="utf-8")
-    stored_files["schema.yaml"] = schema_path
-
-
 @given(parsers.parse('I have a file "{filename}" with content:'))
 def create_generic_file(temp_workspace, filename, docstring):
     """Create a generic file with given content."""
     file_path = temp_workspace / filename
     content = docstring.strip() if docstring else ""
     file_path.write_text(content, encoding="utf-8")
-
-
-@given(parsers.parse('I have a minimal schema file "{filename}" with content:'))
-def create_minimal_schema_file(temp_workspace, stored_files, filename, docstring):
-    """Create a minimal schema file."""
-    schema_path = temp_workspace / filename
-    # Ensure parent directory exists
-    schema_path.parent.mkdir(parents=True, exist_ok=True)
-    content = docstring.strip() if docstring else ""
-    schema_path.write_text(content, encoding="utf-8")
-    stored_files[filename] = schema_path
 
 
 @when(parsers.parse('I run teds verify "{spec_file}" with output level "{level}"'))
@@ -267,15 +177,6 @@ def check_yaml_content(command_result):
     assert found, f"No YAML indicators found in output: {output[:200]}"
 
 
-@then("the output should contain fewer results than warning level")
-def check_filtered_output(command_result):
-    """Check that error level produces less output than warning level."""
-    # This is a simplified check - in a real implementation,
-    # you'd compare with stored warning level output
-    output = command_result["stdout"]
-    assert len(output) >= 0  # Error level can have empty output
-
-
 @then(parsers.parse('the error output should mention "{text}"'))
 def check_error_contains_text(command_result, text):
     """Check that error output contains specific text."""
@@ -283,18 +184,6 @@ def check_error_contains_text(command_result, text):
     assert (
         text.lower() in stderr.lower()
     ), f"Expected '{text}' in error output: {stderr}"
-
-
-@then("the original specification file should be updated")
-def check_spec_file_updated(temp_workspace, stored_files):
-    """Check that the original specification file was updated."""
-    # In-place updates modify the original file
-    spec_files = [f for name, f in stored_files.items() if name.endswith("spec.yaml")]
-    assert len(spec_files) > 0, "No specification file found"
-
-    spec_file = spec_files[0]
-    content = spec_file.read_text(encoding="utf-8")
-    assert len(content) > 0, "Specification file should not be empty"
 
 
 @then(parsers.parse('a test file "{filename}" should be created'))
@@ -342,29 +231,6 @@ def check_spec_file_unchanged(temp_workspace, stored_files):
     assert "version:" in content, "Specification file should contain version"
 
 
-@then(parsers.parse('a report file "{filename}" should be created'))
-def check_report_file_created(temp_workspace, filename):
-    """Check that a report file was created."""
-    report_file = temp_workspace / filename
-    assert report_file.exists(), f"Expected report file {filename} to be created"
-    assert report_file.stat().st_size > 0, f"Report file {filename} is empty"
-
-
-@then("the report should contain Markdown formatting")
-def check_markdown_formatting(temp_workspace):
-    """Check that report contains Markdown formatting."""
-    report_files = list(temp_workspace.glob("*.report.md"))
-    assert len(report_files) > 0, "No Markdown report files found"
-
-    report_file = report_files[0]
-    content = report_file.read_text(encoding="utf-8")
-
-    # Check for Markdown indicators
-    markdown_indicators = ["#", "##", "**", "*", "|", "```", "-"]
-    found = any(indicator in content for indicator in markdown_indicators)
-    assert found, f"No Markdown formatting found in report: {content[:200]}"
-
-
 @then('the output should contain "teds"')
 def check_output_contains_teds(command_result):
     """Check that output contains 'teds'."""
@@ -400,25 +266,6 @@ def check_yaml_parsing_error(command_result):
     assert found, f"No YAML parsing error indicators found in: {stderr}"
 
 
-@then(
-    parsers.parse(
-        'the generated file should contain version field "{expected_version}"'
-    )
-)
-def check_generated_file_has_version(temp_workspace, expected_version):
-    """Check that generated file contains the expected version field."""
-    test_files = list(temp_workspace.glob("*.tests.yaml"))
-    assert len(test_files) > 0, "No test files found"
-
-    test_file = test_files[0]
-    doc = load_yaml_file(test_file)
-
-    assert "version" in doc, f"Generated file missing version field: {doc.keys()}"
-    assert (
-        doc["version"] == expected_version
-    ), f"Expected version {expected_version}, got {doc['version']}"
-
-
 @then("the generated file should be validatable with teds verify")
 def check_generated_file_validatable(temp_workspace, command_result):
     """Check that generated file can be validated with teds verify."""
@@ -429,32 +276,3 @@ def check_generated_file_validatable(temp_workspace, command_result):
     rc, out, err = run_cli(["verify", test_file.name], cwd=temp_workspace)
 
     assert rc in [0, 1], f"Generated file validation failed with exit code {rc}: {err}"
-
-
-@then("the generated file should be executable with teds verify")
-def check_generated_file_executable(temp_workspace):
-    """Check that generated file can be executed with teds verify."""
-    test_files = list(temp_workspace.glob("*.tests.yaml"))
-    assert len(test_files) > 0, "No test files found"
-
-    test_file = test_files[0]
-    rc, out, err = run_cli(["verify", test_file.name], cwd=temp_workspace)
-
-    # Should not fail with hard error (exit code 2)
-    assert rc in [0, 1], f"Generated file execution failed with exit code {rc}: {err}"
-
-
-@then("verification should complete successfully")
-def check_verification_completes_successfully(temp_workspace):
-    """Check that verification completes without hard errors."""
-    test_files = list(temp_workspace.glob("*.tests.yaml"))
-    assert len(test_files) > 0, "No test files found"
-
-    test_file = test_files[0]
-    rc, out, err = run_cli(["verify", test_file.name], cwd=temp_workspace)
-
-    # Should complete successfully (0) or with validation issues (1), but not hard errors (2)
-    assert rc in [
-        0,
-        1,
-    ], f"Verification failed to complete: exit code {rc}, error: {err}"
