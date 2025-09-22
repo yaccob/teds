@@ -100,8 +100,10 @@ class VerifyCommand(Command):
                 out_path = Path(out_override)
             else:
                 base = sp.stem
-                ext = ".html" if tpl_id.endswith(".html") else ".md"
-                tbase = tpl_id.split(".")[0]
+                # Extract extension from template name, default to .md
+                tpl_parts = tpl_id.split(".")
+                ext = f".{tpl_parts[-1]}" if len(tpl_parts) > 1 else ".md"
+                tbase = tpl_parts[0]
                 name = (
                     f"{base}.report{ext}"
                     if not multi
