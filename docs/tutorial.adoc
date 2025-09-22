@@ -208,24 +208,73 @@ teds generate sample_schemas.yaml#/components/schemas/Email
 
 ==== JSON Path (Alternative Method)
 
-**JSON Path** uses CSS-like selector syntax and requires **explicit wildcards** to select multiple elements:
+**JSON Path** uses CSS-like selector syntax and requires **explicit wildcards** to select multiple elements. TeDS supports JSON Path through YAML/JSON configuration objects in three ways:
+
+===== Method 1: Configuration Files
 
 [source,bash]
 ----
-# Select ALL schemas under components/schemas (equivalent to JSON Pointer above)
-teds generate sample_schemas.yaml --json-path '$.components.schemas.*'
+# Create a configuration file
+cat > config.yaml << EOF
+sample_schemas.yaml:
+  paths: ["$.components.schemas.*"]
+EOF
 
-# Select specific schemas by name pattern
-teds generate sample_schemas.yaml --json-path '$.components.schemas[User,Email,Product]'
+# Generate using @file syntax
+teds generate @config.yaml
+----
 
-# Select schemas at any level that match a pattern
-teds generate sample_schemas.yaml --json-path '$..schemas[?(@.type=="object")]'
+===== Method 2: Direct YAML/JSON Arguments
+
+[source,bash]
+----
+# Pass configuration directly as YAML/JSON string
+teds generate '{"sample_schemas.yaml": {"paths": ["$.components.schemas.*"]}}'
+
+# Multiple paths in one schema
+teds generate '{"api.yaml": {"paths": ["$.components.schemas.User", "$.components.schemas.Product"]}}'
+
+# With custom target file
+teds generate '{"schema.yaml": {"paths": ["$.$defs.*"], "target": "custom_tests.yaml"}}'
+----
+
+===== Method 3: Simple List Format
+
+[source,bash]
+----
+# Simplified syntax for multiple paths
+teds generate '{"schema.yaml": ["$.components.schemas.*", "$.$defs.*"]}'
+----
+
+**JSON Path Examples:**
+
+[source,yaml]
+----
+# Configuration examples (can be in files or direct arguments)
+
+# Select ALL schemas under components/schemas
+sample_schemas.yaml:
+  paths: ["$.components.schemas.*"]
+
+# Select specific schemas by name
+api.yaml:
+  paths: ["$.components.schemas.User", "$.components.schemas.Email"]
+
+# Array indices and wildcards
+complex.yaml:
+  paths: ["$.$defs.*", "$.allOf[0]", "$.items[1]"]
+  target: "complex_tests.yaml"
+
+# Nested selections
+nested.yaml:
+  paths: ["$.components.schemas.*.properties"]
 ----
 
 **Key differences:**
 
 * **JSON Pointer**: `#/components/schemas` → finds schemas directly at this location
 * **JSON Path**: `$.components.schemas.*` → requires `*` wildcard to select multiple items
+* **JSON Path usage**: Via YAML/JSON config objects using `@file`, direct strings, or simple lists
 
 ==== Practical Examples
 
@@ -240,9 +289,9 @@ teds generate api_spec.yaml#/components/schemas/User/properties
 # AVOID: Single schema without properties - limited test generation
 # teds generate api_spec.yaml#/components/schemas/User
 
-# Reading paths from file
-echo "api_spec.yaml#/components/schemas" > schema_refs.txt
-teds generate --from-file schema_refs.txt
+# Using configuration file with JSON Path
+echo 'api_spec.yaml: ["$.components.schemas.*"]' > config.yaml
+teds generate @config.yaml
 ----
 
 This creates `api_spec.components+schemas.tests.yaml` with test cases derived from the `examples` in each schema found at the specified location.
@@ -635,7 +684,7 @@ teds generate schema.yaml#/components/schemas --target-template "{base}.{pointer
 # {index}    - 1, 2, 3... (for multiple targets)
 ----
 
-**Important**: Template variables only work with JSON Pointer syntax (`#/path`), not with JSON Path (`--json-path`).
+**Important**: Template variables only work with JSON Pointer syntax (`#/path`), not with JSON Path configuration objects.
 
 ==== Pointer Sanitization with Plus Signs
 

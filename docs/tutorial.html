@@ -821,18 +821,69 @@ teds generate sample_schemas.yaml#/components/schemas/Email</code></pre>
 <div class="sect3">
 <h4 id="_json_path_alternative_method"><a class="link" href="#_json_path_alternative_method">4.3.2. JSON Path (Alternative Method)</a></h4>
 <div class="paragraph">
-<p><strong>JSON Path</strong> uses CSS-like selector syntax and requires <strong>explicit wildcards</strong> to select multiple elements:</p>
+<p><strong>JSON Path</strong> uses CSS-like selector syntax and requires <strong>explicit wildcards</strong> to select multiple elements. TeDS supports JSON Path through YAML/JSON configuration objects in three ways:</p>
+</div>
+<div class="sect4">
+<h5 id="_method_1_configuration_files"><a class="link" href="#_method_1_configuration_files">Method 1: Configuration Files</a></h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Create a configuration file
+cat &gt; config.yaml &lt;&lt; EOF
+sample_schemas.yaml:
+  paths: ["$.components.schemas.*"]
+EOF
+
+# Generate using @file syntax
+teds generate @config.yaml</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_method_2_direct_yamljson_arguments"><a class="link" href="#_method_2_direct_yamljson_arguments">Method 2: Direct YAML/JSON Arguments</a></h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Pass configuration directly as YAML/JSON string
+teds generate '{"sample_schemas.yaml": {"paths": ["$.components.schemas.*"]}}'
+
+# Multiple paths in one schema
+teds generate '{"api.yaml": {"paths": ["$.components.schemas.User", "$.components.schemas.Product"]}}'
+
+# With custom target file
+teds generate '{"schema.yaml": {"paths": ["$.$defs.*"], "target": "custom_tests.yaml"}}'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_method_3_simple_list_format"><a class="link" href="#_method_3_simple_list_format">Method 3: Simple List Format</a></h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Simplified syntax for multiple paths
+teds generate '{"schema.yaml": ["$.components.schemas.*", "$.$defs.*"]}'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>JSON Path Examples:</strong></p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Select ALL schemas under components/schemas (equivalent to JSON Pointer above)
-teds generate sample_schemas.yaml --json-path '$.components.schemas.*'
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># Configuration examples (can be in files or direct arguments)
 
-# Select specific schemas by name pattern
-teds generate sample_schemas.yaml --json-path '$.components.schemas[User,Email,Product]'
+# Select ALL schemas under components/schemas
+sample_schemas.yaml:
+  paths: ["$.components.schemas.*"]
 
-# Select schemas at any level that match a pattern
-teds generate sample_schemas.yaml --json-path '$..schemas[?(@.type=="object")]'</code></pre>
+# Select specific schemas by name
+api.yaml:
+  paths: ["$.components.schemas.User", "$.components.schemas.Email"]
+
+# Array indices and wildcards
+complex.yaml:
+  paths: ["$.$defs.*", "$.allOf[0]", "$.items[1]"]
+  target: "complex_tests.yaml"
+
+# Nested selections
+nested.yaml:
+  paths: ["$.components.schemas.*.properties"]</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -846,7 +897,11 @@ teds generate sample_schemas.yaml --json-path '$..schemas[?(@.type=="object")]'<
 <li>
 <p><strong>JSON Path</strong>: <code>$.components.schemas.<strong></code> → requires <code></strong></code> wildcard to select multiple items</p>
 </li>
+<li>
+<p><strong>JSON Path usage</strong>: Via YAML/JSON config objects using <code>@file</code>, direct strings, or simple lists</p>
+</li>
 </ul>
+</div>
 </div>
 </div>
 <div class="sect3">
@@ -862,9 +917,9 @@ teds generate api_spec.yaml#/components/schemas/User/properties
 # AVOID: Single schema without properties - limited test generation
 # teds generate api_spec.yaml#/components/schemas/User
 
-# Reading paths from file
-echo "api_spec.yaml#/components/schemas" &gt; schema_refs.txt
-teds generate --from-file schema_refs.txt</code></pre>
+# Using configuration file with JSON Path
+echo 'api_spec.yaml: ["$.components.schemas.*"]' &gt; config.yaml
+teds generate @config.yaml</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1328,7 +1383,7 @@ teds generate schema.yaml#/components/schemas --target-template "{base}.{pointer
 </div>
 </div>
 <div class="paragraph">
-<p><strong>Important</strong>: Template variables only work with JSON Pointer syntax (<code>#/path</code>), not with JSON Path (<code>--json-path</code>).</p>
+<p><strong>Important</strong>: Template variables only work with JSON Pointer syntax (<code>#/path</code>), not with JSON Path configuration objects.</p>
 </div>
 <div class="sect3">
 <h4 id="_pointer_sanitization_with_plus_signs"><a class="link" href="#_pointer_sanitization_with_plus_signs">8.4.1. Pointer Sanitization with Plus Signs</a></h4>
@@ -1703,7 +1758,7 @@ teds verify user_generated.tests.yaml --in-place
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-09-22 23:59:50 +0200
+Last updated 2025-09-23 00:24:30 +0200
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
