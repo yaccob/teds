@@ -34,10 +34,10 @@ Expected output: `teds X.Y.Z (spec supported: 1.0-1.0; recommended: 1.0)`
 [source,bash]
 ----
 # Clone and setup for development
-git clone <repository>
-cd <project-directory>
+git clone https://github.com/yaccob/teds.git
+cd teds
 python3 -m venv .venv && . .venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements.txt -r requirements-dev.txt
 
 # Verify installation
 ./teds.py --version
