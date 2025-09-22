@@ -578,8 +578,8 @@ tests:
 Control where generated test files are created using template variables:
 
 ```bash
-# Available template variables
-teds generate schema.yaml --target-template "{base}.{pointer}.custom.yaml"
+# Available template variables (JSON Pointer only - not JSON Path)
+teds generate schema.yaml#/components/schemas --target-template "{base}.{pointer}.custom.yaml"
 
 # Variables:
 # {file}     - schema.yaml
@@ -589,6 +589,26 @@ teds generate schema.yaml --target-template "{base}.{pointer}.custom.yaml"
 # {pointer}  - components+schemas (sanitized)
 # {index}    - 1, 2, 3... (for multiple targets)
 ```
+
+**Important**: Template variables only work with JSON Pointer syntax (`#/path`), not with JSON Path (`--json-path`).
+
+#### Pointer Sanitization with Plus Signs
+
+The `{pointer}` variable automatically converts JSON Pointer slashes to plus signs for safe filenames:
+
+```bash
+# JSON Pointer: #/components/schemas/User
+# Sanitized:    components+schemas+User
+teds generate api.yaml#/components/schemas/User
+# Creates: api.components+schemas+User.tests.yaml
+
+# JSON Pointer: #/$defs/Address
+# Sanitized:    $defs+Address
+teds generate schema.yaml#/$defs/Address
+# Creates: schema.$defs+Address.tests.yaml
+```
+
+**Why sanitization?** Slashes (`/`) are directory separators in file systems, so `components/schemas/User` would create subdirectories. The plus sign (`+`) replacement ensures the entire pointer becomes part of the filename, keeping all generated files in the same directory while preserving the hierarchical information from the JSON Pointer.
 
 ### Configuration Files for Complex Generation
 
