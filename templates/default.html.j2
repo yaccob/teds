@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeDS Default Validation Report</title>
+    <style>
+        /* AsciiDoc-inspired styling */
+        body {
+            font-family: "Noto Serif", "DejaVu Serif", serif;
+            line-height: 1.6;
+            color: #222;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: "Open Sans", "DejaVu Sans", sans-serif;
+            font-weight: 600;
+            line-height: 1.2;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            color: #ba3925;
+        }
+
+        h1 { font-size: 2.2em; border-bottom: 3px solid #ba3925; padding-bottom: 0.3em; }
+        h2 { font-size: 1.8em; border-bottom: 2px solid #ddd; padding-bottom: 0.2em; }
+        h3 { font-size: 1.4em; }
+        h4 { font-size: 1.1em; }
+
+        .lead {
+            font-size: 1.2em;
+            color: #555;
+            margin: 1em 0;
+            font-style: italic;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1em 0;
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #f5f5f5;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .status-success { color: #28a745; font-weight: bold; }
+        .status-warning { color: #ffc107; font-weight: bold; }
+        .status-error { color: #dc3545; font-weight: bold; }
+        .status-unknown { color: #6c757d; font-weight: bold; }
+
+        .admonition {
+            padding: 1em;
+            margin: 1em 0;
+            border-left: 4px solid;
+            background: #f8f9fa;
+        }
+
+        .admonition.warning {
+            border-left-color: #ffc107;
+            background: #fff3cd;
+        }
+
+        .admonition.caution {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .admonition.note {
+            border-left-color: #17a2b8;
+            background: #d1ecf1;
+        }
+
+        .code-block {
+            background: #f8f8f8;
+            border: 1px solid #e1e1e8;
+            border-radius: 4px;
+            padding: 0.75em;
+            font-family: "Liberation Mono", Consolas, monospace;
+            font-size: 0.9em;
+            line-height: 1.4;
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        code {
+            font-family: "Liberation Mono", Consolas, monospace;
+            background: #f8f8f8;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+
+        .anchor {
+            color: #ba3925;
+            text-decoration: none;
+        }
+
+        .footer {
+            margin-top: 3em;
+            padding-top: 1em;
+            border-top: 1px solid #ddd;
+            color: #777;
+            font-style: italic;
+            text-align: center;
+        }
+
+        .toc {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 1em;
+            margin: 1em 0;
+            border-radius: 4px;
+        }
+
+        .toc h3 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .toc ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .toc li {
+            margin: 0.3em 0;
+        }
+
+        .toc a {
+            color: #ba3925;
+            text-decoration: none;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="teds-default-validation-report">TeDS Default Validation Report</h1>
+
+    <div class="toc">
+        <h3>Table of Contents</h3>
+        <ul>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#executive-summary">Executive Summary</a></li>
+            <li><a href="#detailed-results">Detailed Results</a></li>
+            <li><a href="#appendix">Appendix</a></li>
+        </ul>
+    </div>
+
+    <h2 id="overview">Overview</h2>
+
+    <table>
+        <tbody>
+            <tr><th>Tool Version</th><td>teds {{ tool.version }}</td></tr>
+            <tr><th>Specification Support</th><td>{{ tool.spec_supported }}</td></tr>
+            <tr><th>Recommended Version</th><td>{{ tool.spec_recommended }}</td></tr>
+            <tr><th>Generated</th><td>{{ timestamp }}</td></tr>
+            <tr><th>Report File</th><td>{{ inputs[0].path }}</td></tr>
+        </tbody>
+    </table>
+
+    {% set doc = inputs[0].doc %}
+    {% set success_count = 0 %}
+    {% set warning_count = 0 %}
+    {% set error_count = 0 %}
+    {% set schema_warnings = [] %}
+
+    <h2 id="executive-summary">Executive Summary</h2>
+
+    {% if doc.tests %}
+    {# Use pre-computed counts from inputs[0].counts #}
+    {% set success_count = inputs[0].counts.success %}
+    {% set warning_count = inputs[0].counts.warning %}
+    {% set error_count = inputs[0].counts.error %}
+
+    {# Check for schema warnings and collect with proper anchors #}
+    {% for ref, grp in doc.tests.items() %}
+      {% set valid_cases = (grp.valid or {}) %}
+      {% set invalid_cases = (grp.invalid or {}) %}
+      {% set ref_anchor = ref.replace('/', '_').replace('#', '_').replace('.', '_') %}
+
+      {% if valid_cases|length == 0 %}
+        {% set _ = schema_warnings.append({'text': ref + " has no valid test cases", 'anchor': ref_anchor}) %}
+      {% endif %}
+      {% if invalid_cases|length == 0 %}
+        {% set _ = schema_warnings.append({'text': ref + " has no invalid test cases", 'anchor': ref_anchor}) %}
+      {% endif %}
+    {% endfor %}
+
+    <p class="lead">
+        This report analyzes <strong>{{ doc.tests|length }}</strong> schema(s) with a total of <strong>{{ success_count + warning_count + error_count }}</strong> test cases.
+    </p>
+
+    <h3>Results Summary</h3>
+
+    <table>
+        <thead>
+            <tr><th>Status</th><th>Count</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+            {% if success_count > 0 %}
+            <tr><td class="status-success">✓ SUCCESS</td><td>{{ success_count }}</td><td>Test cases passed as expected</td></tr>
+            {% endif %}
+            {% if warning_count > 0 %}
+            <tr><td class="status-warning">⚠ WARNING</td><td>{{ warning_count }}</td><td>Test cases with warnings (review recommended)</td></tr>
+            {% endif %}
+            {% if error_count > 0 %}
+            <tr><td class="status-error">✗ ERROR</td><td>{{ error_count }}</td><td>Test cases failed validation</td></tr>
+            {% endif %}
+            {% if success_count + warning_count + error_count == 0 %}
+            <tr><td class="status-unknown">○ NO RESULTS</td><td>0</td><td>No test cases found</td></tr>
+            {% endif %}
+            <tr><td><strong>Total</strong></td><td><strong>{{ success_count + warning_count + error_count }}</strong></td><td>All test cases processed</td></tr>
+        </tbody>
+    </table>
+
+    {% if schema_warnings %}
+    <h3>Schema Coverage Warnings</h3>
+
+    <div class="admonition warning">
+        <p><strong>Warning:</strong> The following schemas have incomplete test coverage:</p>
+        <ul>
+            {% for warning in schema_warnings %}
+            <li><a href="#{{ warning.anchor }}" class="anchor">{{ warning.text }}</a></li>
+            {% endfor %}
+        </ul>
+        <p>Consider adding both valid and invalid test cases for comprehensive schema validation.</p>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="admonition caution">
+        <p><strong>Caution:</strong> No test cases found in the specification. Consider adding test cases to validate your schemas.</p>
+    </div>
+    {% endif %}
+
+    <h2 id="detailed-results">Detailed Results</h2>
+
+    {% if doc.tests %}
+    {% for ref, grp in doc.tests.items() %}
+    {% set ref_anchor = ref.replace('/', '_').replace('#', '_').replace('.', '_') %}
+    <h3 id="{{ ref_anchor }}">{{ ref }}</h3>
+
+    {% set valid_cases = (grp.valid or {}) %}
+    {% set invalid_cases = (grp.invalid or {}) %}
+    {% set total_cases = valid_cases|length + invalid_cases|length %}
+
+    <h4>Schema Summary</h4>
+
+    <table>
+        <tbody>
+            <tr><th>Valid Cases</th><td>{{ valid_cases|length }}</td></tr>
+            <tr><th>Invalid Cases</th><td>{{ invalid_cases|length }}</td></tr>
+            <tr><th>Total Cases</th><td>{{ total_cases }}</td></tr>
+        </tbody>
+    </table>
+
+    {% if valid_cases %}
+    <h4>Valid Test Cases</h4>
+
+    <table>
+        <thead>
+            <tr><th>Test Case</th><th>Payload</th><th>Status</th><th>Message</th></tr>
+        </thead>
+        <tbody>
+            {% for case_name, case_data in valid_cases.items() %}
+            <tr>
+                <td><code>{{ case_name }}</code></td>
+                <td><div class="code-block">{{ case_data.payload | to_yaml }}</div></td>
+                <td>
+                    {% if case_data.result == "SUCCESS" %}
+                    <span class="status-success">✓ SUCCESS</span>
+                    {% elif case_data.result == "WARNING" %}
+                    <span class="status-warning">⚠ WARNING</span>
+                    {% elif case_data.result == "ERROR" %}
+                    <span class="status-error">✗ ERROR</span>
+                    {% else %}
+                    <span class="status-unknown">○ UNKNOWN</span>
+                    {% endif %}
+                </td>
+                <td>{% if case_data.message %}{{ case_data.message }}{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if invalid_cases %}
+    <h4>Invalid Test Cases</h4>
+
+    <table>
+        <thead>
+            <tr><th>Test Case</th><th>Payload</th><th>Status</th><th>Message</th></tr>
+        </thead>
+        <tbody>
+            {% for case_name, case_data in invalid_cases.items() %}
+            <tr>
+                <td><code>{{ case_name }}</code></td>
+                <td><div class="code-block">{{ case_data.payload | to_yaml }}</div></td>
+                <td>
+                    {% if case_data.result == "SUCCESS" %}
+                    <span class="status-success">✓ SUCCESS</span>
+                    {% elif case_data.result == "WARNING" %}
+                    <span class="status-warning">⚠ WARNING</span>
+                    {% elif case_data.result == "ERROR" %}
+                    <span class="status-error">✗ ERROR</span>
+                    {% else %}
+                    <span class="status-unknown">○ UNKNOWN</span>
+                    {% endif %}
+                </td>
+                <td>{% if case_data.message %}{{ case_data.message }}{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if valid_cases|length == 0 and invalid_cases|length == 0 %}
+    <div class="admonition note">
+        <p><strong>Note:</strong> No test cases defined for this schema. Consider adding both valid and invalid test cases.</p>
+    </div>
+    {% endif %}
+
+    {% endfor %}
+    {% endif %}
+
+    <h2 id="appendix">Appendix</h2>
+
+    <h3>Tool Information</h3>
+
+    <table>
+        <tbody>
+            <tr><th>TeDS Version</th><td>{{ tool.version }}</td></tr>
+            <tr><th>Supported Spec Range</th><td>{{ tool.spec_supported }}</td></tr>
+            <tr><th>Recommended Spec Version</th><td>{{ tool.spec_recommended }}</td></tr>
+            <tr><th>Report Generation Time</th><td>{{ timestamp }}</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Report Scope</h3>
+
+    <p>This default report includes:</p>
+
+    <ul>
+        <li><strong>Executive Summary</strong> - High-level overview of validation results</li>
+        <li><strong>Schema Coverage Analysis</strong> - Warnings for incomplete test coverage</li>
+        <li><strong>Detailed Results</strong> - Complete breakdown of all test cases by schema</li>
+        <li><strong>Color-coded Status Indicators</strong> - Visual distinction between SUCCESS, WARNING, and ERROR states</li>
+        <li><strong>Tabular Format</strong> - Structured presentation for easy analysis</li>
+    </ul>
+
+    <p>For questions about this report or TeDS functionality, please refer to the TeDS documentation.</p>
+
+    <div class="footer">
+        <p>This report was generated automatically by TeDS (Test-Driven Schema Development Tool).</p>
+    </div>
+
+</body>
+</html>
