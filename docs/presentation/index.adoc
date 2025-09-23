@@ -1,0 +1,779 @@
+= TeDS: Test-Driven Schema Development
+:author: TeDS Project
+:email: noreply@example.com
+:revnumber: 1.0
+:revdate: {docdate}
+:backend: revealjs
+:revealjsdir: https://cdn.jsdelivr.net/npm/reveal.js@4.3.1
+:revealjs_theme: white
+:revealjs_transition: slide
+:revealjs_slideNumber: true
+:revealjs_controls: true
+:revealjs_progress: true
+:revealjs_hash: true
+:revealjs_center: true
+:revealjs_touch: true
+:revealjs_loop: false
+:revealjs_rtl: false
+:revealjs_fragments: true
+:revealjs_embedded: false
+:revealjs_autoSlideStoppable: true
+:revealjs_mouseWheel: false
+:revealjs_hideAddressBar: true
+:revealjs_previewLinks: false
+:source-highlighter: highlightjs
+:highlightjs-theme: github
+:icons: font
+:imagesdir: images
+
+// Title slide
+== TeDS: Test-Driven Schema Development
+
+[.subtitle]
+_Validate JSON Schema contracts with confidence_
+
+[.author]
+{author} +
+{revdate}
+
+[.notes]
+--
+Welcome to the TeDS presentation. We'll explore how TeDS revolutionizes JSON Schema validation through test-driven development principles.
+--
+
+// Section 1: Introduction & Problem Statement
+== Agenda
+
+[%step]
+* What is TeDS?
+* The Problem with Schema Validation
+* TeDS Solution & Benefits
+* Core Features & Architecture
+* Getting Started
+* Advanced Use Cases
+* Demo & Examples
+* Q&A
+
+[.notes]
+--
+This 45-60 minute presentation will cover all aspects of TeDS from motivation to practical usage.
+--
+
+== The Problem
+
+=== Traditional Schema Validation Challenges
+
+[%step]
+* ❌ No systematic way to validate schema behavior
+* ❌ Examples scattered or missing in schemas
+* ❌ Manual testing is time-consuming and error-prone
+* ❌ No confidence that schemas work as intended
+* ❌ Difficult to catch breaking changes
+
+[.notes]
+--
+Traditional approaches to JSON Schema validation often lack systematic testing, leading to unreliable schemas and broken integrations.
+--
+
+=== The Pain Points
+
+[.stretch]
+[plantuml, schema-problems, svg]
+....
+@startuml
+!theme plain
+
+actor Developer as dev
+actor Consumer as consumer
+database "JSON Schema" as schema
+cloud "API/Service" as api
+
+dev -> schema : Creates schema
+dev -> schema : Adds examples (maybe)
+schema -> api : Schema deployed
+consumer -> api : Uses API
+api -> consumer : Unexpected errors!
+
+note right of consumer
+  Schema examples don't match
+  actual validation behavior
+end note
+
+@enduml
+....
+
+[.notes]
+--
+This diagram illustrates the common disconnect between schema definitions and actual validation behavior.
+--
+
+// Section 2: TeDS Introduction
+== What is TeDS?
+
+=== TeDS Overview
+
+[.subtitle]
+*T*est-*D*riven *S*chema Development Tool
+
+[%step]
+* 🧪 **Test-First Approach**: Define expected behavior before implementation
+* ✅ **Validation Tool**: Verify schemas against test specifications
+* 📊 **Report Generation**: Beautiful HTML/Markdown reports
+* 🔄 **CI/CD Integration**: Automated schema testing in pipelines
+
+[.notes]
+--
+TeDS brings test-driven development principles to JSON Schema validation, ensuring schemas behave exactly as expected.
+--
+
+=== Key Concepts
+
+[cols="1,3"]
+|===
+|Concept |Description
+
+|*Test Specifications*
+|YAML files defining expected schema behavior
+
+|*Schema References*
+|JSON Pointer/Path expressions targeting specific schemas
+
+|*Positive Tests*
+|Data that should be accepted by the schema
+
+|*Negative Tests*
+|Data that must be rejected by the schema
+|===
+
+[.notes]
+--
+These core concepts form the foundation of TeDS's approach to schema testing.
+--
+
+// Section 3: TeDS Benefits & Value Proposition
+== Why TeDS?
+
+=== Benefits for Development Teams
+
+[.two-columns]
+--
+[.column]
+*Quality Assurance*
+
+[%step]
+* Catch schema bugs early
+* Prevent breaking changes
+* Ensure consistent behavior
+* Automated testing
+
+[.column]
+*Developer Experience*
+
+[%step]
+* Clear test specifications
+* Easy-to-read reports
+* Fast feedback loops
+* CI/CD integration
+--
+
+[.notes]
+--
+TeDS provides both quality benefits and improved developer experience through systematic testing.
+--
+
+=== ROI for Organizations
+
+[.stretch]
+[plantuml, teds-roi, svg]
+....
+@startuml
+!theme plain
+
+rectangle "Before TeDS" as before {
+  [Manual Testing] -> [Schema Issues]
+  [Schema Issues] -> [Production Bugs]
+  [Production Bugs] -> [Customer Impact]
+  [Customer Impact] -> [High Costs]
+}
+
+rectangle "With TeDS" as after {
+  [Automated Tests] -> [Early Detection]
+  [Early Detection] -> [Reliable Schemas]
+  [Reliable Schemas] -> [Happy Customers]
+  [Happy Customers] -> [Reduced Costs]
+}
+
+@enduml
+....
+
+[.notes]
+--
+TeDS reduces costs by catching issues early in the development cycle rather than in production.
+--
+
+// Section 4: Core Features
+== Core Features
+
+=== Test Specification Format
+
+[source,yaml]
+----
+# user.tests.yaml
+version: "1.0.0"
+tests:
+  schemas/user.yaml#/components/schemas/User:
+    valid:
+      valid_user:
+        description: "Complete user with all fields"
+        payload:
+          name: "Alice Smith"
+          email: "alice@example.com"
+          age: 30
+    invalid:
+      missing_email:
+        description: "User without required email"
+        payload:
+          name: "Bob"
+          age: 25
+----
+
+[.notes]
+--
+Test specifications use a clear YAML format to define both valid and invalid test cases.
+--
+
+=== Schema Generation
+
+[source,bash]
+----
+# Generate tests from schema examples
+teds generate schemas/user.yaml#/components/schemas
+
+# Using JSON Path for complex selections
+teds generate '{"api.yaml": ["$.components.schemas.*"]}'
+
+# Generate from multiple schemas
+teds generate schemas/*.yaml#/components/schemas
+----
+
+[.notes]
+--
+TeDS can automatically generate test specifications from existing schema examples, jumpstarting your testing process.
+--
+
+=== Validation & Reporting
+
+[source,bash]
+----
+# Validate test specifications
+teds verify user.tests.yaml
+
+# Generate detailed reports
+teds verify user.tests.yaml --report-template html \
+  --output-file user-report.html
+
+# CI/CD integration
+teds verify *.tests.yaml --fail-fast --quiet
+----
+
+[.notes]
+--
+The verification process provides detailed feedback and can be easily integrated into CI/CD pipelines.
+--
+
+// Section 5: Architecture & Technical Details
+== Architecture
+
+=== High-Level Architecture
+
+[.stretch]
+[plantuml, teds-architecture, svg]
+....
+@startuml
+!theme plain
+
+package "TeDS Core" {
+  [CLI Interface] as cli
+  [Validation Engine] as validator
+  [Generator] as generator
+  [Report Engine] as reporter
+}
+
+package "External Dependencies" {
+  [jsonschema] as jsonschema
+  [JSON Path] as jsonpath
+  [Jinja2] as jinja
+  [YAML Parser] as yaml
+}
+
+cli -> validator
+cli -> generator
+cli -> reporter
+
+validator -> jsonschema
+generator -> jsonpath
+generator -> yaml
+reporter -> jinja
+
+@enduml
+....
+
+[.notes]
+--
+TeDS is built on proven libraries and follows a modular architecture for maintainability and extensibility.
+--
+
+=== Supported Formats & Standards
+
+[cols="1,2,2"]
+|===
+|Category |Standard |Notes
+
+|*JSON Schema*
+|Draft 2020-12, 2019-09, 7, 4
+|Full validation support
+
+|*Schema References*
+|JSON Pointer, JSON Path
+|Flexible targeting
+
+|*Input Formats*
+|YAML, JSON
+|Human-friendly configuration
+
+|*Output Formats*
+|HTML, Markdown, JSON
+|Multiple report formats
+|===
+
+[.notes]
+--
+TeDS supports industry standards and provides flexibility in both input and output formats.
+--
+
+// Section 6: Getting Started
+== Getting Started
+
+=== Installation
+
+[source,bash]
+----
+# Install from PyPI
+pip install teds
+
+# Verify installation
+teds --version
+
+# Get help
+teds --help
+----
+
+[.notes]
+--
+Installation is straightforward using pip, and TeDS provides comprehensive help documentation.
+--
+
+=== Your First Test
+
+[.subtitle]
+Step 1: Create a Schema
+
+[source,yaml]
+----
+# schemas/product.yaml
+type: object
+required: [name, price]
+properties:
+  name:
+    type: string
+    minLength: 1
+  price:
+    type: number
+    minimum: 0
+  category:
+    type: string
+    enum: ["electronics", "books", "clothing"]
+examples:
+  - name: "Laptop"
+    price: 999.99
+    category: "electronics"
+----
+
+[.notes]
+--
+Start with a simple schema that includes examples - these will be used for test generation.
+--
+
+=== Your First Test (continued)
+
+[.subtitle]
+Step 2: Generate Tests
+
+[source,bash]
+----
+# Generate test specification from schema examples
+teds generate schemas/product.yaml#/
+
+# This creates: schemas/product.tests.yaml
+----
+
+[.subtitle]
+Step 3: Validate
+
+[source,bash]
+----
+# Run validation
+teds verify schemas/product.tests.yaml
+
+# Generate report
+teds verify schemas/product.tests.yaml \
+  --report-template html \
+  --output-file product-report.html
+----
+
+[.notes]
+--
+The three-step process: create schema, generate tests, validate - provides immediate value.
+--
+
+// Section 7: Advanced Use Cases
+== Advanced Use Cases
+
+=== Complex Schema Testing
+
+[source,yaml]
+----
+# Multi-schema test specification
+version: "1.0.0"
+tests:
+  # Test user schema
+  api.yaml#/components/schemas/User:
+    valid:
+      admin_user: { ... }
+      regular_user: { ... }
+    invalid:
+      invalid_email: { ... }
+
+  # Test product schema
+  api.yaml#/components/schemas/Product:
+    valid:
+      electronic_product: { ... }
+    invalid:
+      negative_price: { ... }
+----
+
+[.notes]
+--
+TeDS supports complex scenarios with multiple schemas and comprehensive test coverage.
+--
+
+=== JSON Path Power
+
+[source,bash]
+----
+# Select all schemas under components
+teds generate '{"api.yaml": ["$.components.schemas.*"]}'
+
+# Target specific schemas by pattern
+teds generate '{"api.yaml": ["$.components.schemas.User*"]}'
+
+# Combine multiple sources
+teds generate '{"schemas.yaml": ["$.definitions.*", "$.components.schemas.*"]}'
+----
+
+[.notes]
+--
+JSON Path expressions provide powerful and flexible schema targeting capabilities.
+--
+
+=== CI/CD Integration
+
+[source,yaml]
+----
+# .github/workflows/schema-validation.yml
+name: Schema Validation
+on: [push, pull_request]
+
+jobs:
+  validate-schemas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - run: pip install teds
+      - run: teds verify schemas/*.tests.yaml --fail-fast
+      - run: teds verify schemas/*.tests.yaml --report-template html --output-file schema-report.html
+      - uses: actions/upload-artifact@v3
+        with:
+          name: schema-validation-report
+          path: schema-report.html
+----
+
+[.notes]
+--
+TeDS integrates seamlessly into CI/CD pipelines for automated schema validation.
+--
+
+// Section 8: Demo Section
+== Live Demo
+
+=== Demo Overview
+
+[%step]
+* 🏗️ Creating a test specification from scratch
+* 🧪 Running validation with intentional failures
+* 📊 Generating and reviewing HTML reports
+* 🔧 Fixing schema issues based on test results
+* ✅ Achieving full validation success
+
+[.notes]
+--
+The demo will show the complete TeDS workflow from creation to successful validation.
+--
+
+=== Demo: E-Commerce API Schema
+
+[.subtitle]
+Scenario: Online store with User and Product schemas
+
+[%step]
+* **Challenge**: Ensure schemas correctly validate user registrations and product listings
+* **Requirements**: Email validation, price constraints, required fields
+* **Testing**: Both positive and negative test cases
+* **Output**: Professional validation report
+
+[.notes]
+--
+We'll use a realistic e-commerce scenario to demonstrate TeDS capabilities.
+--
+
+// Placeholder slides for actual demo
+=== Demo: Schema Creation
+
+[.subtitle]
+_Live demonstration of schema creation and test generation_
+
+[.center]
+image::demo-placeholder-1.png[Demo Screenshot 1, 800, 600]
+
+[.notes]
+--
+[Live demo section - create schemas with examples]
+--
+
+=== Demo: Test Specification
+
+[.subtitle]
+_Live demonstration of test specification creation_
+
+[.center]
+image::demo-placeholder-2.png[Demo Screenshot 2, 800, 600]
+
+[.notes]
+--
+[Live demo section - create comprehensive test specifications]
+--
+
+=== Demo: Validation & Reports
+
+[.subtitle]
+_Live demonstration of validation and report generation_
+
+[.center]
+image::demo-placeholder-3.png[Demo Screenshot 3, 800, 600]
+
+[.notes]
+--
+[Live demo section - run validation and generate reports]
+--
+
+// Section 9: Best Practices
+== Best Practices
+
+=== Test Design Principles
+
+[cols="1,3"]
+|===
+|Principle |Implementation
+
+|*Comprehensive Coverage*
+|Test all schema constraints and edge cases
+
+|*Clear Descriptions*
+|Use descriptive names and documentation
+
+|*Maintainable Tests*
+|Organize tests logically, avoid duplication
+
+|*Realistic Data*
+|Use real-world examples in test cases
+
+|*Negative Testing*
+|Include comprehensive invalid data tests
+|===
+
+[.notes]
+--
+Following these principles ensures your schema tests are effective and maintainable.
+--
+
+=== Organizational Strategies
+
+[.two-columns]
+--
+[.column]
+*File Organization*
+
+[%step]
+* Mirror schema directory structure
+* Use descriptive test file names
+* Group related tests together
+* Separate concerns clearly
+
+[.column]
+*Team Workflows*
+
+[%step]
+* Schema changes require test updates
+* Peer review for test specifications
+* Automated validation in CI/CD
+* Regular test maintenance
+--
+
+[.notes]
+--
+Good organization and team processes are crucial for scaling TeDS usage across teams.
+--
+
+// Section 10: Roadmap & Future
+== Roadmap & Future
+
+=== Current Features (v0.5.x)
+
+[%step]
+* ✅ Core validation engine
+* ✅ Test generation from examples
+* ✅ JSON Path support
+* ✅ HTML/Markdown reporting
+* ✅ CLI interface
+* ✅ CI/CD integration
+
+[.notes]
+--
+TeDS v0.5.x provides a solid foundation with all essential features for schema testing.
+--
+
+=== Planned Enhancements
+
+[%step]
+* 🔄 **v0.6**: Enhanced reporting with interactive features
+* 🔄 **v0.7**: Plugin system for custom validators
+* 🔄 **v0.8**: IDE integrations and extensions
+* 🔄 **v1.0**: Enterprise features and performance optimizations
+
+[.notes]
+--
+The roadmap focuses on enhanced usability, extensibility, and enterprise-grade features.
+--
+
+=== Community & Contributions
+
+[.subtitle]
+How to Get Involved
+
+[%step]
+* 🐛 **Report Issues**: GitHub issue tracker
+* 💡 **Feature Requests**: Community discussions
+* 🛠️ **Contributions**: Pull requests welcome
+* 📚 **Documentation**: Help improve tutorials and guides
+* 🎯 **Testing**: Beta testing of new features
+
+[.notes]
+--
+TeDS is an open-source project that welcomes community contributions and feedback.
+--
+
+// Section 11: Q&A and Wrap-up
+== Questions & Discussion
+
+[.subtitle]
+Let's discuss your schema validation challenges
+
+[%step]
+* 🤔 How could TeDS fit into your current workflow?
+* 🔧 What specific schema validation pain points do you face?
+* 🚀 What features would be most valuable for your team?
+* 💬 Any questions about implementation or integration?
+
+[.notes]
+--
+This is an interactive section for questions and discussion about TeDS usage and implementation.
+--
+
+== Resources & Next Steps
+
+=== Getting Started Resources
+
+[cols="1,2"]
+|===
+|Resource |Location
+
+|*Documentation*
+|https://github.com/yaccob/teds
+
+|*Tutorial*
+|tutorial.html (included in repo)
+
+|*Examples*
+|examples/ directory
+
+|*PyPI Package*
+|https://pypi.org/project/teds/
+
+|*Issue Tracker*
+|GitHub Issues
+|===
+
+[.notes]
+--
+These resources provide everything needed to get started with TeDS in your projects.
+--
+
+=== Next Steps
+
+[.subtitle]
+Your TeDS Journey
+
+[%step]
+1. **Install TeDS**: `pip install teds`
+2. **Try the Tutorial**: Follow the getting started guide
+3. **Start Small**: Pick one schema to test
+4. **Expand Coverage**: Add more schemas and test cases
+5. **Integrate**: Add to your CI/CD pipeline
+6. **Share**: Help your team adopt TeDS
+
+[.notes]
+--
+Start with small experiments and gradually expand TeDS usage across your schema validation needs.
+--
+
+== Thank You!
+
+[.subtitle]
+Questions? Let's connect!
+
+[.center]
+*TeDS: Test-Driven Schema Development*
+
+[.contact-info]
+📧 Contact: GitHub Issues +
+🌐 Website: https://github.com/yaccob/teds +
+📦 Install: `pip install teds` +
+📖 Docs: tutorial.html
+
+[.notes]
+--
+Thank you for your attention. TeDS is ready to transform your schema validation workflow!
+--
