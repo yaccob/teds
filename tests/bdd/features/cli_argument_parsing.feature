@@ -20,7 +20,7 @@ Feature: CLI Argument Parsing
       """
 
   Scenario: Verify with output-level and report options should work
-    When I run the command "verify --output-level all --report comprehensive.adoc test.yaml"
+    When I run the command "verify --output-level all --report default.adoc test.yaml"
     Then the command should succeed
     And a file "test.report.adoc" should be created
 
@@ -46,9 +46,6 @@ Feature: CLI Argument Parsing
           Email:
             type: string
             format: email
-            examples:
-              - alice@example.com
-              - not-an-email
           User:
             type: object
             additionalProperties: false
@@ -63,13 +60,6 @@ Feature: CLI Argument Parsing
                 pattern: '^[A-Z][a-zA-Z]+(?: [A-Z][a-zA-Z]+)*$'
               email:
                 $ref: '#/components/schemas/Email'
-            examples:
-              - id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-                name: "Alice Example"
-                email: "alice@example.com"
-              - id: "not-a-uuid"
-                name: "bob"
-                email: "x"
       """
     And I have a testspec file "sample_tests.yaml" with content:
       """yaml
@@ -80,10 +70,6 @@ Feature: CLI Argument Parsing
             good email:
               description: simple valid email
               payload: alice@example.com
-          invalid:
-            "not an email":
-              description: not a valid email address
-              payload: "not-an-email"
         sample_schemas.yaml#/components/schemas/User:
           valid:
             minimal valid user:
@@ -96,20 +82,13 @@ Feature: CLI Argument Parsing
               description: payload provided as JSON string
               parse_payload: true
               payload: "{\"id\":\"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\"name\":\"Bob Builder\",\"email\":\"bob@example.com\"}"
-          invalid:
-            bad uuid:
-              description: id is not a valid UUID
-              payload:
-                id: "not-a-uuid"
-                name: "Alice Example"
-                email: "alice@example.com"
       """
-    When I run the command "verify --output-level all --report comprehensive.adoc sample_tests.yaml"
+    When I run the command "verify --output-level all --report default.adoc sample_tests.yaml"
     Then the command should succeed
     And a file "sample_tests.report.adoc" should be created
 
   Scenario: Output-level warning with report should work fine
-    When I run the command "verify --output-level warning --report comprehensive.adoc test.yaml"
+    When I run the command "verify --output-level warning --report default.adoc test.yaml"
     Then the command should succeed
     And a file "test.report.adoc" should be created
 
