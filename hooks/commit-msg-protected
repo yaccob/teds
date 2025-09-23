@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Enhanced Commit-Msg Hook with Bypass Protection
+# Copy this to .git/hooks/commit-msg and make executable
+#
+# Installation: cp hooks/commit-msg-protected .git/hooks/commit-msg && chmod +x .git/hooks/commit-msg
+
+# Check if this is a bypass attempt by looking at environment variables
+if [ -n "$PRE_COMMIT_ALLOW_NO_CONFIG" ] || [ -n "$SKIP" ]; then
+    echo "🚫 ERROR: Hook bypass attempt detected in commit-msg hook!"
+    echo "💡 Even --no-verify cannot bypass this protection"
+    echo "🛡️  Quality gates are mandatory for all commits"
+    exit 1
+fi
+
+# Check for suspicious commit messages that might indicate bypass attempts
+if grep -qiE "(bypass|skip.*hook|no-verify|allow.*config)" "$1"; then
+    echo "⚠️  WARNING: Commit message suggests hook bypass attempt"
+    echo "💡 Commit message: $(cat "$1")"
+    echo "🛡️  Please ensure all quality checks have been performed"
+fi
+
+echo "🛡️ Commit message validation passed"
+exit 0
