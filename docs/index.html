@@ -3,68 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="0; url=tutorial.html">
-    <title>TeDS Documentation</title>
+    <title>TeDS Documentation Hub</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            text-align: center;
-            padding: 50px;
-            background: #f8f9fa;
+            margin: 0;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
         }
         .container {
-            max-width: 600px;
+            max-width: 900px;
             margin: 0 auto;
             background: white;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 50px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
         }
         h1 {
             color: #333;
+            margin-bottom: 15px;
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+        .description {
+            color: #555;
+            line-height: 1.6;
+            font-size: 1.1em;
+            max-width: 700px;
+            margin: 0 auto 40px;
+        }
+        .resources {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        .resource-card {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .resource-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .resource-card h3 {
+            color: #333;
+            margin: 0 0 15px 0;
+            font-size: 1.4em;
+        }
+        .resource-card p {
+            color: #666;
+            line-height: 1.5;
             margin-bottom: 20px;
         }
-        p {
-            color: #666;
-            line-height: 1.6;
+        .resource-card .links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         .link {
             display: inline-block;
-            margin-top: 20px;
-            padding: 12px 24px;
+            padding: 8px 16px;
             background: #007bff;
             color: white;
             text-decoration: none;
-            border-radius: 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
             transition: background 0.2s;
         }
         .link:hover {
             background: #0056b3;
         }
+        .link.secondary {
+            background: #6c757d;
+        }
+        .link.secondary:hover {
+            background: #545b62;
+        }
+        .presentation-card {
+            border-left-color: #28a745;
+        }
+        .tutorial-card {
+            border-left-color: #007bff;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid #dee2e6;
+            color: #666;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #e9ecef;
+            color: #495057;
+            font-size: 0.8em;
+            border-radius: 12px;
+            margin-left: 8px;
+        }
+        .new-badge {
+            background: #d4edda;
+            color: #155724;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+                margin: 0 10px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            .resources {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🚀 TeDS Documentation</h1>
-        <p>You are being redirected to the TeDS Tutorial with fixed sidebar TOC...</p>
-        <p>If you are not redirected automatically, click the link below:</p>
-        <a href="tutorial.html" class="link">📖 Open TeDS Tutorial</a>
+        <div class="header">
+            <h1>🚀 TeDS Documentation Hub</h1>
+            <p class="subtitle">Test-Driven Schema Development Tool</p>
+            <p class="description">
+                Welcome to the comprehensive documentation for TeDS!
+                Choose from interactive tutorials, presentations, or dive deep into
+                advanced features to master JSON Schema validation with confidence.
+            </p>
+        </div>
 
-        <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+        <div class="resources">
+            <!-- Tutorial Section -->
+            <div class="resource-card tutorial-card">
+                <h3>📖 Interactive Tutorial</h3>
+                <p>
+                    Comprehensive step-by-step guide covering everything from basic concepts
+                    to advanced JSON Schema validation. Perfect for getting started with TeDS.
+                </p>
+                <div class="links">
+                    <a href="tutorial.html" class="link">📚 Start Tutorial</a>
+                    <a href="tutorial.md" class="link secondary">Markdown Version</a>
+                </div>
+            </div>
 
-        <h3>📚 Available Documentation</h3>
-        <p style="margin-bottom: 10px;">
-            <a href="tutorial.html">📖 Tutorial (Fixed TOC)</a> -
-            <em>Recommended: Modern layout with fixed sidebar navigation</em>
-        </p>
-        <p style="margin-bottom: 10px;">
-            <a href="tutorial-with-fixed-toc.html">📄 Tutorial (Alternative)</a> -
-            <em>Previous version with TOC</em>
-        </p>
-        <p style="margin-bottom: 10px;">
-            <a href="tutorial.md">📝 Tutorial (Markdown)</a> -
-            <em>Original markdown version</em>
-        </p>
+            <!-- Presentation Section -->
+            <div class="resource-card presentation-card">
+                <h3>🎯 Reveal.js Presentation <span class="badge new-badge">NEW</span></h3>
+                <p>
+                    Professional 45-60 minute presentation about TeDS. Includes motivation,
+                    features, live demos, and Q&A. Perfect for teams and conferences.
+                </p>
+                <div class="links">
+                    <a href="presentation/" class="link">🎬 View Presentation</a>
+                    <a href="presentation/README.md" class="link secondary">Build Guide</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Start Section -->
+        <div class="resource-card" style="margin-top: 30px;">
+            <h3>⚡ Quick Start</h3>
+            <p>
+                New to TeDS? Start here for a rapid introduction to the core concepts and your first validation test.
+            </p>
+            <div style="background: #f1f3f4; padding: 20px; border-radius: 6px; margin: 15px 0;">
+                <code style="font-family: 'SF Mono', Monaco, monospace; color: #333;">
+                    # Install TeDS<br>
+                    pip install teds<br><br>
+                    # Verify installation<br>
+                    teds --version<br><br>
+                    # Start with the tutorial<br>
+                    # → tutorial.html
+                </code>
+            </div>
+            <div class="links">
+                <a href="tutorial.html#_installation" class="link">🛠️ Installation Guide</a>
+                <a href="tutorial.html#_your_first_test" class="link secondary">First Example</a>
+            </div>
+        </div>
+
+        <!-- Additional Resources -->
+        <div style="margin-top: 40px;">
+            <h3 style="text-align: center; color: #333; margin-bottom: 30px;">📋 Additional Resources</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin: 0 0 10px 0; color: #555;">🐛 Found an Issue?</h4>
+                    <p style="color: #666; margin: 0 0 15px 0;">Report bugs or request features</p>
+                    <a href="https://github.com/yaccob/teds/issues" class="link secondary">GitHub Issues</a>
+                </div>
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin: 0 0 10px 0; color: #555;">📦 PyPI Package</h4>
+                    <p style="color: #666; margin: 0 0 15px 0;">Install or browse package details</p>
+                    <a href="https://pypi.org/project/teds/" class="link secondary">PyPI Page</a>
+                </div>
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin: 0 0 10px 0; color: #555;">💡 Why TeDS?</h4>
+                    <p style="color: #666; margin: 0 0 15px 0;">Understanding the motivation</p>
+                    <a href="why_this_matters.md" class="link secondary">Read More</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>
+                <strong>TeDS</strong> - Test-Driven Schema Development Tool<br>
+                <em>Making JSON Schema validation reliable and confidence-inspiring</em>
+            </p>
+            <p style="margin-top: 15px; font-size: 0.9em;">
+                📝 Documentation updated: <span id="update-date"></span> |
+                🏠 <a href="https://github.com/yaccob/teds" style="color: #007bff;">GitHub Repository</a>
+            </p>
+        </div>
     </div>
+
+    <script>
+        // Set current date
+        document.getElementById('update-date').textContent = new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    </script>
 </body>
 </html>
