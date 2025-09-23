@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeDS Presentation</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2.2em;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+        }
+        .description {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+        .code-block {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            border-left: 4px solid #28a745;
+            text-align: left;
+            margin: 20px 0;
+            font-family: 'SF Mono', Monaco, monospace;
+            color: #333;
+        }
+        .link {
+            display: inline-block;
+            margin: 10px;
+            padding: 12px 24px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        .link:hover {
+            background: #1e7e34;
+        }
+        .link.secondary {
+            background: #6c757d;
+        }
+        .link.secondary:hover {
+            background: #545b62;
+        }
+        .status {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            border-left: 4px solid #ffc107;
+        }
+        .requirements {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            border-left: 4px solid #17a2b8;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 TeDS Presentation</h1>
+        <p class="subtitle">Reveal.js Presentation for Test-Driven Schema Development</p>
+
+        <div class="status">
+            <strong>⚠️ Build Required</strong><br>
+            This presentation is built from AsciiDoctor source and requires compilation to view.
+        </div>
+
+        <div class="description">
+            <h3>🚀 About This Presentation</h3>
+            <p>
+                This is a comprehensive 45-60 minute presentation about TeDS, covering:
+            </p>
+            <ul>
+                <li>Problem statement and motivation</li>
+                <li>TeDS features and architecture</li>
+                <li>Getting started guide and best practices</li>
+                <li>Advanced use cases and CI/CD integration</li>
+                <li>Live demonstrations and Q&A</li>
+            </ul>
+        </div>
+
+        <div class="requirements">
+            <h4>📋 Requirements to Build</h4>
+            <ul>
+                <li><code>gem install asciidoctor asciidoctor-revealjs</code></li>
+                <li>Optional: PlantUML for diagrams</li>
+            </ul>
+        </div>
+
+        <div class="code-block">
+            # Quick Build<br>
+            ./build.sh<br><br>
+            # Or manually<br>
+            asciidoctor-revealjs index.adoc<br><br>
+            # Then open index.html in browser
+        </div>
+
+        <div style="margin: 30px 0;">
+            <a href="README.md" class="link">📚 Build Instructions</a>
+            <a href="../" class="link secondary">🏠 Back to Docs Hub</a>
+        </div>
+
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #dee2e6;">
+            <h4>🔧 For Developers</h4>
+            <p style="color: #666; margin-bottom: 20px;">
+                The presentation source is in <code>index.adoc</code>.
+                See the README for detailed build instructions and customization options.
+            </p>
+            <a href="index.adoc" class="link secondary">📝 View AsciiDoc Source</a>
+        </div>
+    </div>
+</body>
+</html>
