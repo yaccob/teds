@@ -232,7 +232,7 @@ teds generate @config.yaml
 teds generate '{"sample_schemas.yaml": {"paths": ["$.components.schemas.*"]}}'
 
 # Multiple paths in one schema
-teds generate '{"api.yaml": {"paths": ["$.components.schemas.User", "$.components.schemas.Product"]}}'
+teds generate '{"api.yaml": {"paths": ["$.components.schemas.Product", "$.components.schemas.Order"]}}'
 
 # With custom target file
 teds generate '{"schema.yaml": {"paths": ["$[\"$defs\"].*"], "target": "custom_tests.yaml"}}'
@@ -258,7 +258,7 @@ sample_schemas.yaml:
 
 # Select specific schemas by name
 api.yaml:
-  paths: ["$.components.schemas.User", "$.components.schemas.Email"]
+  paths: ["$.components.schemas.Product", "$.components.schemas.Email"]
 
 # Array indices and wildcards
 complex.yaml:
@@ -692,10 +692,10 @@ The `{pointer}` variable automatically converts JSON Pointer slashes to plus sig
 
 [source,bash]
 ----
-# JSON Pointer: #/components/schemas/User
-# Sanitized:    components+schemas+User
-teds generate api.yaml#/components/schemas/User
-# Creates: api.components+schemas+User.tests.yaml
+# JSON Pointer: #/components/schemas/Product
+# Sanitized:    components+schemas+Product
+teds generate api.yaml#/components/schemas/Product
+# Creates: api.components+schemas+Product.tests.yaml
 
 # JSON Pointer: #/$defs/Address
 # Sanitized:    $defs+Address
