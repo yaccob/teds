@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# Enhanced Pre-Commit Hook with Bypass Protection
+# Copy this to .git/hooks/pre-commit and make executable
+#
+# Installation: cp hooks/pre-commit-protected .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+
+# 🚫 BYPASS PROTECTION: Prevent hook circumvention
+if [ -n "$PRE_COMMIT_ALLOW_NO_CONFIG" ]; then
+    echo "🚫 ERROR: PRE_COMMIT_ALLOW_NO_CONFIG bypass detected!"
+    echo "💡 Hooks exist for code quality. Remove the bypass and fix issues properly."
+    echo "🛡️  If absolutely necessary, get explicit approval first."
+    exit 1
+fi
+
+if [ -n "$SKIP" ] && [ "$SKIP" != "" ]; then
+    echo "🚫 ERROR: SKIP environment variable detected: $SKIP"
+    echo "💡 Skipping hooks compromises code quality. Fix issues instead."
+    echo "🛡️  If absolutely necessary, get explicit approval first."
+    exit 1
+fi
+
+# Check for --no-verify in the command line (this won't catch it directly, but we can warn)
+if [ -n "$GIT_HOOKS_BYPASSED" ]; then
+    echo "🚫 ERROR: Git hooks bypass detected!"
+    echo "💡 Hooks are essential for maintaining code quality."
+    exit 1
+fi
+
+# 🛡️ QUALITY GATE: Ensure virtual environment
+INSTALL_PYTHON=/Users/yaccob/repos/github.com/yaccob/contest/.venv/bin/python3.13
+if [ ! -x "$INSTALL_PYTHON" ]; then
+    echo "🚫 ERROR: Virtual environment not found at $INSTALL_PYTHON"
+    echo "💡 Please activate the virtual environment: source .venv/bin/activate"
+    exit 1
+fi
+
+echo "🛡️ Running pre-commit hooks (bypass protection active)..."
+
+# Execute pre-commit if available
+if [ -x "$INSTALL_PYTHON" ]; then
+    exec "$INSTALL_PYTHON" -mpre_commit hook-impl --config=.pre-commit-config.yaml --hook-type=pre-commit --hook-dir .git/hooks -- "$@"
+elif command -v pre-commit > /dev/null; then
+    exec pre-commit hook-impl --config=.pre-commit-config.yaml --hook-type=pre-commit --hook-dir .git/hooks -- "$@"
+else
+    echo '`pre-commit` not found.  Did you forget to activate your virtualenv?' 1>&2
+    exit 1
+fi
