@@ -1,0 +1,105 @@
+/* Custom CSS for TeDS Presentation */
+
+/* Typography improvements */
+.reveal h1, .reveal h2, .reveal h3 {
+    text-transform: none;
+    font-weight: 600;
+}
+
+.reveal .subtitle {
+    font-size: 0.8em;
+    color: #666;
+    font-style: italic;
+    margin-top: 0.5em;
+}
+
+/* Two-column layout */
+.two-columns {
+    display: flex;
+    gap: 2em;
+}
+
+.two-columns .column {
+    flex: 1;
+}
+
+/* Contact info styling */
+.contact-info {
+    font-size: 0.9em;
+    line-height: 1.6;
+}
+
+/* Code block improvements */
+.reveal pre code {
+    font-size: 0.8em;
+    line-height: 1.4;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+/* Table styling */
+.reveal table {
+    font-size: 0.8em;
+}
+
+.reveal table th {
+    background-color: #f5f5f5;
+    font-weight: 600;
+}
+
+/* Slide-specific styles */
+.reveal .slide-background {
+    background-size: cover;
+}
+
+/* Progress bar customization */
+.reveal .progress span {
+    background: #2c3e50;
+}
+
+/* Navigation controls */
+.reveal .controls {
+    color: #2c3e50;
+}
+
+/* Step fragments */
+.reveal .fragment.step {
+    opacity: 0.3;
+}
+
+.reveal .fragment.step.current-fragment {
+    opacity: 1;
+}
+
+/* Demo placeholders */
+.demo-placeholder {
+    border: 2px dashed #ccc;
+    padding: 2em;
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    background-color: #f9f9f9;
+}
+
+/* Notes styling (for speaker view) */
+.reveal aside.notes {
+    font-size: 16px;
+    line-height: 1.5;
+    color: #333;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .two-columns {
+        flex-direction: column;
+        gap: 1em;
+    }
+
+    .reveal pre code {
+        font-size: 0.7em;
+    }
+
+    .reveal table {
+        font-size: 0.7em;
+    }
+}
