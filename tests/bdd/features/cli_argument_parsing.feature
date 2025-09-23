@@ -70,6 +70,10 @@ Feature: CLI Argument Parsing
             good email:
               description: simple valid email
               payload: alice@example.com
+          invalid:
+            "not an email":
+              description: not a valid email address
+              payload: "not-an-email"
         sample_schemas.yaml#/components/schemas/User:
           valid:
             minimal valid user:
@@ -82,9 +86,16 @@ Feature: CLI Argument Parsing
               description: payload provided as JSON string
               parse_payload: true
               payload: "{\"id\":\"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\"name\":\"Bob Builder\",\"email\":\"bob@example.com\"}"
+          invalid:
+            bad uuid:
+              description: id is not a valid UUID
+              payload:
+                id: "not-a-uuid"
+                name: "Alice Example"
+                email: "alice@example.com"
       """
     When I run the command "verify --output-level all --report default.adoc sample_tests.yaml"
-    Then the command should succeed
+    Then the command should complete with validation errors
     And a file "sample_tests.report.adoc" should be created
 
   Scenario: Output-level warning with report should work fine
