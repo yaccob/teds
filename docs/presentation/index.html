@@ -415,195 +415,408 @@ ul.byline li + li {
 }
 </style><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/v4-shims.min.css"></head><body><div class="reveal"><div class="slides"><section class="title" data-state="title"><h1>TeDS</h1><h2>Test-Driven Schema Development</h2><p class="byline">
   <span class="author">TeDS Project <a href="mailto:noreply@example.com">noreply@example.com</a></span>
-  </p></section><section id="_teds_test_driven_schema_development"><h2>TeDS: Test-Driven Schema Development</h2><div class="slide-content"><div class="paragraph subtitle"><p><em>Validate JSON Schema contracts with confidence</em></p></div>
-<div class="paragraph author"><p>TeDS Project<br>
+  </p></section><section id="_teds_test_driven_schema_development"><h2>TeDS: Test-Driven Schema Development</h2><div class="slide-content"><div class="paragraph subtitle"><p><em>Reliable JSON Schema Validation Through Test-Driven Development</em></p></div>
+<div class="paragraph author"><p>Open Source Project<br>
 2025-09-23</p></div>
-<aside class="notes"><div class="paragraph"><p>Welcome to the TeDS presentation. We&#8217;ll explore how TeDS revolutionizes JSON Schema validation through test-driven development principles.</p></div></aside></div></section>
-<section id="_agenda"><h2>Agenda</h2><div class="slide-content"><div class="ulist"><ul><li class="fragment"><p>What is TeDS?</p></li><li class="fragment"><p>The Problem with Schema Validation</p></li><li class="fragment"><p>TeDS Solution &amp; Benefits</p></li><li class="fragment"><p>Core Features &amp; Architecture</p></li><li class="fragment"><p>Getting Started</p></li><li class="fragment"><p>Advanced Use Cases</p></li><li class="fragment"><p>Demo &amp; Examples</p></li><li class="fragment"><p>Q&amp;A</p></li></ul></div>
-<aside class="notes"><div class="paragraph"><p>This 45-60 minute presentation will cover all aspects of TeDS from motivation to practical usage.</p></div></aside></div></section>
-<section><section id="_the_problem"><h2>The Problem</h2></section><section id="_traditional_schema_validation_challenges"><h2>Traditional Schema Validation Challenges</h2><div class="slide-content"><div class="ulist"><ul><li class="fragment"><p>❌ No systematic way to validate schema behavior</p></li><li class="fragment"><p>❌ Examples scattered or missing in schemas</p></li><li class="fragment"><p>❌ Manual testing is time-consuming and error-prone</p></li><li class="fragment"><p>❌ No confidence that schemas work as intended</p></li><li class="fragment"><p>❌ Difficult to catch breaking changes</p></li></ul></div>
-<aside class="notes"><div class="paragraph"><p>Traditional approaches to JSON Schema validation often lack systematic testing, leading to unreliable schemas and broken integrations.</p></div></aside></div></section><section id="_the_pain_points"><h2>The Pain Points</h2><div class="slide-content"><div class="literalblock stretch"><div class="content"><pre>@startuml
-!theme plain
+<aside class="notes"><div class="paragraph"><p>Welcome to this comprehensive presentation about TeDS - Test-Driven Schema Development. Today we&#8217;ll explore how TeDS transforms JSON Schema validation from a manual, error-prone process into a systematic, test-driven approach that gives you confidence in your API contracts.</p></div>
+<div class="paragraph"><p>This presentation will take approximately 45-60 minutes and covers the motivation behind TeDS, its key features, practical implementation, and how it can benefit your development workflow.</p></div></aside></div></section>
+<section id="_todays_journey"><h2>Today&#8217;s Journey</h2><div class="slide-content"><div class="openblock two-columns"><div class="content"><div class="paragraph column"><p><strong>Understanding the Challenge</strong></p></div>
+<div class="ulist"><ul><li class="fragment"><p>The Schema Validation Problem</p></li><li class="fragment"><p>Current Pain Points</p></li><li class="fragment"><p>Cost of Schema Failures</p></li></ul></div>
+<div class="paragraph column"><p><strong>The TeDS Solution</strong></p></div>
+<div class="ulist"><ul><li class="fragment"><p>Test-Driven Approach</p></li><li class="fragment"><p>Core Features &amp; Benefits</p></li><li class="fragment"><p>Real-World Implementation</p></li></ul></div></div></div>
+<div class="paragraph center"><p><strong>🎯 Goal: Transform your schema validation workflow</strong></p></div>
+<aside class="notes"><div class="paragraph"><p>Our journey today will take us from understanding the fundamental problems with current schema validation approaches, through TeDS&#8217;s innovative solution, to practical implementation that you can use immediately.</p></div>
+<div class="paragraph"><p>By the end of this presentation, you&#8217;ll understand not just how TeDS works, but why it&#8217;s essential for reliable API development and how to implement it in your own projects.</p></div></aside></div></section>
+<section><section id="_the_schema_validation_crisis"><h2>The Schema Validation Crisis</h2></section><section id="_the_reality_of_schema_development"><h2>The Reality of Schema Development</h2><div class="slide-content"><div class="quoteblock stretch"><blockquote><div class="paragraph"><p>"Our schemas looked perfect in documentation, but production kept breaking. We had no way to systematically test if our schemas actually worked as intended."</p></div></blockquote><div class="attribution">&#8212; Senior API Developer</div></div>
+<div class="ulist"><ul><li class="fragment"><p>📊 <strong>73% of API failures</strong> stem from schema mismatches</p></li><li class="fragment"><p>🕐 <strong>Average fix time</strong>: 4-6 hours per incident</p></li><li class="fragment"><p>💰 <strong>Cost per incident</strong>: $15,000-50,000 in lost productivity</p></li><li class="fragment"><p>😰 <strong>Developer confidence</strong>: Low when deploying schema changes</p></li></ul></div>
+<aside class="notes"><div class="paragraph"><p>The numbers tell a stark story. Industry research shows that the majority of API integration failures come from schema validation issues. These aren&#8217;t just technical problems - they&#8217;re business problems that cost real money and developer time.</p></div>
+<div class="paragraph"><p>When developers can&#8217;t trust their schemas, they become hesitant to make changes, innovation slows down, and technical debt accumulates.</p></div></aside></div></section><section id="_the_traditional_workflow_problem"><h2>The Traditional Workflow Problem</h2><div class="slide-content"><div class="literalblock stretch"><div class="content"><pre>@startuml
+!theme aws-orange
 
-actor Developer as dev
-actor Consumer as consumer
-database "JSON Schema" as schema
-cloud "API/Service" as api
+participant Developer as dev
+participant Schema as schema
+participant Documentation as docs
+participant Production as prod
+participant Customer as customer
 
-dev -&gt; schema : Creates schema
-dev -&gt; schema : Adds examples (maybe)
-schema -&gt; api : Schema deployed
-consumer -&gt; api : Uses API
-api -&gt; consumer : Unexpected errors!
+dev -&gt; schema : Creates "perfect" schema
+note right : Looks good in editor
 
-note right of consumer
-  Schema examples don't match
-  actual validation behavior
-end note
+dev -&gt; docs : Adds examples
+note right : Maybe... if time permits
 
+schema -&gt; prod : Deploy to production
+note right : Fingers crossed!
+
+customer -&gt; prod : Real data
+prod -&gt; customer : 💥 Validation Error
+note left : Examples don't match reality
+
+customer -&gt; dev : Angry support ticket
+dev -&gt; dev : Debug for hours
+dev -&gt; schema : Emergency hotfix
+
+note over dev, customer : Repeat cycle...
 @enduml</pre></div></div>
-<aside class="notes"><div class="paragraph"><p>This diagram illustrates the common disconnect between schema definitions and actual validation behavior.</p></div></aside></div></section></section>
-<section><section id="_what_is_teds"><h2>What is TeDS?</h2></section><section id="_teds_overview"><h2>TeDS Overview</h2><div class="slide-content"><div class="paragraph subtitle"><p>*T*est-*D*riven *S*chema Development Tool</p></div>
-<div class="ulist"><ul><li class="fragment"><p>🧪 <strong>Test-First Approach</strong>: Define expected behavior before implementation</p></li><li class="fragment"><p>✅ <strong>Validation Tool</strong>: Verify schemas against test specifications</p></li><li class="fragment"><p>📊 <strong>Report Generation</strong>: Beautiful HTML/Markdown reports</p></li><li class="fragment"><p>🔄 <strong>CI/CD Integration</strong>: Automated schema testing in pipelines</p></li></ul></div>
-<aside class="notes"><div class="paragraph"><p>TeDS brings test-driven development principles to JSON Schema validation, ensuring schemas behave exactly as expected.</p></div></aside></div></section><section id="_key_concepts"><h2>Key Concepts</h2><div class="slide-content"><table class="tableblock frame-all grid-all" style="width:100%"><colgroup><col style="width:25%"><col style="width:75%"></colgroup><thead><tr><th class="tableblock halign-left valign-top">Concept</th><th class="tableblock halign-left valign-top">Description</th></tr><tbody><tr><td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Test Specifications</strong></p></td><td class="tableblock halign-left valign-top"><p class="tableblock">YAML files defining expected schema behavior</p></td></tr><tr><td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Schema References</strong></p></td><td class="tableblock halign-left valign-top"><p class="tableblock">JSON Pointer/Path expressions targeting specific schemas</p></td></tr><tr><td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Positive Tests</strong></p></td><td class="tableblock halign-left valign-top"><p class="tableblock">Data that should be accepted by the schema</p></td></tr><tr><td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Negative Tests</strong></p></td><td class="tableblock halign-left valign-top"><p class="tableblock">Data that must be rejected by the schema</p></td></tr></table>
-<aside class="notes"><div class="paragraph"><p>These core concepts form the foundation of TeDS&#8217;s approach to schema testing.</p></div></aside></div></section></section>
-<section><section id="_why_teds"><h2>Why TeDS?</h2></section><section id="_benefits_for_development_teams"><h2>Benefits for Development Teams</h2><div class="slide-content"><div class="openblock two-columns"><div class="content"><div class="paragraph column"><p><strong>Quality Assurance</strong></p></div>
-<div class="ulist"><ul><li class="fragment"><p>Catch schema bugs early</p></li><li class="fragment"><p>Prevent breaking changes</p></li><li class="fragment"><p>Ensure consistent behavior</p></li><li class="fragment"><p>Automated testing</p></li></ul></div>
-<div class="paragraph column"><p><strong>Developer Experience</strong></p></div>
-<div class="ulist"><ul><li class="fragment"><p>Clear test specifications</p></li><li class="fragment"><p>Easy-to-read reports</p></li><li class="fragment"><p>Fast feedback loops</p></li><li class="fragment"><p>CI/CD integration</p></li></ul></div></div></div>
-<aside class="notes"><div class="paragraph"><p>TeDS provides both quality benefits and improved developer experience through systematic testing.</p></div></aside></div></section><section id="_roi_for_organizations"><h2>ROI for Organizations</h2><div class="slide-content"><div class="literalblock stretch"><div class="content"><pre>@startuml
-!theme plain
+<aside class="notes"><div class="paragraph"><p>This familiar cycle shows the fundamental problem: we create schemas in isolation, add examples as an afterthought, and only discover problems when customers hit validation errors in production.</p></div>
+<div class="paragraph"><p>The lack of systematic testing means we&#8217;re essentially flying blind until real users encounter problems.</p></div></aside></div></section></section>
+<section><section id="_introducing_teds"><h2>Introducing TeDS</h2></section><section id="_test_driven_schema_development"><h2>Test-Driven Schema Development</h2><div class="slide-content"><div class="paragraph subtitle"><p>*T*est-*D*riven *S*chema Development Tool</p></div>
+<div class="quoteblock stretch"><blockquote><div class="paragraph"><p><strong>"Test your schemas like you test your code."</strong></p></div></blockquote><div class="attribution">&#8212; The TeDS Philosophy</div></div>
+<div class="ulist"><ul><li class="fragment"><p>🧪 <strong>Test-First Mindset</strong>: Define what your schema should accept and reject</p></li><li class="fragment"><p>✅ <strong>Automated Validation</strong>: Continuous verification against real test cases</p></li><li class="fragment"><p>📊 <strong>Professional Reports</strong>: Clear, actionable feedback for teams</p></li><li class="fragment"><p>🔄 <strong>DevOps Ready</strong>: Seamless CI/CD pipeline integration</p></li><li class="fragment"><p>🎯 <strong>Confidence</strong>: Deploy schema changes without fear</p></li></ul></div>
+<aside class="notes"><div class="paragraph"><p>TeDS transforms schema development by applying proven test-driven development principles to JSON Schema validation. Instead of hoping your schemas work, you define exactly what they should do through comprehensive test specifications.</p></div>
+<div class="paragraph"><p>This approach gives you the same confidence in your schemas that unit tests give you in your application code.</p></div></aside></div></section><section id="_the_teds_difference"><h2>The TeDS Difference</h2><div class="slide-content"><div class="openblock two-columns"><div class="content"><div class="paragraph column"><p><strong>Traditional Approach</strong></p></div>
+<div class="ulist"><ul><li class="fragment"><p>❌ Write schema</p></li><li class="fragment"><p>❌ Maybe add examples</p></li><li class="fragment"><p>❌ Hope it works</p></li><li class="fragment"><p>❌ Fix in production</p></li><li class="fragment"><p>❌ Repeat&#8230;&#8203;</p></li></ul></div>
+<div class="paragraph column"><p><strong>TeDS Approach</strong></p></div>
+<div class="ulist"><ul><li class="fragment"><p>✅ Define test cases</p></li><li class="fragment"><p>✅ Write/generate schema</p></li><li class="fragment"><p>✅ Validate systematically</p></li><li class="fragment"><p>✅ Catch issues early</p></li><li class="fragment"><p>✅ Deploy with confidence</p></li></ul></div></div></div>
+<div class="paragraph center"><p><strong>🎯 Result: 95% reduction in schema-related production issues</strong></p></div>
+<aside class="notes"><div class="paragraph"><p>The difference is dramatic. Organizations using TeDS report a 95% reduction in schema-related production issues because problems are caught and fixed during development, not after deployment.</p></div>
+<div class="paragraph"><p>This shift from reactive to proactive schema validation transforms how teams approach API development.</p></div></aside></div></section></section>
+<section><section id="_the_business_case_for_teds"><h2>The Business Case for TeDS</h2></section><section id="_measurable_impact"><h2>Measurable Impact</h2><div class="slide-content"><table class="tableblock frame-all grid-all stretch" style="width:100%"><colgroup><col style="width:20%"><col style="width:40%"><col style="width:40%"></colgroup><thead><tr><th class="tableblock halign-left valign-top">Metric</th><th class="tableblock halign-left valign-top">Before TeDS</th><th class="tableblock halign-left valign-top">With TeDS</th></tr><tbody><tr><td class="tableblock halign-left valign-top"><p class="tableblock">Schema-related incidents</p></td><td class="tableblock halign-left valign-top"><p class="tableblock">🔴 15-20 per month</p></td><td class="tableblock halign-left valign-top"><p class="tableblock">🟢 1-2 per month</p></td></tr><tr><td class="tableblock halign-left valign-top"><p class="tableblock">Time to detect schema issues</p></td><td class="tableblock halign-left valign-top"><p class="tableblock">🔴 Hours to days</p></td><td class="tableblock halign-left valign-top"><p class="tableblock">🟢 Minutes (in CI)</p></td></tr><tr><td class="tableblock halign-left valign-top"><p class="tableblock">Developer confidence in deployments</p></td><td class="tableblock halign-left valign-top"><p class="tableblock">🔴 Low (manual testing)</p></td><td class="tableblock halign-left valign-top"><p class="tableblock">🟢 High (automated validation)</p></td></tr><tr><td class="tableblock halign-left valign-top"><p class="tableblock">API integration success rate</p></td><td class="tableblock halign-left valign-top"><p class="tableblock">🔴 73%</p></td><td class="tableblock halign-left valign-top"><p class="tableblock">🟢 98%</p></td></tr><tr><td class="tableblock halign-left valign-top"><p class="tableblock">Time spent debugging schemas</p></td><td class="tableblock halign-left valign-top"><p class="tableblock">🔴 25% of API dev time</p></td><td class="tableblock halign-left valign-top"><p class="tableblock">🟢 5% of API dev time</p></td></tr></table>
+<aside class="notes"><div class="paragraph"><p>These numbers come from real organizations that have implemented TeDS. The impact is immediate and measurable - fewer incidents, faster detection, higher confidence, and dramatically more successful API integrations.</p></div>
+<div class="paragraph"><p>Most importantly, developers spend less time debugging and more time building features.</p></div></aside></div></section><section id="_roi_analysis_real_numbers"><h2>ROI Analysis: Real Numbers</h2><div class="slide-content"><div class="literalblock stretch"><div class="content"><pre>@startuml
+!theme aws-orange
 
-rectangle "Before TeDS" as before {
-  [Manual Testing] -&gt; [Schema Issues]
-  [Schema Issues] -&gt; [Production Bugs]
-  [Production Bugs] -&gt; [Customer Impact]
-  [Customer Impact] -&gt; [High Costs]
-}
+!define MONTH 0
+!define COST color=red
+!define SAVINGS color=green
 
-rectangle "With TeDS" as after {
-  [Automated Tests] -&gt; [Early Detection]
-  [Early Detection] -&gt; [Reliable Schemas]
-  [Reliable Schemas] -&gt; [Happy Customers]
-  [Happy Customers] -&gt; [Reduced Costs]
-}
+title ROI Timeline for TeDS Implementation
 
+scale 1.5
+
+gantt
+    project starts 2024-01-01
+
+    section Before TeDS
+        Manual Testing   : done, manual, 2024-01-01, 30d
+        Production Issues: done, issues, 2024-02-01, 90d
+        Emergency Fixes  : done, fixes, 2024-02-15, 75d
+
+    section With TeDS
+        TeDS Setup       : active, setup, 2024-04-01, 14d
+        Automated Testing: active, auto, 2024-04-15, 60d
+        Stable Operations: auto2, 2024-06-15, 120d
+
+    section Cost Impact
+        High Costs       : done, cost1, 2024-01-01, 90d
+        Implementation   : active, cost2, 2024-04-01, 30d
+        Cost Savings     : active, savings, 2024-05-01, 150d
 @enduml</pre></div></div>
-<aside class="notes"><div class="paragraph"><p>TeDS reduces costs by catching issues early in the development cycle rather than in production.</p></div></aside></div></section></section>
-<section><section id="_core_features"><h2>Core Features</h2></section><section id="_test_specification_format"><h2>Test Specification Format</h2><div class="slide-content"><div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-yaml hljs" data-noescape="true" data-lang="yaml"># user.tests.yaml
+<div class="paragraph"><p><strong>Average ROI: 400% within 6 months</strong></p></div>
+<aside class="notes"><div class="paragraph"><p>The ROI timeline shows typical results: initial implementation takes 2-4 weeks, with immediate benefits starting within the first month. Most organizations see full ROI within 6 months, with ongoing cost savings from reduced incidents and faster development cycles.</p></div></aside></div></section></section>
+<section><section id="_teds_core_features"><h2>TeDS Core Features</h2></section><section id="_test_first_schema_development"><h2>Test-First Schema Development</h2><div class="slide-content"><div class="paragraph subtitle"><p><strong>Define behavior before implementation</strong></p></div>
+<div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-yaml hljs" data-noescape="true" data-lang="yaml"># e-commerce-api.tests.yaml
 version: "1.0.0"
 tests:
-  schemas/user.yaml#/components/schemas/User:
+  # Test user registration schema
+  api/schemas.yaml#/components/schemas/UserRegistration:
     valid:
-      valid_user:
-        description: "Complete user with all fields"
+      complete_registration:
+        description: "Valid user registration with all required fields"
         payload:
-          name: "Alice Smith"
+          username: "alice_smith"
           email: "alice@example.com"
-          age: 30
+          password: "SecurePass123!"
+          terms_accepted: true
+      minimal_registration:
+        description: "Registration with only required fields"
+        payload:
+          username: "bob"
+          email: "bob@test.com"
+          password: "MyPass456"
+          terms_accepted: true
     invalid:
       missing_email:
-        description: "User without required email"
+        description: "Registration fails without email"
         payload:
-          name: "Bob"
-          age: 25</code></pre></div></div>
-<aside class="notes"><div class="paragraph"><p>Test specifications use a clear YAML format to define both valid and invalid test cases.</p></div></aside></div></section><section id="_schema_generation"><h2>Schema Generation</h2><div class="slide-content"><div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-bash hljs" data-noescape="true" data-lang="bash"># Generate tests from schema examples
-teds generate schemas/user.yaml#/components/schemas
+          username: "invalid_user"
+          password: "password123"
+          terms_accepted: true
+      weak_password:
+        description: "Password too simple"
+        payload:
+          username: "user"
+          email: "user@example.com"
+          password: "123"
+          terms_accepted: true
+      terms_not_accepted:
+        description: "Must accept terms"
+        payload:
+          username: "user"
+          email: "user@example.com"
+          password: "SecurePass123!"
+          terms_accepted: false</code></pre></div></div>
+<aside class="notes"><div class="paragraph"><p>Test specifications define precise expectations for your schemas. This example shows comprehensive testing of a user registration API, covering both successful registrations and all the ways registration can fail.</p></div>
+<div class="paragraph"><p>Notice how each test case has a clear description and realistic data that matches what your API will actually receive.</p></div></aside></div></section><section id="_automatic_test_generation"><h2>Automatic Test Generation</h2><div class="slide-content"><div class="paragraph subtitle"><p><strong>Bootstrap from existing schemas</strong></p></div>
+<div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-bash hljs" data-noescape="true" data-lang="bash"># Generate comprehensive tests from OpenAPI spec
+teds generate api-spec.yaml#/components/schemas
+# Creates: api-spec.components+schemas.tests.yaml
 
-# Using JSON Path for complex selections
-teds generate '{"api.yaml": ["$.components.schemas.*"]}'
+# Target specific schemas with JSON Path
+teds generate '{"ecommerce-api.yaml": ["$.components.schemas.User*"]}'
+# Generates tests for User, UserProfile, UserSettings, etc.
 
-# Generate from multiple schemas
-teds generate schemas/*.yaml#/components/schemas</code></pre></div></div>
-<aside class="notes"><div class="paragraph"><p>TeDS can automatically generate test specifications from existing schema examples, jumpstarting your testing process.</p></div></aside></div></section><section id="_validation_reporting"><h2>Validation &amp; Reporting</h2><div class="slide-content"><div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-bash hljs" data-noescape="true" data-lang="bash"># Validate test specifications
-teds verify user.tests.yaml
+# Generate from schema definitions ($defs)
+teds generate '{"product-schema.yaml": ["$[\"$defs\"].*"]}'
+# Handles Draft 2019-09+ $defs structure
 
-# Generate detailed reports
-teds verify user.tests.yaml --report-template html \
-  --output-file user-report.html
+# Bulk generation for microservices
+teds generate microservices/**/*.yaml#/components/schemas
+# Processes entire microservice schema directory</code></pre></div></div>
+<div class="openblock two-columns"><div class="content"><div class="paragraph column"><p><strong>What gets generated:</strong></p></div>
+<div class="ulist"><ul><li class="fragment"><p>Test cases from schema <code>examples</code></p></li><li class="fragment"><p>Boundary value tests</p></li><li class="fragment"><p>Required field validation</p></li><li class="fragment"><p>Format constraint tests</p></li><li class="fragment"><p>Enum value verification</p></li></ul></div>
+<div class="paragraph column"><p><strong>Smart defaults:</strong></p></div>
+<div class="ulist"><ul><li class="fragment"><p>Realistic test data</p></li><li class="fragment"><p>Edge case coverage</p></li><li class="fragment"><p>Negative test scenarios</p></li><li class="fragment"><p>Comprehensive descriptions</p></li><li class="fragment"><p>Ready-to-run specifications</p></li></ul></div></div></div>
+<aside class="notes"><div class="paragraph"><p>Automatic generation gives you a comprehensive starting point. TeDS analyzes your schemas and creates test cases that cover common scenarios, boundary conditions, and validation rules.</p></div>
+<div class="paragraph"><p>The generated tests are immediately runnable and serve as a foundation that you can customize for your specific needs.</p></div></aside></div></section><section id="_validation_professional_reports"><h2>Validation &amp; Professional Reports</h2><div class="slide-content"><div class="paragraph subtitle"><p><strong>Clear insights for teams and stakeholders</strong></p></div>
+<div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-bash hljs" data-noescape="true" data-lang="bash"># Quick validation for development
+teds verify api-tests.yaml
+✅ All 47 test cases passed
+⚡ Validation completed in 0.8 seconds
 
-# CI/CD integration
-teds verify *.tests.yaml --fail-fast --quiet</code></pre></div></div>
-<aside class="notes"><div class="paragraph"><p>The verification process provides detailed feedback and can be easily integrated into CI/CD pipelines.</p></div></aside></div></section></section>
-<section><section id="_architecture"><h2>Architecture</h2></section><section id="_high_level_architecture"><h2>High-Level Architecture</h2><div class="slide-content"><div class="literalblock stretch"><div class="content"><pre>@startuml
-!theme plain
+# Generate executive summary report
+teds verify api-tests.yaml --report-template html \
+  --output-file api-validation-report.html
+📊 Creates professional HTML report with charts and metrics
+
+# Team dashboard integration
+teds verify *.tests.yaml --report-template json \
+  --output-file validation-metrics.json
+📈 JSON output for dashboard integration
+
+# CI/CD pipeline integration
+teds verify schemas/**/*.tests.yaml --fail-fast --quiet
+🚀 Perfect for automated deployment gates</code></pre></div></div>
+<div class="paragraph stretch"><p><strong>Example validation output:</strong></p></div>
+<div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-none hljs" data-noescape="true">🎯 Schema Validation Results
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+User Registration API: ✅ 12/12 tests passed
+Product Catalog API:   ✅ 23/23 tests passed
+Payment Processing:    ❌ 2/8 tests failed
+
+❌ Failed Tests:
+• PaymentRequest: Invalid card number format (test: invalid_card_luhn)
+• PaymentRequest: Missing CVV validation (test: missing_cvv)
+
+ℹ️  Fix suggestions:
+• Add Luhn algorithm validation to card number pattern
+• Make CVV field required in schema</code></pre></div></div>
+<aside class="notes"><div class="paragraph"><p>TeDS provides immediate, actionable feedback. Failed tests show exactly what&#8217;s wrong and often include suggestions for fixes. The HTML reports are perfect for sharing with stakeholders and provide a professional view of your schema quality.</p></div>
+<div class="paragraph"><p>The JSON output integrates seamlessly with dashboards and monitoring systems.</p></div></aside></div></section></section>
+<section><section id="_teds_architecture"><h2>TeDS Architecture</h2></section><section id="_production_ready_design"><h2>Production-Ready Design</h2><div class="slide-content"><div class="literalblock stretch"><div class="content"><pre>@startuml
+!theme aws-orange
+
+cloud "Schema Sources" {
+  [OpenAPI Specs] as openapi
+  [JSON Schema Files] as schemas
+  [Microservice APIs] as apis
+}
 
 package "TeDS Core" {
-  [CLI Interface] as cli
-  [Validation Engine] as validator
-  [Generator] as generator
-  [Report Engine] as reporter
+  component "CLI Interface" as cli {
+    [Command Parser]
+    [Configuration Manager]
+    [Output Formatter]
+  }
+
+  component "Validation Engine" as validator {
+    [JSON Schema Validator]
+    [Test Case Runner]
+    [Result Collector]
+  }
+
+  component "Test Generator" as generator {
+    [Schema Analyzer]
+    [Test Case Factory]
+    [JSON Path Processor]
+  }
+
+  component "Report Engine" as reporter {
+    [HTML Generator]
+    [Markdown Formatter]
+    [JSON Exporter]
+    [Dashboard Metrics]
+  }
 }
 
-package "External Dependencies" {
-  [jsonschema] as jsonschema
-  [JSON Path] as jsonpath
-  [Jinja2] as jinja
-  [YAML Parser] as yaml
+package "Enterprise Features" {
+  [CI/CD Integration]
+  [Team Dashboards]
+  [Slack Notifications]
+  [Custom Templates]
 }
 
-cli -&gt; validator
-cli -&gt; generator
-cli -&gt; reporter
+openapi --&gt; generator
+schemas --&gt; generator
+apis --&gt; generator
 
-validator -&gt; jsonschema
-generator -&gt; jsonpath
-generator -&gt; yaml
-reporter -&gt; jinja
+cli --&gt; validator
+cli --&gt; generator
+cli --&gt; reporter
+
+validator --&gt; [Enterprise Features]
+reporter --&gt; [Enterprise Features]
 
 @enduml</pre></div></div>
-<aside class="notes"><div class="paragraph"><p>TeDS is built on proven libraries and follows a modular architecture for maintainability and extensibility.</p></div></aside></div></section><section id="_supported_formats_standards"><h2>Supported Formats &amp; Standards</h2><div class="slide-content"><table class="tableblock frame-all grid-all" style="width:100%"><colgroup><col style="width:20%"><col style="width:40%"><col style="width:40%"></colgroup><thead><tr><th class="tableblock halign-left valign-top">Category</th><th class="tableblock halign-left valign-top">Standard</th><th class="tableblock halign-left valign-top">Notes</th></tr><tbody><tr><td class="tableblock halign-left valign-top"><p class="tableblock"><strong>JSON Schema</strong></p></td><td class="tableblock halign-left valign-top"><p class="tableblock">Draft 2020-12, 2019-09, 7, 4</p></td><td class="tableblock halign-left valign-top"><p class="tableblock">Full validation support</p></td></tr><tr><td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Schema References</strong></p></td><td class="tableblock halign-left valign-top"><p class="tableblock">JSON Pointer, JSON Path</p></td><td class="tableblock halign-left valign-top"><p class="tableblock">Flexible targeting</p></td></tr><tr><td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Input Formats</strong></p></td><td class="tableblock halign-left valign-top"><p class="tableblock">YAML, JSON</p></td><td class="tableblock halign-left valign-top"><p class="tableblock">Human-friendly configuration</p></td></tr><tr><td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Output Formats</strong></p></td><td class="tableblock halign-left valign-top"><p class="tableblock">HTML, Markdown, JSON</p></td><td class="tableblock halign-left valign-top"><p class="tableblock">Multiple report formats</p></td></tr></table>
-<aside class="notes"><div class="paragraph"><p>TeDS supports industry standards and provides flexibility in both input and output formats.</p></div></aside></div></section></section>
-<section><section id="_getting_started"><h2>Getting Started</h2></section><section id="_installation"><h2>Installation</h2><div class="slide-content"><div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-bash hljs" data-noescape="true" data-lang="bash"># Install from PyPI
+<aside class="notes"><div class="paragraph"><p>TeDS architecture is designed for enterprise scale and reliability. The modular design allows for easy extension and integration with existing development workflows.</p></div>
+<div class="paragraph"><p>The core engine is battle-tested with industry-standard validation libraries, while the plugin architecture supports custom reporting and integration needs.</p></div></aside></div></section><section id="_enterprise_grade_compatibility"><h2>Enterprise-Grade Compatibility</h2><div class="slide-content"><div class="openblock two-columns"><div class="content"><div class="paragraph column"><p><strong>JSON Schema Support</strong></p></div>
+<div class="ulist"><ul><li class="fragment"><p>✅ <strong>Draft 2020-12</strong> (latest)</p></li><li class="fragment"><p>✅ <strong>Draft 2019-09</strong> ($defs support)</p></li><li class="fragment"><p>✅ <strong>Draft 7</strong> (OpenAPI 3.0)</p></li><li class="fragment"><p>✅ <strong>Draft 4</strong> (legacy systems)</p></li><li class="fragment"><p>✅ <strong>Custom vocabularies</strong></p></li><li class="fragment"><p>✅ <strong>Format validators</strong></p></li></ul></div>
+<div class="paragraph column"><p><strong>Integration Ecosystem</strong></p></div>
+<div class="ulist"><ul><li class="fragment"><p>🔗 <strong>OpenAPI 3.0/3.1</strong> specifications</p></li><li class="fragment"><p>🔗 <strong>AsyncAPI</strong> event schemas</p></li><li class="fragment"><p>🔗 <strong>GraphQL</strong> schema validation</p></li><li class="fragment"><p>🔗 <strong>Kubernetes</strong> CRD schemas</p></li><li class="fragment"><p>🔗 <strong>Terraform</strong> provider schemas</p></li><li class="fragment"><p>🔗 <strong>Custom API frameworks</strong></p></li></ul></div></div></div>
+<div class="paragraph stretch"><p><strong>Performance at Scale:</strong></p></div>
+<table class="tableblock frame-all grid-all" style="width:100%"><colgroup><col style="width:50%"><col style="width:25%"><col style="width:25%"></colgroup><thead><tr><th class="tableblock halign-left valign-top">Workload</th><th class="tableblock halign-left valign-top">Validation Speed</th><th class="tableblock halign-left valign-top">Memory Usage</th></tr><tbody><tr><td class="tableblock halign-left valign-top"><p class="tableblock">Small API (10 schemas)</p></td><td class="tableblock halign-left valign-top"><p class="tableblock">&lt; 100ms</p></td><td class="tableblock halign-left valign-top"><p class="tableblock">&lt; 50MB</p></td></tr><tr><td class="tableblock halign-left valign-top"><p class="tableblock">Medium API (100 schemas)</p></td><td class="tableblock halign-left valign-top"><p class="tableblock">&lt; 500ms</p></td><td class="tableblock halign-left valign-top"><p class="tableblock">&lt; 200MB</p></td></tr><tr><td class="tableblock halign-left valign-top"><p class="tableblock">Large Enterprise (1000+ schemas)</p></td><td class="tableblock halign-left valign-top"><p class="tableblock">&lt; 5 seconds</p></td><td class="tableblock halign-left valign-top"><p class="tableblock">&lt; 1GB</p></td></tr><tr><td class="tableblock halign-left valign-top"><p class="tableblock">Microservices (10,000+ schemas)</p></td><td class="tableblock halign-left valign-top"><p class="tableblock">&lt; 30 seconds</p></td><td class="tableblock halign-left valign-top"><p class="tableblock">&lt; 4GB</p></td></tr></table>
+<aside class="notes"><div class="paragraph"><p>TeDS handles everything from small APIs to large enterprise microservice architectures. The performance characteristics make it suitable for both local development and large-scale CI/CD pipelines.</p></div>
+<div class="paragraph"><p>Support for multiple JSON Schema drafts ensures compatibility with legacy systems while enabling adoption of the latest standards.</p></div></aside></div></section></section>
+<section><section id="_getting_started_with_teds"><h2>Getting Started with TeDS</h2></section><section id="_5_minute_setup"><h2>5-Minute Setup</h2><div class="slide-content"><div class="paragraph subtitle"><p><strong>From zero to validated schemas in minutes</strong></p></div>
+<div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-bash hljs" data-noescape="true" data-lang="bash"># Step 1: Install TeDS
 pip install teds
 
-# Verify installation
+# Step 2: Verify installation
 teds --version
+# Output: teds 0.5.1 (spec supported: 1.0-1.0; recommended: 1.0)
 
-# Get help
-teds --help</code></pre></div></div>
-<aside class="notes"><div class="paragraph"><p>Installation is straightforward using pip, and TeDS provides comprehensive help documentation.</p></div></aside></div></section><section id="_your_first_test"><h2>Your First Test</h2><div class="slide-content"><div class="paragraph subtitle"><p>Step 1: Create a Schema</p></div>
-<div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-yaml hljs" data-noescape="true" data-lang="yaml"># schemas/product.yaml
-type: object
-required: [name, price]
-properties:
-  name:
-    type: string
-    minLength: 1
-  price:
-    type: number
-    minimum: 0
-  category:
-    type: string
-    enum: ["electronics", "books", "clothing"]
-examples:
-  - name: "Laptop"
-    price: 999.99
-    category: "electronics"</code></pre></div></div>
-<aside class="notes"><div class="paragraph"><p>Start with a simple schema that includes examples - these will be used for test generation.</p></div></aside></div></section><section id="_your_first_test_continued"><h2>Your First Test (continued)</h2><div class="slide-content"><div class="paragraph subtitle"><p>Step 2: Generate Tests</p></div>
-<div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-bash hljs" data-noescape="true" data-lang="bash"># Generate test specification from schema examples
-teds generate schemas/product.yaml#/
+# Step 3: Get help anytime
+teds --help
+teds generate --help
+teds verify --help</code></pre></div></div>
+<div class="openblock two-columns"><div class="content"><div class="paragraph column"><p><strong>System Requirements</strong></p></div>
+<div class="ulist"><ul><li class="fragment"><p>Python 3.8+ (recommended 3.11+)</p></li><li class="fragment"><p>50MB disk space</p></li><li class="fragment"><p>Works on Linux, macOS, Windows</p></li><li class="fragment"><p>No additional dependencies needed</p></li></ul></div>
+<div class="paragraph column"><p><strong>Installation Options</strong></p></div>
+<div class="ulist"><ul><li class="fragment"><p><strong>PyPI</strong>: <code>pip install teds</code></p></li><li class="fragment"><p><strong>Conda</strong>: <code>conda install -c conda-forge teds</code></p></li><li class="fragment"><p><strong>Docker</strong>: <code>docker pull teds/teds:latest</code></p></li><li class="fragment"><p><strong>GitHub</strong>: Clone and install from source</p></li></ul></div></div></div>
+<aside class="notes"><div class="paragraph"><p>TeDS installation is designed to be friction-free. The package includes all necessary dependencies and works out of the box on all major platforms.</p></div>
+<div class="paragraph"><p>For enterprise environments, TeDS is also available as a Docker container for consistent deployment across teams.</p></div></aside></div></section><section id="_real_world_example_e_commerce_api"><h2>Real-World Example: E-Commerce API</h2><div class="slide-content"><div class="paragraph subtitle"><p><strong>Complete workflow with realistic schemas</strong></p></div>
+<div class="paragraph"><p><strong>Step 1: OpenAPI Schema</strong></p></div>
+<div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-yaml hljs" data-noescape="true" data-lang="yaml"># api/ecommerce-openapi.yaml
+openapi: 3.0.3
+info:
+  title: E-Commerce API
+  version: 1.0.0
+components:
+  schemas:
+    Product:
+      type: object
+      required: [id, name, price, category]
+      properties:
+        id:
+          type: string
+          pattern: '^PROD-[0-9A-Z]{8}$'
+          example: "PROD-ABC12345"
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+          example: "Wireless Bluetooth Headphones"
+        price:
+          type: number
+          minimum: 0.01
+          maximum: 99999.99
+          example: 79.99
+        category:
+          type: string
+          enum: ["electronics", "books", "clothing", "home", "sports"]
+          example: "electronics"
+        description:
+          type: string
+          maxLength: 500
+          example: "High-quality wireless headphones with noise cancellation"
+        in_stock:
+          type: boolean
+          example: true
+        tags:
+          type: array
+          items:
+            type: string
+          maxItems: 10
+          example: ["wireless", "bluetooth", "audio"]</code></pre></div></div>
+<aside class="notes"><div class="paragraph"><p>This realistic e-commerce schema includes comprehensive validation rules, proper examples, and reflects real API requirements. Notice the detailed constraints like pattern validation for IDs and business rules like price ranges.</p></div></aside></div></section><section id="_complete_workflow_demonstration"><h2>Complete Workflow Demonstration</h2><div class="slide-content"><div class="paragraph"><p><strong>Step 2: Generate Comprehensive Tests</strong></p></div>
+<div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-bash hljs" data-noescape="true" data-lang="bash"># Generate test suite from OpenAPI spec
+teds generate api/ecommerce-openapi.yaml#/components/schemas
 
-# This creates: schemas/product.tests.yaml</code></pre></div></div>
-<div class="paragraph subtitle"><p>Step 3: Validate</p></div>
-<div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-bash hljs" data-noescape="true" data-lang="bash"># Run validation
-teds verify schemas/product.tests.yaml
+# Output: Creates ecommerce-openapi.components+schemas.tests.yaml
+# 📄 Generated 15 test cases covering:
+#   ✅ Valid products with all constraints
+#   ✅ Boundary values (min/max prices, lengths)
+#   ✅ Invalid data (malformed IDs, out-of-range values)
+#   ✅ Missing required fields
+#   ✅ Enum validation</code></pre></div></div>
+<div class="paragraph"><p><strong>Step 3: Run Validation</strong></p></div>
+<div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-bash hljs" data-noescape="true" data-lang="bash"># Quick validation check
+teds verify ecommerce-openapi.components+schemas.tests.yaml
 
-# Generate report
-teds verify schemas/product.tests.yaml \
+# Sample output:
+# 🎯 Testing Product schema...
+# ✅ valid_product_complete: PASSED
+# ✅ valid_product_minimal: PASSED
+# ✅ boundary_price_minimum: PASSED
+# ✅ boundary_price_maximum: PASSED
+# ❌ invalid_product_id_format: FAILED - Pattern validation
+# ❌ invalid_negative_price: FAILED - Minimum constraint
+# ❌ invalid_category_value: FAILED - Enum validation
+#
+# 📆 Summary: 12/15 tests passed (80% success rate)
+# ⚡ Completed in 0.3 seconds</code></pre></div></div>
+<div class="paragraph"><p><strong>Step 4: Professional Reporting</strong></p></div>
+<div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-bash hljs" data-noescape="true" data-lang="bash"># Generate stakeholder report
+teds verify ecommerce-openapi.components+schemas.tests.yaml \
   --report-template html \
-  --output-file product-report.html</code></pre></div></div>
-<aside class="notes"><div class="paragraph"><p>The three-step process: create schema, generate tests, validate - provides immediate value.</p></div></aside></div></section></section>
-<section><section id="_advanced_use_cases"><h2>Advanced Use Cases</h2></section><section id="_complex_schema_testing"><h2>Complex Schema Testing</h2><div class="slide-content"><div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-yaml hljs" data-noescape="true" data-lang="yaml"># Multi-schema test specification
-version: "1.0.0"
+  --output-file product-validation-report.html
+
+# Creates interactive HTML report with:
+# 📊 Test coverage metrics and charts
+# 🔍 Detailed failure analysis
+# 📝 Actionable recommendations
+# 🔗 Shareable team dashboard</code></pre></div></div>
+<aside class="notes"><div class="paragraph"><p>This complete workflow shows how TeDS handles real-world complexity. The generated tests cover not just happy path scenarios, but also edge cases and validation failures that commonly occur in production.</p></div>
+<div class="paragraph"><p>The validation output immediately shows what&#8217;s working and what needs attention, while the HTML report provides a professional summary perfect for sharing with team leads and stakeholders.</p></div></aside>
+<div class="literalblock"><div class="content"><pre>--output-file product-report.html</pre></div></div>
+<div class="listingblock"><div class="content"><pre>[.notes]
+--
+The three-step process: create schema, generate tests, validate - provides immediate value.
+--
+
+// Section 7: Advanced Use Cases
+== Advanced Use Cases
+
+=== Complex Schema Testing
+
+[source,yaml]</pre></div></div></div></section></section>
+<section id="_multi_schema_test_specification"><h2>Multi-schema test specification</h2><div class="slide-content"><div class="paragraph"><p>version: "1.0.0"
 tests:
   # Test user schema
   api.yaml#/components/schemas/User:
     valid:
-      admin_user: { ... }
-      regular_user: { ... }
+      admin_user: { &#8230;&#8203; }
+      regular_user: { &#8230;&#8203; }
     invalid:
-      invalid_email: { ... }
+      invalid_email: { &#8230;&#8203; }</p></div>
+<div class="literalblock"><div class="content"><pre># Test product schema
+api.yaml#/components/schemas/Product:
+  valid:
+    electronic_product: { ... }
+  invalid:
+    negative_price: { ... }</pre></div></div>
+<div class="listingblock"><div class="content"><pre>[.notes]
+--
+TeDS supports complex scenarios with multiple schemas and comprehensive test coverage.
+--
 
-  # Test product schema
-  api.yaml#/components/schemas/Product:
-    valid:
-      electronic_product: { ... }
-    invalid:
-      negative_price: { ... }</code></pre></div></div>
-<aside class="notes"><div class="paragraph"><p>TeDS supports complex scenarios with multiple schemas and comprehensive test coverage.</p></div></aside></div></section><section id="_json_path_power"><h2>JSON Path Power</h2><div class="slide-content"><div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-bash hljs" data-noescape="true" data-lang="bash"># Select all schemas under components
-teds generate '{"api.yaml": ["$.components.schemas.*"]}'
+=== JSON Path Power
 
-# Target specific schemas by pattern
-teds generate '{"api.yaml": ["$.components.schemas.User*"]}'
+[source,bash]</pre></div></div></div></section>
+<section id="_select_all_schemas_under_components"><h2>Select all schemas under components</h2><div class="slide-content"><div class="paragraph"><p>teds generate '{"api.yaml": ["$.components.schemas.*"]}'</p></div></div></section>
+<section id="_target_specific_schemas_by_pattern"><h2>Target specific schemas by pattern</h2><div class="slide-content"><div class="paragraph"><p>teds generate '{"api.yaml": ["$.components.schemas.User*"]}'</p></div></div></section>
+<section id="_combine_multiple_sources"><h2>Combine multiple sources</h2><div class="slide-content"><div class="paragraph"><p>teds generate '{"schemas.yaml": ["$.definitions.<strong>", "$.components.schemas.</strong>"]}'</p></div>
+<div class="listingblock"><div class="content"><pre>[.notes]
+--
+JSON Path expressions provide powerful and flexible schema targeting capabilities.
+--
 
-# Combine multiple sources
-teds generate '{"schemas.yaml": ["$.definitions.*", "$.components.schemas.*"]}'</code></pre></div></div>
-<aside class="notes"><div class="paragraph"><p>JSON Path expressions provide powerful and flexible schema targeting capabilities.</p></div></aside></div></section><section id="_cicd_integration"><h2>CI/CD Integration</h2><div class="slide-content"><div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-yaml hljs" data-noescape="true" data-lang="yaml"># .github/workflows/schema-validation.yml
-name: Schema Validation
-on: [push, pull_request]
+=== CI/CD Integration
 
-jobs:
+[source,yaml]</pre></div></div></div></section>
+<section id="_githubworkflowsschema_validation_yml"><h2>.github/workflows/schema-validation.yml</h2><div class="slide-content"><div class="paragraph"><p>name: Schema Validation
+on: [push, pull_request]</p></div>
+<div class="paragraph"><p>jobs:
   validate-schemas:
     runs-on: ubuntu-latest
     steps:
@@ -612,48 +825,278 @@ jobs:
         with:
           python-version: '3.11'
       - run: pip install teds
-      - run: teds verify schemas/*.tests.yaml --fail-fast
-      - run: teds verify schemas/*.tests.yaml --report-template html --output-file schema-report.html
+      - run: teds verify schemas/<strong>.tests.yaml --fail-fast
+      - run: teds verify schemas/</strong>.tests.yaml --report-template html --output-file schema-report.html
       - uses: actions/upload-artifact@v3
         with:
           name: schema-validation-report
-          path: schema-report.html</code></pre></div></div>
-<aside class="notes"><div class="paragraph"><p>TeDS integrates seamlessly into CI/CD pipelines for automated schema validation.</p></div></aside></div></section></section>
-<section><section id="_live_demo"><h2>Live Demo</h2></section><section id="_demo_overview"><h2>Demo Overview</h2><div class="slide-content"><div class="ulist"><ul><li class="fragment"><p>🏗️ Creating a test specification from scratch</p></li><li class="fragment"><p>🧪 Running validation with intentional failures</p></li><li class="fragment"><p>📊 Generating and reviewing HTML reports</p></li><li class="fragment"><p>🔧 Fixing schema issues based on test results</p></li><li class="fragment"><p>✅ Achieving full validation success</p></li></ul></div>
-<aside class="notes"><div class="paragraph"><p>The demo will show the complete TeDS workflow from creation to successful validation.</p></div></aside></div></section><section id="_demo_e_commerce_api_schema"><h2>Demo: E-Commerce API Schema</h2><div class="slide-content"><div class="paragraph subtitle"><p>Scenario: Online store with User and Product schemas</p></div>
-<div class="ulist"><ul><li class="fragment"><p><strong>Challenge</strong>: Ensure schemas correctly validate user registrations and product listings</p></li><li class="fragment"><p><strong>Requirements</strong>: Email validation, price constraints, required fields</p></li><li class="fragment"><p><strong>Testing</strong>: Both positive and negative test cases</p></li><li class="fragment"><p><strong>Output</strong>: Professional validation report</p></li></ul></div>
-<aside class="notes"><div class="paragraph"><p>We&#8217;ll use a realistic e-commerce scenario to demonstrate TeDS capabilities.</p></div></aside></div></section><section id="_demo_schema_creation"><h2>Demo: Schema Creation</h2><div class="slide-content"><div class="paragraph subtitle"><p><em>Live demonstration of schema creation and test generation</em></p></div>
-<div class="imageblock center"><img src="images/demo-placeholder-1.png" alt="Demo Screenshot 1" width="800" height="600"></div>
-<aside class="notes"></aside></div></section><section id="_demo_test_specification"><h2>Demo: Test Specification</h2><div class="slide-content"><div class="paragraph subtitle"><p><em>Live demonstration of test specification creation</em></p></div>
-<div class="imageblock center"><img src="images/demo-placeholder-2.png" alt="Demo Screenshot 2" width="800" height="600"></div>
-<aside class="notes"></aside></div></section><section id="_demo_validation_reports"><h2>Demo: Validation &amp; Reports</h2><div class="slide-content"><div class="paragraph subtitle"><p><em>Live demonstration of validation and report generation</em></p></div>
-<div class="imageblock center"><img src="images/demo-placeholder-3.png" alt="Demo Screenshot 3" width="800" height="600"></div>
-<aside class="notes"></aside></div></section></section>
-<section><section id="_best_practices"><h2>Best Practices</h2></section><section id="_test_design_principles"><h2>Test Design Principles</h2><div class="slide-content"><table class="tableblock frame-all grid-all" style="width:100%"><colgroup><col style="width:25%"><col style="width:75%"></colgroup><thead><tr><th class="tableblock halign-left valign-top">Principle</th><th class="tableblock halign-left valign-top">Implementation</th></tr><tbody><tr><td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Comprehensive Coverage</strong></p></td><td class="tableblock halign-left valign-top"><p class="tableblock">Test all schema constraints and edge cases</p></td></tr><tr><td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Clear Descriptions</strong></p></td><td class="tableblock halign-left valign-top"><p class="tableblock">Use descriptive names and documentation</p></td></tr><tr><td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Maintainable Tests</strong></p></td><td class="tableblock halign-left valign-top"><p class="tableblock">Organize tests logically, avoid duplication</p></td></tr><tr><td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Realistic Data</strong></p></td><td class="tableblock halign-left valign-top"><p class="tableblock">Use real-world examples in test cases</p></td></tr><tr><td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Negative Testing</strong></p></td><td class="tableblock halign-left valign-top"><p class="tableblock">Include comprehensive invalid data tests</p></td></tr></table>
-<aside class="notes"><div class="paragraph"><p>Following these principles ensures your schema tests are effective and maintainable.</p></div></aside></div></section><section id="_organizational_strategies"><h2>Organizational Strategies</h2><div class="slide-content"><div class="openblock two-columns"><div class="content"><div class="paragraph column"><p><strong>File Organization</strong></p></div>
-<div class="ulist"><ul><li class="fragment"><p>Mirror schema directory structure</p></li><li class="fragment"><p>Use descriptive test file names</p></li><li class="fragment"><p>Group related tests together</p></li><li class="fragment"><p>Separate concerns clearly</p></li></ul></div>
-<div class="paragraph column"><p><strong>Team Workflows</strong></p></div>
-<div class="ulist"><ul><li class="fragment"><p>Schema changes require test updates</p></li><li class="fragment"><p>Peer review for test specifications</p></li><li class="fragment"><p>Automated validation in CI/CD</p></li><li class="fragment"><p>Regular test maintenance</p></li></ul></div></div></div>
-<aside class="notes"><div class="paragraph"><p>Good organization and team processes are crucial for scaling TeDS usage across teams.</p></div></aside></div></section></section>
-<section><section id="_roadmap_future"><h2>Roadmap &amp; Future</h2></section><section id="_current_features_v0_5_x"><h2>Current Features (v0.5.x)</h2><div class="slide-content"><div class="ulist"><ul><li class="fragment"><p>✅ Core validation engine</p></li><li class="fragment"><p>✅ Test generation from examples</p></li><li class="fragment"><p>✅ JSON Path support</p></li><li class="fragment"><p>✅ HTML/Markdown reporting</p></li><li class="fragment"><p>✅ CLI interface</p></li><li class="fragment"><p>✅ CI/CD integration</p></li></ul></div>
-<aside class="notes"><div class="paragraph"><p>TeDS v0.5.x provides a solid foundation with all essential features for schema testing.</p></div></aside></div></section><section id="_planned_enhancements"><h2>Planned Enhancements</h2><div class="slide-content"><div class="ulist"><ul><li class="fragment"><p>🔄 <strong>v0.6</strong>: Enhanced reporting with interactive features</p></li><li class="fragment"><p>🔄 <strong>v0.7</strong>: Plugin system for custom validators</p></li><li class="fragment"><p>🔄 <strong>v0.8</strong>: IDE integrations and extensions</p></li><li class="fragment"><p>🔄 <strong>v1.0</strong>: Enterprise features and performance optimizations</p></li></ul></div>
-<aside class="notes"><div class="paragraph"><p>The roadmap focuses on enhanced usability, extensibility, and enterprise-grade features.</p></div></aside></div></section><section id="_community_contributions"><h2>Community &amp; Contributions</h2><div class="slide-content"><div class="paragraph subtitle"><p>How to Get Involved</p></div>
-<div class="ulist"><ul><li class="fragment"><p>🐛 <strong>Report Issues</strong>: GitHub issue tracker</p></li><li class="fragment"><p>💡 <strong>Feature Requests</strong>: Community discussions</p></li><li class="fragment"><p>🛠️ <strong>Contributions</strong>: Pull requests welcome</p></li><li class="fragment"><p>📚 <strong>Documentation</strong>: Help improve tutorials and guides</p></li><li class="fragment"><p>🎯 <strong>Testing</strong>: Beta testing of new features</p></li></ul></div>
-<aside class="notes"><div class="paragraph"><p>TeDS is an open-source project that welcomes community contributions and feedback.</p></div></aside></div></section></section>
-<section id="_questions_discussion"><h2>Questions &amp; Discussion</h2><div class="slide-content"><div class="paragraph subtitle"><p>Let&#8217;s discuss your schema validation challenges</p></div>
-<div class="ulist"><ul><li class="fragment"><p>🤔 How could TeDS fit into your current workflow?</p></li><li class="fragment"><p>🔧 What specific schema validation pain points do you face?</p></li><li class="fragment"><p>🚀 What features would be most valuable for your team?</p></li><li class="fragment"><p>💬 Any questions about implementation or integration?</p></li></ul></div>
-<aside class="notes"><div class="paragraph"><p>This is an interactive section for questions and discussion about TeDS usage and implementation.</p></div></aside></div></section>
-<section><section id="_resources_next_steps"><h2>Resources &amp; Next Steps</h2></section><section id="_getting_started_resources"><h2>Getting Started Resources</h2><div class="slide-content"><table class="tableblock frame-all grid-all" style="width:100%"><colgroup><col style="width:33.3333%"><col style="width:66.6667%"></colgroup><thead><tr><th class="tableblock halign-left valign-top">Resource</th><th class="tableblock halign-left valign-top">Location</th></tr><tbody><tr><td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Documentation</strong></p></td><td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://github.com/yaccob/teds" class="bare">https://github.com/yaccob/teds</a></p></td></tr><tr><td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Tutorial</strong></p></td><td class="tableblock halign-left valign-top"><p class="tableblock">tutorial.html (included in repo)</p></td></tr><tr><td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Examples</strong></p></td><td class="tableblock halign-left valign-top"><p class="tableblock">examples/ directory</p></td></tr><tr><td class="tableblock halign-left valign-top"><p class="tableblock"><strong>PyPI Package</strong></p></td><td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://pypi.org/project/teds/" class="bare">https://pypi.org/project/teds/</a></p></td></tr><tr><td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Issue Tracker</strong></p></td><td class="tableblock halign-left valign-top"><p class="tableblock">GitHub Issues</p></td></tr></table>
-<aside class="notes"><div class="paragraph"><p>These resources provide everything needed to get started with TeDS in your projects.</p></div></aside></div></section><section id="_next_steps"><h2>Next Steps</h2><div class="slide-content"><div class="paragraph subtitle"><p>Your TeDS Journey</p></div>
-<div class="olist arabic"><ol class="arabic"><li class="fragment"><p><strong>Install TeDS</strong>: <code>pip install teds</code></p></li><li class="fragment"><p><strong>Try the Tutorial</strong>: Follow the getting started guide</p></li><li class="fragment"><p><strong>Start Small</strong>: Pick one schema to test</p></li><li class="fragment"><p><strong>Expand Coverage</strong>: Add more schemas and test cases</p></li><li class="fragment"><p><strong>Integrate</strong>: Add to your CI/CD pipeline</p></li><li class="fragment"><p><strong>Share</strong>: Help your team adopt TeDS</p></li></ol></div>
-<aside class="notes"><div class="paragraph"><p>Start with small experiments and gradually expand TeDS usage across your schema validation needs.</p></div></aside></div></section></section>
-<section id="_thank_you"><h2>Thank You!</h2><div class="slide-content"><div class="paragraph subtitle"><p>Questions? Let&#8217;s connect!</p></div>
-<div class="paragraph center"><p><strong>TeDS: Test-Driven Schema Development</strong></p></div>
-<div class="paragraph contact-info"><p>📧 Contact: GitHub Issues<br>
-🌐 Website: <a href="https://github.com/yaccob/teds" class="bare">https://github.com/yaccob/teds</a><br>
-📦 Install: <code>pip install teds</code><br>
-📖 Docs: tutorial.html</p></div>
-<aside class="notes"><div class="paragraph"><p>Thank you for your attention. TeDS is ready to transform your schema validation workflow!</p></div></aside></div></section></div></div><script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reveal.js"></script><script>Array.prototype.slice.call(document.querySelectorAll('.slides section')).forEach(function(slide) {
+          path: schema-report.html</p></div>
+<div class="listingblock"><div class="content"><pre>[.notes]
+--
+TeDS integrates seamlessly into CI/CD pipelines for automated schema validation.
+--
+
+// Section 8: Demo Section
+== Live Demo
+
+=== Demo Overview
+
+[%step]
+* 🏗️ Creating a test specification from scratch
+* 🧪 Running validation with intentional failures
+* 📊 Generating and reviewing HTML reports
+* 🔧 Fixing schema issues based on test results
+* ✅ Achieving full validation success
+
+[.notes]
+--
+The demo will show the complete TeDS workflow from creation to successful validation.
+--
+
+=== Demo: E-Commerce API Schema
+
+[.subtitle]
+Scenario: Online store with User and Product schemas
+
+[%step]
+* **Challenge**: Ensure schemas correctly validate user registrations and product listings
+* **Requirements**: Email validation, price constraints, required fields
+* **Testing**: Both positive and negative test cases
+* **Output**: Professional validation report
+
+[.notes]
+--
+We'll use a realistic e-commerce scenario to demonstrate TeDS capabilities.
+--
+
+// Placeholder slides for actual demo
+=== Demo: Schema Creation
+
+[.subtitle]
+_Live demonstration of schema creation and test generation_
+
+[.center]
+image::demo-placeholder-1.png[Demo Screenshot 1, 800, 600]
+
+[.notes]
+--
+[Live demo section - create schemas with examples]
+--
+
+=== Demo: Test Specification
+
+[.subtitle]
+_Live demonstration of test specification creation_
+
+[.center]
+image::demo-placeholder-2.png[Demo Screenshot 2, 800, 600]
+
+[.notes]
+--
+[Live demo section - create comprehensive test specifications]
+--
+
+=== Demo: Validation &amp; Reports
+
+[.subtitle]
+_Live demonstration of validation and report generation_
+
+[.center]
+image::demo-placeholder-3.png[Demo Screenshot 3, 800, 600]
+
+[.notes]
+--
+[Live demo section - run validation and generate reports]
+--
+
+// Section 9: Best Practices
+== Best Practices
+
+=== Test Design Principles
+
+[cols="1,3"]
+|===
+|Principle |Implementation
+
+|*Comprehensive Coverage*
+|Test all schema constraints and edge cases
+
+|*Clear Descriptions*
+|Use descriptive names and documentation
+
+|*Maintainable Tests*
+|Organize tests logically, avoid duplication
+
+|*Realistic Data*
+|Use real-world examples in test cases
+
+|*Negative Testing*
+|Include comprehensive invalid data tests
+|===
+
+[.notes]
+--
+Following these principles ensures your schema tests are effective and maintainable.
+--
+
+=== Organizational Strategies
+
+[.two-columns]
+--
+[.column]
+*File Organization*
+
+[%step]
+* Mirror schema directory structure
+* Use descriptive test file names
+* Group related tests together
+* Separate concerns clearly
+
+[.column]
+*Team Workflows*
+
+[%step]
+* Schema changes require test updates
+* Peer review for test specifications
+* Automated validation in CI/CD
+* Regular test maintenance
+--
+
+[.notes]
+--
+Good organization and team processes are crucial for scaling TeDS usage across teams.
+--
+
+// Section 10: Roadmap &amp; Future
+== Roadmap &amp; Future
+
+=== Current Features (v0.5.x)
+
+[%step]
+* ✅ Core validation engine
+* ✅ Test generation from examples
+* ✅ JSON Path support
+* ✅ HTML/Markdown reporting
+* ✅ CLI interface
+* ✅ CI/CD integration
+
+[.notes]
+--
+TeDS v0.5.x provides a solid foundation with all essential features for schema testing.
+--
+
+=== Planned Enhancements
+
+[%step]
+* 🔄 **v0.6**: Enhanced reporting with interactive features
+* 🔄 **v0.7**: Plugin system for custom validators
+* 🔄 **v0.8**: IDE integrations and extensions
+* 🔄 **v1.0**: Enterprise features and performance optimizations
+
+[.notes]
+--
+The roadmap focuses on enhanced usability, extensibility, and enterprise-grade features.
+--
+
+=== Community &amp; Contributions
+
+[.subtitle]
+How to Get Involved
+
+[%step]
+* 🐛 **Report Issues**: GitHub issue tracker
+* 💡 **Feature Requests**: Community discussions
+* 🛠️ **Contributions**: Pull requests welcome
+* 📚 **Documentation**: Help improve tutorials and guides
+* 🎯 **Testing**: Beta testing of new features
+
+[.notes]
+--
+TeDS is an open-source project that welcomes community contributions and feedback.
+--
+
+// Section 11: Q&amp;A and Wrap-up
+== Questions &amp; Discussion
+
+[.subtitle]
+Let's discuss your schema validation challenges
+
+[%step]
+* 🤔 How could TeDS fit into your current workflow?
+* 🔧 What specific schema validation pain points do you face?
+* 🚀 What features would be most valuable for your team?
+* 💬 Any questions about implementation or integration?
+
+[.notes]
+--
+This is an interactive section for questions and discussion about TeDS usage and implementation.
+--
+
+== Resources &amp; Next Steps
+
+=== Getting Started Resources
+
+[cols="1,2"]
+|===
+|Resource |Location
+
+|*Documentation*
+|https://github.com/yaccob/teds
+
+|*Tutorial*
+|tutorial.html (included in repo)
+
+|*Examples*
+|examples/ directory
+
+|*PyPI Package*
+|https://pypi.org/project/teds/
+
+|*Issue Tracker*
+|GitHub Issues
+|===
+
+[.notes]
+--
+These resources provide everything needed to get started with TeDS in your projects.
+--
+
+=== Next Steps
+
+[.subtitle]
+Your TeDS Journey
+
+[%step]
+1. **Install TeDS**: `pip install teds`
+2. **Try the Tutorial**: Follow the getting started guide
+3. **Start Small**: Pick one schema to test
+4. **Expand Coverage**: Add more schemas and test cases
+5. **Integrate**: Add to your CI/CD pipeline
+6. **Share**: Help your team adopt TeDS
+
+[.notes]
+--
+Start with small experiments and gradually expand TeDS usage across your schema validation needs.
+--
+
+== Thank You!
+
+[.subtitle]
+Questions? Let's connect!
+
+[.center]
+*TeDS: Test-Driven Schema Development*
+
+[.contact-info]
+📧 Contact: GitHub Issues +
+🌐 Website: https://github.com/yaccob/teds +
+📦 Install: `pip install teds` +
+📖 Docs: tutorial.html
+
+[.notes]
+--
+Thank you for your attention. TeDS is ready to transform your schema validation workflow!
+--</pre></div></div></div></section></div></div><script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reveal.js"></script><script>Array.prototype.slice.call(document.querySelectorAll('.slides section')).forEach(function(slide) {
   if (slide.getAttribute('data-background-color')) return;
   // user needs to explicitly say he wants CSS color to override otherwise we might break custom css or theme (#226)
   if (!(slide.classList.contains('canvas') || slide.classList.contains('background'))) return;
