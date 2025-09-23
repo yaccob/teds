@@ -139,18 +139,18 @@ merge-pr: ## Merge PR after all checks pass (auto-merge with squash)
 	gh pr merge --auto --squash
 
 # Documentation
-docs-html: ## Generate HTML documentation with fixed TOC from AsciiDoc
+docs-html: ## Generate HTML documentation from AsciiDoc
 	@echo "📖 Generating HTML documentation..."
-	@asciidoctor docs/tutorial.adoc -o docs/tutorial-with-fixed-toc.html
-	@echo "🎨 Embedding custom CSS for fixed TOC..."
-	@sed -i.bak '/<style>/r docs/tutorial-style.css' docs/tutorial-with-fixed-toc.html
-	@rm -f docs/tutorial-with-fixed-toc.html.bak
-	@echo "✅ Generated: docs/tutorial-with-fixed-toc.html"
+	@asciidoctor docs/tutorial.adoc -o docs/tutorial.html
+	@echo "🎨 Embedding custom CSS..."
+	@sed -i.bak '/<style>/r docs/tutorial-style.css' docs/tutorial.html
+	@rm -f docs/tutorial.html.bak
+	@echo "✅ Generated: docs/tutorial.html"
 	@echo "   Features: Fixed left sidebar TOC, modern styling, responsive design"
 
 docs-clean: ## Clean generated documentation files
 	@echo "🧹 Cleaning generated documentation..."
-	@rm -f docs/tutorial-with-fixed-toc.html
+	@rm -f docs/tutorial.html
 	@echo "✅ Cleaned generated documentation files"
 
 docs: docs-html ## Generate all documentation (default: HTML with fixed TOC)
