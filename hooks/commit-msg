@@ -1,0 +1,43 @@
+#!/bin/sh
+#
+# MANDATORY commit-msg hook - prevents marketing attribution in commit messages
+# This hook BLOCKS any commit containing attribution/marketing text
+#
+
+commit_msg_file="$1"
+
+# Check if commit message contains forbidden attribution patterns
+if grep -q -i -E "(Generated with.*Claude|via.*Happy|Co-Authored-By.*Claude|Co-Authored-By.*Happy)" "$commit_msg_file"; then
+    echo ""
+    echo "🚫 COMMIT BLOCKED: Marketing attribution detected!"
+    echo ""
+    echo "❌ Forbidden patterns found in commit message:"
+    grep -i -E "(Generated with.*Claude|via.*Happy|Co-Authored-By.*Claude|Co-Authored-By.*Happy)" "$commit_msg_file" || true
+    echo ""
+    echo "✅ REQUIRED: Remove ALL attribution markers:"
+    echo "   - 'Generated with Claude Code'"
+    echo "   - 'via Happy'"
+    echo "   - 'Co-Authored-By: Claude'"
+    echo "   - 'Co-Authored-By: Happy'"
+    echo ""
+    echo "💡 Use ONLY technical content in commit messages."
+    echo "   Focus on WHAT changed and WHY."
+    echo ""
+    exit 1
+fi
+
+# Additional check for any remaining attribution patterns
+if grep -q -i -E "(claude.*code|happy.*engineering)" "$commit_msg_file"; then
+    echo ""
+    echo "⚠️  WARNING: Potential attribution text detected!"
+    echo ""
+    echo "Found patterns that might be attribution:"
+    grep -i -E "(claude.*code|happy.*engineering)" "$commit_msg_file" || true
+    echo ""
+    echo "If this is intentional technical content, proceed."
+    echo "If this is attribution, please remove it."
+    echo ""
+    # Don't block, but warn
+fi
+
+exit 0
