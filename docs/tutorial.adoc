@@ -206,6 +206,22 @@ teds generate sample_schemas.yaml#/components/schemas/Email
 * TeDS processes schemas found directly at that location
 * No wildcards needed - the tool looks at the direct children of the specified path
 
+[IMPORTANT]
+.🔍 Critical Difference: JSON-Pointer vs JSON-Path Reference Behavior
+====
+**JSON-Pointer** (`#/path/to/element`) **references the children** of the specified node:
+
+* `#/components/schemas/User` → Returns `type`, `properties`, `required` (schema internals)
+* ❌ **Problem**: You get schema properties, not the schema itself
+
+**JSON-Path** (`$.path.to.element`) **references the node directly**:
+
+* `$.components.schemas.User` → Returns the complete User schema object
+* ✅ **Correct**: You get the actual schema for test generation
+
+**Key Rule**: Use JSON-Path syntax (`$.components.schemas.User`) when you want to reference a schema directly. JSON-Pointer syntax (`#/components/schemas/User`) will give you the schema's internal properties instead.
+====
+
 ==== JSON Path (Alternative Method)
 
 **JSON Path** uses CSS-like selector syntax and requires **explicit wildcards** to select multiple elements. TeDS supports JSON Path through YAML/JSON configuration objects in three ways:
@@ -692,10 +708,10 @@ The `{pointer}` variable automatically converts JSON Pointer slashes to plus sig
 
 [source,bash]
 ----
-# JSON Pointer: #/components/schemas/Product
-# Sanitized:    components+schemas+Product
-teds generate api.yaml#/components/schemas/Product
-# Creates: api.components+schemas+Product.tests.yaml
+# JSON Pointer: #/components/schemas
+# Sanitized:    components+schemas
+teds generate api.yaml#/components/schemas
+# Creates: api.components+schemas.tests.yaml
 
 # JSON Pointer: #/$defs/Address
 # Sanitized:    $defs+Address

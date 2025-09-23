@@ -817,6 +817,47 @@ teds generate sample_schemas.yaml#/components/schemas/Email</code></pre>
 </li>
 </ul>
 </div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="title">🔍 Critical Difference: JSON-Pointer vs JSON-Path Reference Behavior</div>
+<div class="paragraph">
+<p><strong>JSON-Pointer</strong> (<code>#/path/to/element</code>) <strong>references the children</strong> of the specified node:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>#/components/schemas/User</code> → Returns <code>type</code>, <code>properties</code>, <code>required</code> (schema internals)</p>
+</li>
+<li>
+<p>❌ <strong>Problem</strong>: You get schema properties, not the schema itself</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>JSON-Path</strong> (<code>$.path.to.element</code>) <strong>references the node directly</strong>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>$.components.schemas.User</code> → Returns the complete User schema object</p>
+</li>
+<li>
+<p>✅ <strong>Correct</strong>: You get the actual schema for test generation</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>Key Rule</strong>: Use JSON-Path syntax (<code>$.components.schemas.User</code>) when you want to reference a schema directly. JSON-Pointer syntax (<code>#/components/schemas/User</code>) will give you the schema&#8217;s internal properties instead.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
 </div>
 <div class="sect3">
 <h4 id="_json_path_alternative_method"><a class="link" href="#_json_path_alternative_method">4.3.2. JSON Path (Alternative Method)</a></h4>
@@ -1392,10 +1433,10 @@ teds generate schema.yaml#/components/schemas --target-template "{base}.{pointer
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># JSON Pointer: #/components/schemas/Product
-# Sanitized:    components+schemas+Product
-teds generate api.yaml#/components/schemas/Product
-# Creates: api.components+schemas+Product.tests.yaml
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># JSON Pointer: #/components/schemas
+# Sanitized:    components+schemas
+teds generate api.yaml#/components/schemas
+# Creates: api.components+schemas.tests.yaml
 
 # JSON Pointer: #/$defs/Address
 # Sanitized:    $defs+Address
@@ -1758,7 +1799,7 @@ teds verify user_generated.tests.yaml --in-place
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-09-23 17:57:52 +0200
+Last updated 2025-09-23 18:08:26 +0200
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
