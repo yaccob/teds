@@ -14,19 +14,35 @@ if ! command -v asciidoctor-revealjs &> /dev/null; then
     exit 1
 fi
 
+# Check if asciidoctor-diagram is available
+if ! ruby -e "require 'asciidoctor-diagram'" &> /dev/null; then
+    echo "❌ Error: asciidoctor-diagram not found"
+    echo "💡 Install with: gem install asciidoctor-diagram"
+    exit 1
+fi
+
+# Check if PlantUML is available (Java-based)
+if ! command -v plantuml &> /dev/null && ! command -v java &> /dev/null; then
+    echo "⚠️  Warning: PlantUML not found, diagrams will be rendered using online service"
+    echo "💡 For offline rendering, install: brew install plantuml (or apt-get install plantuml)"
+fi
+
 # Build the presentation
 echo "📝 Converting index.adoc to Reveal.js presentation..."
 
 asciidoctor-revealjs \
+    -r asciidoctor-diagram \
     -a revealjsdir=https://cdn.jsdelivr.net/npm/reveal.js@4.3.1 \
-    -a revealjs_theme=white \
-    -a revealjs_transition=slide \
+    -a revealjs_theme=moon \
+    -a revealjs_transition=convex \
     -a source-highlighter=highlightjs \
-    -a highlightjs-theme=github \
+    -a highlightjs-theme=monokai-sublime \
     -a icons=font \
     -a sectids \
     -a linkattrs \
     -a experimental \
+    -a allow-uri-read \
+    -a diagram-svg-type=inline \
     index.adoc
 
 echo "✅ Presentation built successfully!"
