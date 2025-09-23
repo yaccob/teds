@@ -195,9 +195,6 @@ teds generate sample_schemas.yaml#/components/schemas
 # This processes the properties defined at this level
 teds generate sample_schemas.yaml#/components/schemas/User/properties
 
-# Generate tests for a single specific schema
-# This processes only the Email schema itself
-teds generate sample_schemas.yaml#/components/schemas/Email
 ----
 
 **How JSON Pointer works:**
@@ -283,13 +280,13 @@ complex.yaml:
 
 # Nested selections
 nested.yaml:
-  paths: ["$.components.schemas.*.properties"]
+  paths: ["$.components.schemas.*.properties.*"]
 ----
 
 **Key differences:**
 
 * **JSON Pointer**: `#/components/schemas` → finds schemas directly at this location
-* **JSON Path**: `$.components.schemas.*` → requires `*` wildcard to select multiple items
+* **JSON Path**: `+$.components.schemas.*+` → requires `+*+` wildcard to select multiple items
 * **JSON Path usage**: Via YAML/JSON config objects using `@file`, direct strings, or simple lists
 
 ==== Practical Examples
