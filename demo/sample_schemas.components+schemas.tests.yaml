@@ -1,0 +1,123 @@
+version: 1.0.0
+tests:
+  /Users/yaccob/repos/github.com/yaccob/contest/demo/sample_schemas.yaml#/components/schemas/Email:
+    valid:
+      .components.schemas.Email.examples[0]:
+        payload: alice@example.com
+        from_examples: true
+      .components.schemas.Email.examples[1]:
+        payload: not-an-email
+        from_examples: true
+    invalid:
+  /Users/yaccob/repos/github.com/yaccob/contest/demo/sample_schemas.yaml#/components/schemas/User:
+    valid:
+      .components.schemas.User.examples[0]:
+        payload:
+          id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+          name: Alice Example
+          email: alice@example.com
+        from_examples: true
+      .components.schemas.User.examples[1]:
+        payload:
+          id: not-a-uuid
+          name: bob
+          email: x
+        from_examples: true
+    invalid:
+  /Users/yaccob/repos/github.com/yaccob/contest/demo/sample_schemas.yaml#/components/schemas/Tag:
+    valid:
+      .components.schemas.Tag.examples[0]:
+        payload:
+          key: env
+          value: prod
+        from_examples: true
+    invalid:
+  /Users/yaccob/repos/github.com/yaccob/contest/demo/sample_schemas.yaml#/components/schemas/Identifier:
+    valid:
+      .components.schemas.Identifier.examples[0]:
+        payload: AB-123
+        from_examples: true
+      .components.schemas.Identifier.examples[1]:
+        payload: 99
+        from_examples: true
+    invalid:
+  /Users/yaccob/repos/github.com/yaccob/contest/demo/sample_schemas.yaml#/components/schemas/Color:
+    valid:
+      .components.schemas.Color.examples[0]:
+        payload: green
+        from_examples: true
+    invalid:
+  /Users/yaccob/repos/github.com/yaccob/contest/demo/sample_schemas.yaml#/components/schemas/Regexy:
+    valid:
+      .components.schemas.Regexy.examples[0]:
+        payload: abc12
+        from_examples: true
+    invalid:
+  /Users/yaccob/repos/github.com/yaccob/contest/demo/sample_schemas.yaml#/components/schemas/Product:
+    valid:
+      .components.schemas.Product.examples[0]:
+        payload:
+          sku: SKU1234
+          price: 12.5
+          tags:
+          - key: env
+            value: prod
+          color: red
+        from_examples: true
+    invalid:
+  /Users/yaccob/repos/github.com/yaccob/contest/demo/sample_schemas.yaml#/components/schemas/Phone:
+    valid:
+    invalid:
+  /Users/yaccob/repos/github.com/yaccob/contest/demo/sample_schemas.yaml#/components/schemas/Contact:
+    valid:
+      .components.schemas.Contact.examples[0]:
+        payload:
+          email: someone@example.com
+        from_examples: true
+      .components.schemas.Contact.examples[1]:
+        payload:
+          phone: +49 621 1234567
+        from_examples: true
+      .components.schemas.Contact.examples[2]:
+        payload:
+          email: someone@example.com
+          phone: +49 621 1234567
+        from_examples: true
+    invalid:
+  /Users/yaccob/repos/github.com/yaccob/contest/demo/sample_schemas.yaml#/components/schemas/OrderLine:
+    valid:
+      .components.schemas.OrderLine.examples[0]:
+        payload:
+          sku: SKU1234
+          unitPrice: 19.99
+          quantity: 2
+        from_examples: true
+      .components.schemas.OrderLine.examples[1]:
+        payload:
+          bundleId: B-42
+          items:
+          - sku: SKU9
+            quantity: 1
+        from_examples: true
+      .components.schemas.OrderLine.examples[2]:
+        payload:
+          sku: SKU1
+          unitPrice: 10
+          quantity: 1
+          items:
+          - sku: SKU2
+            quantity: 1
+        from_examples: true
+    invalid:
+  /Users/yaccob/repos/github.com/yaccob/contest/demo/sample_schemas.yaml#/components/schemas/URI:
+    valid:
+      .components.schemas.URI.examples[0]:
+        payload: https://example.com
+        from_examples: true
+    invalid:
+  /Users/yaccob/repos/github.com/yaccob/contest/demo/sample_schemas.yaml#/components/schemas/DateISO:
+    valid:
+      .components.schemas.DateISO.examples[0]:
+        payload: '2025-08-31'
+        from_examples: true
+    invalid:
