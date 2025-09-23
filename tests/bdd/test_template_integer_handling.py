@@ -141,8 +141,9 @@ def generate_comprehensive_report(test_context):
     os.chdir(temp_dir)
 
     try:
-        # Use the main script path from the project root
-        teds_script = Path(__file__).resolve().parents[2] / "teds.py"
+        # Get project root relative to this test file
+        project_root = Path(__file__).resolve().parents[2]
+        teds_script = project_root / "teds.py"
 
         result = subprocess.run(
             [
@@ -152,7 +153,7 @@ def generate_comprehensive_report(test_context):
                 "--output-level",
                 "all",
                 "--report",
-                "comprehensive.adoc",
+                "default.adoc",
                 str(testspec_path.name),  # Use relative path
             ],
             capture_output=True,
