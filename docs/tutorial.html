@@ -453,23 +453,23 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <ul class="sectlevel2">
 <li><a href="#_understanding_the_problem">3.1. Understanding the Problem</a></li>
 <li><a href="#_create_your_first_testspec">3.2. Create Your First Testspec</a></li>
-<li><a href="#_run_your_first_verification">3.3. Run Your First Verification</a></li>
-<li><a href="#_understanding_the_warning">3.4. Understanding the Warning</a></li>
+<li><a href="#_key_as_payload_quick_testing_without_payload_field">3.3. Key-as-Payload: Quick Testing without Payload Field</a></li>
+<li><a href="#_run_your_first_verification">3.4. Run Your First Verification</a></li>
+<li><a href="#_understanding_the_warning">3.5. Understanding the Warning</a></li>
 </ul>
 </li>
 <li><a href="#_chapter_2_generating_tests_from_existing_schemas">4. Chapter 2: Generating Tests from Existing Schemas</a>
 <ul class="sectlevel2">
-<li><a href="#_key_as_payload_quick_testing_without_payload_field">4.1. Key-as-Payload: Quick Testing without Payload Field</a></li>
-<li><a href="#_working_with_the_demo_schema">4.2. Working with the Demo Schema</a></li>
-<li><a href="#_generate_tests_from_schema_examples">4.3. Generate Tests from Schema Examples</a>
+<li><a href="#_working_with_the_demo_schema">4.1. Working with the Demo Schema</a></li>
+<li><a href="#_generate_tests_from_schema_examples">4.2. Generate Tests from Schema Examples</a>
 <ul class="sectlevel3">
-<li><a href="#_json_pointer_default_method">4.3.1. JSON Pointer (Default Method)</a></li>
-<li><a href="#_json_path_alternative_method">4.3.2. JSON Path (Alternative Method)</a></li>
-<li><a href="#_practical_examples">4.3.3. Practical Examples</a></li>
+<li><a href="#_json_pointer_default_method">4.2.1. JSON Pointer (Default Method)</a></li>
+<li><a href="#_json_path_alternative_method">4.2.2. JSON Path (Alternative Method)</a></li>
+<li><a href="#_practical_examples">4.2.3. Practical Examples</a></li>
 </ul>
 </li>
-<li><a href="#_inspect_generated_tests">4.4. Inspect Generated Tests</a></li>
-<li><a href="#_extend_with_manual_test_cases">4.5. Extend with Manual Test Cases</a></li>
+<li><a href="#_inspect_generated_tests">4.3. Inspect Generated Tests</a></li>
+<li><a href="#_extend_with_manual_test_cases">4.4. Extend with Manual Test Cases</a></li>
 </ul>
 </li>
 <li><a href="#_chapter_3_advanced_schema_testing_patterns">5. Chapter 3: Advanced Schema Testing Patterns</a>
@@ -645,67 +645,7 @@ tests:
 </div>
 </div>
 <div class="sect2">
-<h3 id="_run_your_first_verification"><a class="link" href="#_run_your_first_verification">3.3. Run Your First Verification</a></h3>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">teds verify user_email.tests.yaml</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p><strong>Note: Use <code>./teds.py</code> instead of <code>teds</code> if you&#8217;re using the development installation.</strong></p>
-</div>
-<div class="paragraph">
-<p>You&#8217;ll see output like:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs">version: 1.0.0
-tests:
-  user_email.yaml#/:
-    valid:
-      simple_email:
-        payload: alice@example.com
-        result: SUCCESS
-      email_with_subdomain:
-        payload: bob@mail.company.com
-        result: SUCCESS
-    invalid:
-      missing_at:
-        payload: alice.example.com
-        result: WARNING
-        message: |
-          UNEXPECTEDLY VALID
-          A validator that *ignores* 'format' accepted this instance...</code></pre>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_understanding_the_warning"><a class="link" href="#_understanding_the_warning">3.4. Understanding the Warning</a></h3>
-<div class="paragraph">
-<p>The <code>WARNING</code> tells us that <code>format: email</code> isn&#8217;t enforced by all validators. Some accept <code>alice.example.com</code> as valid, others reject it. This is a real-world issue!</p>
-</div>
-<div class="paragraph">
-<p><strong>Fix it by tightening the schema:</strong></p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># user_email.yaml (improved)
-type: string
-format: email
-pattern: '^[^@]+@[^@]+\.[^@]+$'  # Basic email pattern</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Run the test again - the warning should disappear.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_chapter_2_generating_tests_from_existing_schemas"><a class="link" href="#_chapter_2_generating_tests_from_existing_schemas">4. Chapter 2: Generating Tests from Existing Schemas</a></h2>
-<div class="sectionbody">
-<div class="sect2">
-<h3 id="_key_as_payload_quick_testing_without_payload_field"><a class="link" href="#_key_as_payload_quick_testing_without_payload_field">4.1. Key-as-Payload: Quick Testing without Payload Field</a></h3>
+<h3 id="_key_as_payload_quick_testing_without_payload_field"><a class="link" href="#_key_as_payload_quick_testing_without_payload_field">3.3. Key-as-Payload: Quick Testing without Payload Field</a></h3>
 <div class="paragraph">
 <p>TeDS offers a powerful shortcut: when the <code>payload</code> field is missing, the test case <strong>key</strong> is automatically parsed as YAML/JSON and used as the payload:</p>
 </div>
@@ -713,17 +653,17 @@ pattern: '^[^@]+@[^@]+\.[^@]+$'  # Basic email pattern</code></pre>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">version: "1.0.0"
 tests:
-  user_age.yaml#/:
+  user_email.yaml#/:
     valid:
-      "25": {description: "Valid adult age"}
-      "0": {description: "Minimum age"}
-      "150": {description: "Maximum realistic age"}
+      '"alice@example.com"':    # Key becomes payload: "alice@example.com"
+        description: "Valid email from key"
+      '"bob@company.com"':      # Key becomes payload: "bob@company.com"
+        description: "Another valid email"
     invalid:
-      "-1": {}          # Negative age (no description needed)
-      "151": {}         # Too old
-      '"not-a-number"': {}  # String instead of number
-      "null": {}        # Null value
-      "25.5": {}        # Float instead of integer</code></pre>
+      '"alice.example.com"':    # Key becomes payload: "alice.example.com"
+        description: "Invalid: missing @"
+      '"@example.com"':         # Key becomes payload: "@example.com"
+        description: "Invalid: missing user"</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -763,7 +703,67 @@ tests:
 </div>
 </div>
 <div class="sect2">
-<h3 id="_working_with_the_demo_schema"><a class="link" href="#_working_with_the_demo_schema">4.2. Working with the Demo Schema</a></h3>
+<h3 id="_run_your_first_verification"><a class="link" href="#_run_your_first_verification">3.4. Run Your First Verification</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">teds verify user_email.tests.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Note: Use <code>./teds.py</code> instead of <code>teds</code> if you&#8217;re using the development installation.</strong></p>
+</div>
+<div class="paragraph">
+<p>You&#8217;ll see output like:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">version: 1.0.0
+tests:
+  user_email.yaml#/:
+    valid:
+      simple_email:
+        payload: alice@example.com
+        result: SUCCESS
+      email_with_subdomain:
+        payload: bob@mail.company.com
+        result: SUCCESS
+    invalid:
+      missing_at:
+        payload: alice.example.com
+        result: WARNING
+        message: |
+          UNEXPECTEDLY VALID
+          A validator that *ignores* 'format' accepted this instance...</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_understanding_the_warning"><a class="link" href="#_understanding_the_warning">3.5. Understanding the Warning</a></h3>
+<div class="paragraph">
+<p>The <code>WARNING</code> tells us that <code>format: email</code> isn&#8217;t enforced by all validators. Some accept <code>alice.example.com</code> as valid, others reject it. This is a real-world issue!</p>
+</div>
+<div class="paragraph">
+<p><strong>Fix it by tightening the schema:</strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># user_email.yaml (improved)
+type: string
+format: email
+pattern: '^[^@]+@[^@]+\.[^@]+$'  # Basic email pattern</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Run the test again - the warning should disappear.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_chapter_2_generating_tests_from_existing_schemas"><a class="link" href="#_chapter_2_generating_tests_from_existing_schemas">4. Chapter 2: Generating Tests from Existing Schemas</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_working_with_the_demo_schema"><a class="link" href="#_working_with_the_demo_schema">4.1. Working with the Demo Schema</a></h3>
 <div class="paragraph">
 <p>Explore the demo schema:</p>
 </div>
@@ -777,12 +777,12 @@ tests:
 </div>
 </div>
 <div class="sect2">
-<h3 id="_generate_tests_from_schema_examples"><a class="link" href="#_generate_tests_from_schema_examples">4.3. Generate Tests from Schema Examples</a></h3>
+<h3 id="_generate_tests_from_schema_examples"><a class="link" href="#_generate_tests_from_schema_examples">4.2. Generate Tests from Schema Examples</a></h3>
 <div class="paragraph">
 <p>The <code>generate</code> command creates test cases from schema definitions using two different addressing methods:</p>
 </div>
 <div class="sect3">
-<h4 id="_json_pointer_default_method"><a class="link" href="#_json_pointer_default_method">4.3.1. JSON Pointer (Default Method)</a></h4>
+<h4 id="_json_pointer_default_method"><a class="link" href="#_json_pointer_default_method">4.2.1. JSON Pointer (Default Method)</a></h4>
 <div class="paragraph">
 <p><strong>JSON Pointer</strong> uses the <code>#/path/to/element</code> format and points to a specific location in the document. <strong>TeDS generates tests for the schemas found directly under the specified path</strong>.</p>
 </div>
@@ -856,7 +856,7 @@ teds generate sample_schemas.yaml#/components/schemas/User/properties</code></pr
 </div>
 </div>
 <div class="sect3">
-<h4 id="_json_path_alternative_method"><a class="link" href="#_json_path_alternative_method">4.3.2. JSON Path (Alternative Method)</a></h4>
+<h4 id="_json_path_alternative_method"><a class="link" href="#_json_path_alternative_method">4.2.2. JSON Path (Alternative Method)</a></h4>
 <div class="paragraph">
 <p><strong>JSON Path</strong> uses CSS-like selector syntax and requires <strong>explicit wildcards</strong> to select multiple elements. TeDS supports JSON Path through YAML/JSON configuration objects in three ways:</p>
 </div>
@@ -942,7 +942,7 @@ nested.yaml:
 </div>
 </div>
 <div class="sect3">
-<h4 id="_practical_examples"><a class="link" href="#_practical_examples">4.3.3. Practical Examples</a></h4>
+<h4 id="_practical_examples"><a class="link" href="#_practical_examples">4.2.3. Practical Examples</a></h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># GOOD: Generate from schema container - finds schemas directly under this path
@@ -965,7 +965,7 @@ teds generate @config.yaml</code></pre>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_inspect_generated_tests"><a class="link" href="#_inspect_generated_tests">4.4. Inspect Generated Tests</a></h3>
+<h3 id="_inspect_generated_tests"><a class="link" href="#_inspect_generated_tests">4.3. Inspect Generated Tests</a></h3>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cat api_spec.components+schemas.tests.yaml</code></pre>
@@ -989,7 +989,7 @@ teds generate @config.yaml</code></pre>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_extend_with_manual_test_cases"><a class="link" href="#_extend_with_manual_test_cases">4.5. Extend with Manual Test Cases</a></h3>
+<h3 id="_extend_with_manual_test_cases"><a class="link" href="#_extend_with_manual_test_cases">4.4. Extend with Manual Test Cases</a></h3>
 <div class="paragraph">
 <p>Edit the generated file to add negative cases:</p>
 </div>
@@ -1795,7 +1795,7 @@ teds verify user_generated.tests.yaml --in-place
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-09-23 23:44:03 +0200
+Last updated 2025-09-24 00:27:14 +0200
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
