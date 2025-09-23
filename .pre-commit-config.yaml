@@ -1,0 +1,97 @@
+# Pre-commit configuration for TeDS project
+# All tool settings are centralized in pyproject.toml
+repos:
+  # Import sorting - reads config from pyproject.toml
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+
+  # Linting and formatting - reads config from pyproject.toml
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+        args: ["--fix", "--exit-non-zero-on-fix"]
+      - id: ruff-format
+
+  # Basic file hygiene
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: '\.html$'  # Exclude generated HTML files
+      - id: end-of-file-fixer
+        exclude: '\.html$'  # Exclude generated HTML files
+      - id: check-yaml
+        args: ["--unsafe"]  # Allow custom YAML tags
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+      - id: debug-statements
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+
+  # Python-specific checks
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
+    hooks:
+      - id: python-check-blanket-noqa
+      - id: python-check-blanket-type-ignore
+      - id: python-no-log-warn
+
+  # Local hooks for project-specific validation
+  - repo: local
+    hooks:
+      # Fast unit tests with coverage (critical quality gate)
+      # Coverage config and fail_under threshold read from pyproject.toml
+      - id: unit-tests
+        name: Run unit tests with coverage
+        entry: bash -c 'source .venv/bin/activate && pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing -q'
+        language: system
+        types: [python]
+        pass_filenames: false
+        stages: [pre-commit]
+
+      # Schema validation (critical for TeDS functionality)
+      - id: schema-validation
+        name: Validate spec_schema.yaml
+        entry: bash -c 'source .venv/bin/activate && python -m teds_core.cli verify spec_schema.tests.yaml --output-level error'
+        language: system
+        files: ^(spec_schema\.(yaml|tests\.yaml)|teds_core/validate\.py|teds_core/refs\.py)$
+        pass_filenames: false
+        stages: [pre-commit]
+
+      # BDD integration tests (critical for TeDS CLI functionality)
+      - id: bdd-tests
+        name: Run BDD integration tests
+        entry: bash -c 'source .venv/bin/activate && pytest tests/bdd/test_report_extensions.py tests/bdd/test_template_integer_handling.py -x --tb=short -q'
+        language: system
+        types: [python]
+        pass_filenames: false
+        stages: [pre-commit]
+
+      # Check that virtual environment is activated
+      - id: venv-check
+        name: Ensure virtual environment is activated
+        entry: bash
+        args: ["-c", "if [[ \"$VIRTUAL_ENV\" != *\".venv\"* ]]; then echo \"❌ Virtual environment not activated. Run: source .venv/bin/activate\"; exit 1; fi"]
+        language: system
+        types: [python]
+        pass_filenames: false
+        stages: [pre-commit]
+
+      # CRITICAL: Prevent commits to master/main branches
+      - id: prevent-master-commits
+        name: Block commits to master/main branches
+        entry: bash
+        args: ["-c", "BRANCH=$(git branch --show-current); if [[ \"$BRANCH\" == \"master\" ]] || [[ \"$BRANCH\" == \"main\" ]]; then echo \"🚫 BLOCKED: Direct commits to master/main forbidden!\"; echo \"💡 Create feature branch: git checkout -b feature/your-feature\"; exit 1; fi"]
+        language: system
+        always_run: true
+        pass_filenames: false
+        stages: [pre-commit]
+
+# Global settings
+default_stages: [pre-commit]
+fail_fast: false
+minimum_pre_commit_version: '3.0.0'
