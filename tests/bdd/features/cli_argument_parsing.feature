@@ -84,7 +84,7 @@ Feature: CLI Argument Parsing
               payload: "{\"id\":\"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\"name\":\"Bob Builder\",\"email\":\"bob@example.com\"}"
       """
     When I run the command "verify --output-level all --report default.adoc sample_tests.yaml"
-    Then the command should complete with validation errors
+    Then the command should succeed
     And a file "sample_tests.report.adoc" should be created
 
   Scenario: Output-level warning with report should work fine
