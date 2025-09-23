@@ -1,0 +1,16 @@
+# Generated presentation files
+index.html
+
+# Local Reveal.js installation (if used)
+reveal.js/
+
+# Temporary files
+*.tmp
+*.bak
+
+# PlantUML cache
+.plantuml-cache/
+
+# OS files
+.DS_Store
+Thumbs.db
