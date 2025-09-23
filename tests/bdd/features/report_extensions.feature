@@ -20,7 +20,7 @@ Feature: Report File Extensions
       """
 
   Scenario: AsciiDoc template generates .adoc extension by default
-    When I run the command "verify test.yaml --report comprehensive.adoc"
+    When I run the command "verify test.yaml --report default.adoc"
     Then the command should succeed
     And a file "test.report.adoc" should be created
     And the file "test.report.adoc" should contain AsciiDoc content

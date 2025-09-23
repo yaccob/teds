@@ -152,7 +152,7 @@ def generate_comprehensive_report(test_context):
                 "--output-level",
                 "all",
                 "--report",
-                "comprehensive.adoc",
+                "default.adoc",
                 str(testspec_path.name),  # Use relative path
             ],
             capture_output=True,

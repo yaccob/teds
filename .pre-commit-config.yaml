@@ -62,6 +62,15 @@ repos:
         pass_filenames: false
         stages: [pre-commit]
 
+      # BDD integration tests (critical for TeDS CLI functionality)
+      - id: bdd-tests
+        name: Run BDD integration tests
+        entry: bash -c 'source .venv/bin/activate && pytest tests/bdd/test_cli_argument_parsing.py tests/bdd/test_report_extensions.py tests/bdd/test_template_integer_handling.py -x --tb=short -q'
+        language: system
+        types: [python]
+        pass_filenames: false
+        stages: [pre-commit]
+
       # Check that virtual environment is activated
       - id: venv-check
         name: Ensure virtual environment is activated

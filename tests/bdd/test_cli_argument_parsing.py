@@ -80,7 +80,15 @@ def command_should_succeed(command_result):
     """Verify that the command executed successfully."""
     assert (
         command_result["returncode"] == 0
-    ), f"Command failed with: {command_result['stderr']}"
+    ), f"Command failed with returncode {command_result['returncode']}\nSTDOUT: {command_result['stdout']}\nSTDERR: {command_result['stderr']}"
+
+
+@then("the command should complete with validation errors")
+def command_should_complete_with_validation_errors(command_result):
+    """Verify that the command completed but found validation errors (exit code 1)."""
+    assert (
+        command_result["returncode"] == 1
+    ), f"Expected validation errors (exit code 1) but got {command_result['returncode']}\nSTDOUT: {command_result['stdout']}\nSTDERR: {command_result['stderr']}"
 
 
 @then(parsers.parse('a file "{filename}" should be created'))
