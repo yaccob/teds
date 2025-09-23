@@ -58,7 +58,7 @@ def create_testspec_file(temp_workspace, filename, docstring):
 @when(parsers.parse('I run the command "{command}"'))
 def run_command(temp_workspace, command_result, command):
     """Execute a CLI command and store the result."""
-    # Get the path to teds.py from the project root
+    # Get project root relative to this test file
     project_root = Path(__file__).resolve().parents[2]
     teds_script = project_root / "teds.py"
 
