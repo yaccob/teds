@@ -248,7 +248,7 @@ teds generate @config.yaml
 teds generate '{"sample_schemas.yaml": {"paths": ["$.components.schemas.*"]}}'
 
 # Multiple paths in one schema
-teds generate '{"api.yaml": {"paths": ["$.components.schemas.User", "$.components.schemas.Product"]}}'
+teds generate '{"api.yaml": {"paths": ["$.components.schemas.Product", "$.components.schemas.Order"]}}'
 
 # With custom target file
 teds generate '{"schema.yaml": {"paths": ["$[\"$defs\"].*"], "target": "custom_tests.yaml"}}'
@@ -274,7 +274,7 @@ sample_schemas.yaml:
 
 # Select specific schemas by name
 api.yaml:
-  paths: ["$.components.schemas.User", "$.components.schemas.Email"]
+  paths: ["$.components.schemas.Product", "$.components.schemas.Email"]
 
 # Array indices and wildcards
 complex.yaml:
