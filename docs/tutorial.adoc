@@ -83,6 +83,40 @@ tests:
         payload: "alice@"
 ----
 
+=== Key-as-Payload: Quick Testing without Payload Field
+
+TeDS offers a powerful shortcut: when the `payload` field is missing, the test case **key** is automatically parsed as YAML/JSON and used as the payload:
+
+[source,yaml]
+----
+version: "1.0.0"
+tests:
+  user_email.yaml#/:
+    valid:
+      '"alice@example.com"':    # Key becomes payload: "alice@example.com"
+        description: "Valid email from key"
+      '"bob@company.com"':      # Key becomes payload: "bob@company.com"
+        description: "Another valid email"
+    invalid:
+      '"alice.example.com"':    # Key becomes payload: "alice.example.com"
+        description: "Invalid: missing @"
+      '"@example.com"':         # Key becomes payload: "@example.com"
+        description: "Invalid: missing user"
+----
+
+**Key advantages:**
+
+* **Compact**: Perfect for testing primitive values
+* **Quick**: No need to write `payload:` for simple cases
+* **Clear**: Test key shows exactly what's being tested
+
+**Parsing rules:**
+
+* `"42"` → number 42
+* `"null"` → null value
+* `'"hello"'` → string "hello" (note the nested quotes)
+* `'{"name": "test"}'` → object with name property
+
 === Run Your First Verification
 
 [source,bash]
@@ -130,41 +164,9 @@ pattern: '^[^@]+@[^@]+\.[^@]+$'  # Basic email pattern
 
 Run the test again - the warning should disappear.
 
+
 == Chapter 2: Generating Tests from Existing Schemas
 
-=== Key-as-Payload: Quick Testing without Payload Field
-
-TeDS offers a powerful shortcut: when the `payload` field is missing, the test case **key** is automatically parsed as YAML/JSON and used as the payload:
-
-[source,yaml]
-----
-version: "1.0.0"
-tests:
-  user_age.yaml#/:
-    valid:
-      "25": {description: "Valid adult age"}
-      "0": {description: "Minimum age"}
-      "150": {description: "Maximum realistic age"}
-    invalid:
-      "-1": {}          # Negative age (no description needed)
-      "151": {}         # Too old
-      '"not-a-number"': {}  # String instead of number
-      "null": {}        # Null value
-      "25.5": {}        # Float instead of integer
-----
-
-**Key advantages:**
-
-* **Compact**: Perfect for testing primitive values
-* **Quick**: No need to write `payload:` for simple cases
-* **Clear**: Test key shows exactly what's being tested
-
-**Parsing rules:**
-
-* `"42"` → number 42
-* `"null"` → null value
-* `'"hello"'` → string "hello" (note the nested quotes)
-* `'{"name": "test"}'` → object with name property
 
 === Working with the Demo Schema
 
