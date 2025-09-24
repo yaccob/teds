@@ -177,9 +177,7 @@ components:
         assert result == 0
 
         # Check that a test file was created (using current naming convention)
-        expected_file = (
-            schema.parent / "schema.components+schemas+SimpleString.tests.yaml"
-        )
+        expected_file = schema.parent / "schema.tests.yaml"
         assert expected_file.exists()
 
     def test_conflict_resolution_with_warning(self, tmp_path: Path):

@@ -24,18 +24,18 @@ Feature: JSON Pointer CLI Generation Tests
               price: 29.99
       """
     When I run the generate command: `teds generate product.yaml#/$defs`
-    Then a test file "product.$defs.tests.yaml" should be created with content:
+    Then a test file "product.tests.yaml" should be created with content:
       """yaml
       version: "1.0.0"
       tests:
         product.yaml#/$defs/Product:
           valid:
-            example_0:
+            .["$defs"].Product.examples[0]:
               payload:
                 title: Laptop
                 price: 999.99
               from_examples: true
-            example_1:
+            .["$defs"].Product.examples[1]:
               payload:
                 title: Mouse
                 price: 29.99
@@ -55,7 +55,7 @@ Feature: JSON Pointer CLI Generation Tests
               type: string
       """
     When I run the generate command: `teds generate models/user.yaml#/$defs`
-    Then a test file "models/user.$defs.tests.yaml" should be created with content:
+    Then a test file "models/user.tests.yaml" should be created with content:
       """yaml
       version: "1.0.0"
       tests:
@@ -71,12 +71,12 @@ Feature: JSON Pointer CLI Generation Tests
         Item:
           type: string
       """
-    When I run the generate command: `teds generate schema.yaml#/$defs/Item --output custom.tests.yaml`
+    When I run the generate command: `teds generate schema.yaml#/$defs/Item=custom.tests.yaml`
     Then a test file "custom.tests.yaml" should be created with content:
       """yaml
       version: "1.0.0"
       tests:
-        schema.yaml#/$defs/Item:
+        schema.yaml#/$defs/Item/type:
           valid: null
           invalid: null
       """
@@ -91,7 +91,7 @@ Feature: JSON Pointer CLI Generation Tests
               type: string
       """
     When I run the generate command: `teds generate legacy.yaml#/definitions`
-    Then a test file "legacy.definitions.tests.yaml" should be created with content:
+    Then a test file "legacy.tests.yaml" should be created with content:
       """yaml
       version: "1.0.0"
       tests:

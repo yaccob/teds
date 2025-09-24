@@ -120,7 +120,19 @@ def run_cli_command(temp_workspace, cli_result, command):
 def verify_test_file_exists(temp_workspace, test_files, filename):
     """Verify that a test file was created."""
     test_path = temp_workspace / filename
-    assert test_path.exists(), f"Test file {filename} was not created. Files in directory: {list(temp_workspace.iterdir())}"
+
+    # Show what files were actually created for debugging
+    actual_files = [f.name for f in temp_workspace.iterdir() if f.is_file()]
+    test_files_found = [
+        f for f in actual_files if f.endswith(".tests.yaml") or f.endswith(".yaml")
+    ]
+
+    assert test_path.exists(), (
+        f"Test file '{filename}' was not created.\n"
+        f"Expected: {filename}\n"
+        f"Actual files created: {actual_files}\n"
+        f"Test/YAML files found: {test_files_found}"
+    )
     test_files[filename] = test_path
 
 

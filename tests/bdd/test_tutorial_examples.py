@@ -177,7 +177,19 @@ def command_should_fail():
 def step_test_file_should_be_created(temp_workspace, filename):
     """Assert that a test file was created."""
     file_path = temp_workspace / filename
-    assert file_path.exists(), f"Test file {filename} was not created"
+
+    # Show what files were actually created for debugging
+    actual_files = [f.name for f in temp_workspace.iterdir() if f.is_file()]
+    test_files = [
+        f for f in actual_files if f.endswith(".tests.yaml") or f.endswith(".yaml")
+    ]
+
+    assert file_path.exists(), (
+        f"Test file '{filename}' was not created.\n"
+        f"Expected: {filename}\n"
+        f"Actual files created: {actual_files}\n"
+        f"Test/YAML files found: {test_files}"
+    )
 
 
 @then(parsers.parse('a file "{filename}" should be created'))
