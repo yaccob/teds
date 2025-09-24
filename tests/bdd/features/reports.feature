@@ -500,3 +500,25 @@ Feature: Reports and CLI Tests
     When I generate a comprehensive AsciiDoc report
     Then the report should handle all payload types correctly
     And no "object of type 'int' has no len()" error should occur
+
+  # ==========================================================================
+  # Status Message Tests
+  # ==========================================================================
+
+  Scenario: Report generation outputs status message to stderr
+    Given I have a schema file "simple.yaml" with content:
+      """yaml
+      type: string
+      """
+    And I have a test specification file "simple.tests.yaml" with content:
+      """yaml
+      version: "1.0.0"
+      tests:
+        simple.yaml#:
+          valid:
+            test_case:
+              payload: "test"
+      """
+    When I run the verify command: `teds verify simple.tests.yaml --report default.html`
+    Then the command should succeed
+    And the error output should contain "Generating report simple.tests.report.html"
