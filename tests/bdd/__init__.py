@@ -1,1 +1,1 @@
-"""BDD tests for TeDS generate functionality."""
+"""BDD tests for TeDS functionality."""
