@@ -24,7 +24,7 @@ Feature: JSON Pointer CLI Generation Tests
               price: 29.99
       """
     When I run the generate command: `teds generate product.yaml#/$defs`
-    Then a test file "product.tests.yaml" should be created with content:
+    Then a test file "product.$defs.tests.yaml" should be created with content:
       """yaml
       version: "1.0.0"
       tests:
@@ -55,7 +55,7 @@ Feature: JSON Pointer CLI Generation Tests
               type: string
       """
     When I run the generate command: `teds generate models/user.yaml#/$defs`
-    Then a test file "models/user.tests.yaml" should be created with content:
+    Then a test file "models/user.$defs.tests.yaml" should be created with content:
       """yaml
       version: "1.0.0"
       tests:
@@ -91,7 +91,7 @@ Feature: JSON Pointer CLI Generation Tests
               type: string
       """
     When I run the generate command: `teds generate legacy.yaml#/definitions`
-    Then a test file "legacy.tests.yaml" should be created with content:
+    Then a test file "legacy.definitions.tests.yaml" should be created with content:
       """yaml
       version: "1.0.0"
       tests:
