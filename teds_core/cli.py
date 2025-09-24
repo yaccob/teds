@@ -186,9 +186,9 @@ class GenerateCommand(Command):
                             abs_ref_str = ref_str
                         else:
                             schema_dir = Path.cwd() / Path(file_part).parent
-                            # Convert relative ref to absolute ref for generate_from
-                            abs_file_part = str(Path.cwd() / file_part)
-                            abs_ref_str = f"{abs_file_part}#{pointer}"
+                            # Create relative ref from testspec location to schema
+                            schema_filename = Path(file_part).name
+                            abs_ref_str = f"{schema_filename}#{pointer}"
                         target_path = schema_dir / _default_filename(base, pointer)
 
                     generate_from(abs_ref_str, target_path)
