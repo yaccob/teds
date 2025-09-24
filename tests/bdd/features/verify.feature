@@ -434,3 +434,43 @@ Feature: Verify Command Tests
     When I run the verify command: `teds verify user.tests.yaml product.tests.yaml`
     Then the command should succeed
     And the output should contain results from both files
+
+  # ==========================================================================
+  # Status Message Tests
+  # ==========================================================================
+
+  Scenario: Verify command outputs status message to stderr
+    Given I have a schema file "simple.yaml" with content:
+      """yaml
+      type: string
+      """
+    And I have a test specification file "simple.tests.yaml" with content:
+      """yaml
+      version: "1.0.0"
+      tests:
+        simple.yaml#:
+          valid:
+            test_case:
+              payload: "test"
+      """
+    When I run the verify command: `teds verify simple.tests.yaml`
+    Then the command should succeed
+    And the error output should contain "Verifying simple.tests.yaml"
+
+  Scenario: Verify command with in-place update outputs status message to stderr
+    Given I have a schema file "simple.yaml" with content:
+      """yaml
+      type: string
+      """
+    And I have a test specification file "simple.tests.yaml" with content:
+      """yaml
+      version: "1.0.0"
+      tests:
+        simple.yaml#:
+          valid:
+            test_case:
+              payload: "test"
+      """
+    When I run the verify command: `teds verify simple.tests.yaml --in-place`
+    Then the command should succeed
+    And the error output should contain "Updating simple.tests.yaml"

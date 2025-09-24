@@ -1,8 +1,2 @@
 version: 1.0.0
-tests:
-  address_list.yaml#/$defs:
-    valid:
-    invalid:
-  address_list.yaml#/definitions:
-    valid:
-    invalid:
+tests: {}

@@ -1,6 +1,7 @@
 """BDD tests for TeDS verify command - reorganized from original working files."""
 
 import os
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -9,6 +10,18 @@ import pytest
 from pytest_bdd import given, parsers, scenarios, then, when
 
 from teds_core.cli import main as cli_main
+
+
+def run_teds_command_with_stderr(*args):
+    """Helper function to run teds CLI commands and capture stderr."""
+    teds_path = Path(__file__).parent.parent.parent / "teds.py"
+    result = subprocess.run(
+        [sys.executable, str(teds_path), *args],
+        capture_output=True,
+        text=True,
+        cwd=os.getcwd(),
+    )
+    return result.returncode, result.stderr
 
 
 def run_teds_command(*args):
@@ -97,9 +110,10 @@ def run_verify_command(command):
         args = command.split()[2:]
 
     # Store result for later assertions
-    exit_code = run_teds_command("verify", *args)
+    exit_code, stderr = run_teds_command_with_stderr("verify", *args)
     pytest.current_exit_code = exit_code
     pytest.current_command_success = exit_code == 0
+    pytest.current_stderr = stderr
 
 
 @then("the command should succeed")
@@ -108,6 +122,15 @@ def command_should_succeed():
     assert getattr(
         pytest, "current_command_success", False
     ), f"Command failed with exit code {getattr(pytest, 'current_exit_code', 'unknown')}"
+
+
+@then(parsers.parse('the error output should contain "{expected_text}"'))
+def verify_error_output(expected_text):
+    """Verify that the error output contains the expected text."""
+    stderr = getattr(pytest, "current_stderr", "")
+    assert (
+        expected_text in stderr
+    ), f"Expected '{expected_text}' in stderr, but got: {stderr}"
 
 
 @then("the command should complete with validation errors")
