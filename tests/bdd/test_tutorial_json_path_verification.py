@@ -149,7 +149,7 @@ components:
 
     # Run command as documented
     yaml_config = '{"api.yaml": {"paths": ["$.components.schemas.User", "$.components.schemas.Product"]}}'
-    exit_code = cli_main(["generate", yaml_config])
+    exit_code = run_teds_command("generate", yaml_config)
     assert exit_code == 0, "Specific targets generation failed"
 
     # Verify results
@@ -167,7 +167,7 @@ def test_json_path_custom_target_file(temp_workspace):
     """
     Test JSON Path with custom target file
     From tutorial example:
-    teds generate '{"schema.yaml": {"paths": ["$.$defs.*"], "target": "custom_tests.yaml"}}'
+    teds generate '{"schema.yaml": {"paths": ["$[\"$defs\"].*"], "target": "custom_tests.yaml"}}'
     """
     # Create schema
     schema_content = """
@@ -185,10 +185,8 @@ $defs:
     schema_file.write_text(schema_content.strip())
 
     # Run command with custom target as documented
-    yaml_config = (
-        '{"schema.yaml": {"paths": ["$.$defs.*"], "target": "custom_tests.yaml"}}'
-    )
-    exit_code = cli_main(["generate", yaml_config])
+    yaml_config = '{"schema.yaml": {"paths": ["$[\\"$defs\\"].*"], "target": "custom_tests.yaml"}}'
+    exit_code = run_teds_command("generate", yaml_config)
     assert exit_code == 0, "Custom target generation failed"
 
     # Verify custom target file was created
@@ -204,7 +202,7 @@ def test_json_path_simple_list_format(temp_workspace):
     """
     Test JSON Path Method 3: Simple List Format
     From tutorial example:
-    teds generate '{"schema.yaml": ["$.components.schemas.*", "$.$defs.*"]}'
+    teds generate '{"schema.yaml": ["$.components.schemas.*", "$[\"$defs\"].*"]}'
     """
     # Create schema with both components and $defs
     schema_content = """
@@ -224,8 +222,8 @@ $defs:
     schema_file.write_text(schema_content.strip())
 
     # Run command with simple list format as documented
-    yaml_config = '{"schema.yaml": ["$.components.schemas.*", "$.$defs.*"]}'
-    exit_code = cli_main(["generate", yaml_config])
+    yaml_config = '{"schema.yaml": ["$.components.schemas.*", "$[\\"$defs\\"].*"]}'
+    exit_code = run_teds_command("generate", yaml_config)
     assert exit_code == 0, "Simple list format generation failed"
 
     # Verify results
@@ -264,8 +262,8 @@ $defs:
     schema_file.write_text(schema_content.strip())
 
     # Test array index access
-    yaml_config = '{"schema.yaml": {"paths": ["$.$defs.User.allOf[0]"]}}'
-    exit_code = cli_main(["generate", yaml_config])
+    yaml_config = '{"schema.yaml": {"paths": ["$[\\"$defs\\"].User.allOf[0]"]}}'
+    exit_code = run_teds_command("generate", yaml_config)
     assert exit_code == 0, "Array index generation failed"
 
     # Verify results
@@ -315,7 +313,7 @@ components:
 
     # Test that wildcard expands only at the wildcard level (properties level)
     yaml_config = '{"nested.yaml": {"paths": ["$.components.schemas.*.properties"]}}'
-    exit_code = cli_main(["generate", yaml_config])
+    exit_code = run_teds_command("generate", yaml_config)
     assert exit_code == 0, "Wildcard expansion failed"
 
     # Verify results
@@ -356,7 +354,7 @@ components:
 
     # Test JSON Path - requires explicit wildcard
     yaml_config = '{"comparison.yaml": {"paths": ["$.components.schemas.*"]}}'
-    exit_code = cli_main(["generate", yaml_config])
+    exit_code = run_teds_command("generate", yaml_config)
     assert exit_code == 0, "JSON Path with wildcard failed"
 
     # Verify it finds both schemas
@@ -371,7 +369,7 @@ components:
     expected_file.unlink()
 
     # Test JSON Pointer - no wildcard needed, expands children automatically
-    exit_code = cli_main(["generate", "comparison.yaml#/components/schemas"])
+    exit_code = run_teds_command("generate", "comparison.yaml#/components/schemas")
     assert exit_code == 0, "JSON Pointer generation failed"
 
     # Verify JSON Pointer created appropriate file

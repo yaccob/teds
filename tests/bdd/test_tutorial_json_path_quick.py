@@ -130,9 +130,15 @@ $defs:
     schema_file = temp_workspace / "schema.yaml"
     schema_file.write_text(schema_content.strip())
 
-    # Run: teds generate '{"schema.yaml": ["$.components.schemas.*", "$.[\"$defs\"].*"]}'
-    yaml_config = '{"schema.yaml": ["$.components.schemas.*", "$.["$defs"].*"]}'
-    exit_code = run_teds_command("generate", yaml_config)
+    # Run: teds generate '{"schema.yaml": ["$.components.schemas.*", "$[\"$defs\"].*"]}'
+    # Use config file to avoid shell escaping issues
+    import json
+
+    config_data = {"schema.yaml": ["$.components.schemas.*", '$["$defs"].*']}
+    config_file = temp_workspace / "temp_config.json"
+    with open(config_file, "w") as f:
+        json.dump(config_data, f)
+    exit_code = run_teds_command("generate", f"@{config_file}")
     assert exit_code == 0, "JSON Path simple list format failed"
 
     # Verify results
@@ -162,11 +168,17 @@ $defs:
     schema_file = temp_workspace / "schema.yaml"
     schema_file.write_text(schema_content.strip())
 
-    # Run: teds generate '{"schema.yaml": {"paths": ["$.[\"$defs\"].*"], "target": "custom_tests.yaml"}}'
-    yaml_config = (
-        '{"schema.yaml": {"paths": ["$.["$defs"].*"], "target": "custom_tests.yaml"}}'
-    )
-    exit_code = run_teds_command("generate", yaml_config)
+    # Run: teds generate '{"schema.yaml": {"paths": ["$[\"$defs\"].*"], "target": "custom_tests.yaml"}}'
+    # Use config file to avoid shell escaping issues
+    import json
+
+    config_data = {
+        "schema.yaml": {"paths": ['$["$defs"].*'], "target": "custom_tests.yaml"}
+    }
+    config_file = temp_workspace / "temp_config.json"
+    with open(config_file, "w") as f:
+        json.dump(config_data, f)
+    exit_code = run_teds_command("generate", f"@{config_file}")
     assert exit_code == 0, "JSON Path custom target failed"
 
     # Verify custom target file was created

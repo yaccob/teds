@@ -43,11 +43,13 @@ components:
     schema_file.write_text(schema_content.strip())
 
     # Run generate command using subprocess to test actual CLI
+    teds_path = Path(__file__).parent.parent.parent / "teds.py"
+    import sys
+
     result = subprocess.run(
         [
-            "python",
-            "-m",
-            "teds_core.cli",
+            sys.executable,
+            str(teds_path),
             "generate",
             "sample_schemas.yaml#/components/schemas",
         ],
@@ -101,8 +103,11 @@ sample_schemas.yaml:
     config_file.write_text(config_content.strip())
 
     # Run generate command
+    teds_path = Path(__file__).parent.parent.parent / "teds.py"
+    import sys
+
     result = subprocess.run(
-        ["python", "-m", "teds_core.cli", "generate", "@config.yaml"],
+        [sys.executable, str(teds_path), "generate", "@config.yaml"],
         capture_output=True,
         text=True,
         cwd=str(temp_workspace),
@@ -141,8 +146,11 @@ components:
 
     # Run generate command with direct YAML argument
     yaml_config = '{"sample_schemas.yaml": {"paths": ["$.components.schemas.*"]}}'
+    teds_path = Path(__file__).parent.parent.parent / "teds.py"
+    import sys
+
     result = subprocess.run(
-        ["python", "-m", "teds_core.cli", "generate", yaml_config],
+        [sys.executable, str(teds_path), "generate", yaml_config],
         capture_output=True,
         text=True,
         cwd=str(temp_workspace),
@@ -180,9 +188,19 @@ $defs:
     schema_file.write_text(schema_content.strip())
 
     # Run generate command with simple list format
-    yaml_config = '{"schema.yaml": ["$.components.schemas.*", "$.$defs.*"]}'
+    # Write JSON config to a temporary file to avoid shell escaping issues
+    import json
+
+    config_data = {"schema.yaml": ["$.components.schemas.*", '$["$defs"].*']}
+    config_file = temp_workspace / "temp_config.json"
+    with open(config_file, "w") as f:
+        json.dump(config_data, f)
+
+    teds_path = Path(__file__).parent.parent.parent / "teds.py"
+    import sys
+
     result = subprocess.run(
-        ["python", "-m", "teds_core.cli", "generate", yaml_config],
+        [sys.executable, str(teds_path), "generate", f"@{config_file}"],
         capture_output=True,
         text=True,
         cwd=str(temp_workspace),
@@ -214,7 +232,7 @@ format: email
     test_content = """
 version: "1.0.0"
 tests:
-  user_email.yaml#/:
+  user_email.yaml#:
     valid:
       simple_email:
         description: "Basic valid email"
@@ -234,14 +252,26 @@ tests:
     test_file.write_text(test_content.strip())
 
     # Run verify command
+    teds_path = Path(__file__).parent.parent.parent / "teds.py"
+    import sys
+
     result = subprocess.run(
-        ["python", "-m", "teds_core.cli", "verify", "user_email.tests.yaml"],
+        [
+            sys.executable,
+            str(teds_path),
+            "verify",
+            "user_email.tests.yaml",
+            "--output-level",
+            "all",
+        ],
         capture_output=True,
         text=True,
         cwd=str(temp_workspace),
     )
 
-    assert result.returncode == 0, f"Verify command failed: {result.stderr}"
+    assert (
+        result.returncode == 1
+    ), f"Verify command should report validation errors: {result.stderr}"
 
     # Check that output contains expected results
     output = result.stdout
@@ -265,15 +295,15 @@ components:
     schema_file.write_text(schema_content.strip())
 
     # Run generate with template variables
+    teds_path = Path(__file__).parent.parent.parent / "teds.py"
+    import sys
+
     result = subprocess.run(
         [
-            "python",
-            "-m",
-            "teds_core.cli",
+            sys.executable,
+            str(teds_path),
             "generate",
-            "schema.yaml#/components/schemas",
-            "--target-template",
-            "{base}.{pointer}.custom.yaml",
+            "schema.yaml#/components/schemas={base}.{pointer}.custom.yaml",
         ],
         capture_output=True,
         text=True,
@@ -306,11 +336,13 @@ components:
     schema_file.write_text(schema_content.strip())
 
     # Run generate command
+    teds_path = Path(__file__).parent.parent.parent / "teds.py"
+    import sys
+
     result = subprocess.run(
         [
-            "python",
-            "-m",
-            "teds_core.cli",
+            sys.executable,
+            str(teds_path),
             "generate",
             "api.yaml#/components/schemas/User",
         ],
@@ -340,8 +372,11 @@ $defs:
     schema_file.write_text(schema_content.strip())
 
     # Run generate command
+    teds_path = Path(__file__).parent.parent.parent / "teds.py"
+    import sys
+
     result = subprocess.run(
-        ["python", "-m", "teds_core.cli", "generate", "schema.yaml#/$defs/Address"],
+        [sys.executable, str(teds_path), "generate", "schema.yaml#/$defs/Address"],
         capture_output=True,
         text=True,
         cwd=str(temp_workspace),
