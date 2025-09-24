@@ -86,7 +86,7 @@ Feature: Tutorial Examples Verification
               - "alice@example.com"
       """
     When I run the generate command: `teds generate sample_schemas.yaml#/components/schemas`
-    Then a test file "sample_schemas.components+schemas.tests.yaml" should be created
+    Then a test file "sample_schemas.tests.yaml" should be created
     And the test file should contain "sample_schemas.yaml#/components/schemas/User"
     And the test file should contain "sample_schemas.yaml#/components/schemas/Email"
     And the test file should contain examples marked with "from_examples: true"
@@ -110,7 +110,7 @@ Feature: Tutorial Examples Verification
                   - "alice@example.com"
       """
     When I run the generate command: `teds generate api_spec.yaml#/components/schemas/User/properties`
-    Then a test file "api_spec.components+schemas+User+properties.tests.yaml" should be created
+    Then a test file "api_spec.tests.yaml" should be created
     And the test file should contain "api_spec.yaml#/components/schemas/User/properties/name"
     And the test file should contain "api_spec.yaml#/components/schemas/User/properties/email"
 
@@ -127,7 +127,7 @@ Feature: Tutorial Examples Verification
               - "bob@example.org"
       """
     When I run the generate command: `teds generate single_schema.yaml#/components/schemas`
-    Then a test file "single_schema.components+schemas.tests.yaml" should be created
+    Then a test file "single_schema.tests.yaml" should be created
     And the test file should contain "single_schema.yaml#/components/schemas/Email"
     And the test file should contain "alice@example.com"
     And the test file should contain "bob@example.org"
@@ -571,7 +571,7 @@ Feature: Tutorial Examples Verification
               - name: "Alice"
       """
     When I run the generate command: `teds generate api.yaml#/components/schemas/User`
-    Then a test file "api.components+schemas+User.tests.yaml" should be created
+    Then a test file "api.tests.yaml" should be created
 
   Scenario: $defs pointer sanitization
     Given I have a schema file "schema.yaml" with content:
@@ -583,7 +583,7 @@ Feature: Tutorial Examples Verification
             - street: "Main St"
       """
     When I run the generate command: `teds generate schema.yaml#/$defs/Address`
-    Then a test file "schema.$defs+Address.tests.yaml" should be created
+    Then a test file "schema.tests.yaml" should be created
 
   # ==========================================================================
   # Key-as-Payload Feature from Chapter 2

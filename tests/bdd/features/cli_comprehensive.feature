@@ -103,7 +103,7 @@ Feature: TeDS CLI Comprehensive Testing
       """
     When I run teds generate "user.yaml#/components/schemas/User"
     Then the command should exit with code 0
-    And a test file "user.components+schemas+User.tests.yaml" should be created
+    And a test file "user.tests.yaml" should be created
     And the test file should contain valid YAML content
 
   Scenario: Generate with omitted target defaults to schema directory

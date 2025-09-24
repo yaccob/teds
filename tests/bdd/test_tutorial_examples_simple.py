@@ -66,7 +66,7 @@ components:
     assert result.returncode == 0, f"Generate command failed: {result.stderr}"
 
     # Check if test file was created
-    expected_file = temp_workspace / "sample_schemas.components+schemas.tests.yaml"
+    expected_file = temp_workspace / "sample_schemas.tests.yaml"
     assert expected_file.exists(), "Test file was not created"
 
     # Check content
@@ -354,7 +354,7 @@ components:
     assert result.returncode == 0, f"Generate command failed: {result.stderr}"
 
     # Check if sanitized filename was created
-    expected_file = temp_workspace / "api.components+schemas+User.tests.yaml"
+    expected_file = temp_workspace / "api.tests.yaml"
     assert expected_file.exists(), "Sanitized filename test file was not created"
 
 
@@ -385,5 +385,5 @@ $defs:
     assert result.returncode == 0, f"Generate command failed: {result.stderr}"
 
     # Check if sanitized filename was created
-    expected_file = temp_workspace / "schema.$defs+Address.tests.yaml"
+    expected_file = temp_workspace / "schema.tests.yaml"
     assert expected_file.exists(), "$defs sanitized filename test file was not created"

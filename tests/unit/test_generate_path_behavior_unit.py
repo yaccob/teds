@@ -199,7 +199,7 @@ $defs:
         assert exit_code == 0, f"CLI command failed with exit code {exit_code}"
 
         # Check generated file
-        testspec = subdir / "user.$defs.tests.yaml"
+        testspec = subdir / "user.tests.yaml"
         assert testspec.exists(), f"Expected test file {testspec} was not created"
 
         # CRITICAL: Verify that schema references are RELATIVE

@@ -373,7 +373,7 @@ components:
     assert exit_code == 0, "JSON Pointer generation failed"
 
     # Verify JSON Pointer created appropriate file
-    pointer_file = temp_workspace / "comparison.components+schemas.tests.yaml"
+    pointer_file = temp_workspace / "comparison.tests.yaml"
     assert pointer_file.exists(), "JSON Pointer test file was not created"
 
     pointer_content = pointer_file.read_text()
