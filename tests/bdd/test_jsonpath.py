@@ -117,14 +117,22 @@ def run_generate_command(temp_workspace, command):
     import sys
 
     original_argv = sys.argv[:]
+    exit_code = None
     try:
         sys.argv = ["teds", "generate", *args]
         cli_main()
-    except SystemExit:
-        # Expected for successful completion
-        pass
+        exit_code = 0
+    except SystemExit as e:
+        exit_code = e.code
     finally:
         sys.argv = original_argv
+
+    # CRITICAL: The command must succeed for the BDD test to be valid
+    # If exit code is not 0, the command failed and we should fail the test
+    if exit_code != 0:
+        raise AssertionError(
+            f"Generate command failed with exit code {exit_code}: teds generate {' '.join(args)}"
+        )
 
 
 @then(
