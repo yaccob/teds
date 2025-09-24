@@ -58,47 +58,33 @@ def create_subdirectory(temp_workspace, dirname):
     subdir.mkdir(parents=True, exist_ok=True)
 
 
-@given(
-    parsers.parse('I have a schema file "{filename}" with content:'),
-    target_fixture="created_schema",
-)
-def create_schema_file(temp_workspace, schema_files, filename):
-    """Create a schema file with given content."""
+@given(parsers.parse('I have a schema file "{filename}" with content:'))
+def create_schema_file(temp_workspace, schema_files, filename, docstring):
+    """Create a schema file with specified content."""
+    schema_path = temp_workspace / filename
+    schema_path.parent.mkdir(parents=True, exist_ok=True)
 
-    def _create_with_content(content):
-        schema_path = temp_workspace / filename
-        schema_path.parent.mkdir(parents=True, exist_ok=True)
+    # Remove yaml language marker if present
+    content = docstring
+    if content.strip().startswith("yaml"):
+        content = "\n".join(content.strip().split("\n")[1:])
 
-        # Remove yaml language marker if present
-        if content.strip().startswith("yaml"):
-            content = "\n".join(content.strip().split("\n")[1:])
-
-        schema_path.write_text(content.strip(), encoding="utf-8")
-        schema_files[filename] = schema_path
-        return schema_path
-
-    return _create_with_content
+    schema_path.write_text(content.strip(), encoding="utf-8")
+    schema_files[filename] = schema_path
 
 
-@given(
-    parsers.parse('I have a configuration file "{filename}" with content:'),
-    target_fixture="created_config",
-)
-def create_config_file(temp_workspace, config_files, filename):
-    """Create a configuration file with given content."""
+@given(parsers.parse('I have a configuration file "{filename}" with content:'))
+def create_config_file(temp_workspace, config_files, filename, docstring):
+    """Create a configuration file with specified content."""
+    config_path = temp_workspace / filename
 
-    def _create_with_content(content):
-        config_path = temp_workspace / filename
+    # Remove yaml language marker if present
+    content = docstring
+    if content.strip().startswith("yaml"):
+        content = "\n".join(content.strip().split("\n")[1:])
 
-        # Remove yaml language marker if present
-        if content.strip().startswith("yaml"):
-            content = "\n".join(content.strip().split("\n")[1:])
-
-        config_path.write_text(content.strip(), encoding="utf-8")
-        config_files[filename] = config_path
-        return config_path
-
-    return _create_with_content
+    config_path.write_text(content.strip(), encoding="utf-8")
+    config_files[filename] = config_path
 
 
 @when(parsers.parse("I run the generate command: `{command}`"))

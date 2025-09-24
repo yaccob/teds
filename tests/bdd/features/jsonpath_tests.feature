@@ -20,7 +20,7 @@ Feature: JSONPath YAML Configuration Tests
     And I have a configuration file "config.yaml" with content:
       """yaml
       schema.yaml:
-        paths: ["$.$defs.User.properties"]
+        paths: ["$.['$defs'].User.properties"]
       """
     When I run the generate command: `teds generate @config.yaml`
     Then a test file "schema.tests.yaml" should be created with content:
@@ -54,7 +54,7 @@ Feature: JSONPath YAML Configuration Tests
     And I have a configuration file "wildcard_config.yaml" with content:
       """yaml
       api.yaml:
-        paths: ["$.$defs.*"]
+        paths: ["$.['$defs'].*"]
       """
     When I run the generate command: `teds generate @wildcard_config.yaml`
     Then a test file "api.tests.yaml" should be created with content:
@@ -85,7 +85,7 @@ Feature: JSONPath YAML Configuration Tests
     And I have a configuration file "user_config.yaml" with content:
       """yaml
       user.yaml:
-        paths: ["$.$defs.User"]
+        paths: ["$.['$defs'].User"]
       """
     When I run the generate command: `teds generate @user_config.yaml`
     Then a test file "user.tests.yaml" should be created with content:
@@ -114,7 +114,7 @@ Feature: JSONPath YAML Configuration Tests
     And I have a configuration file "complex_config.yaml" with content:
       """yaml
       complex.yaml:
-        paths: ["$.$defs.User.allOf[0]"]
+        paths: ["$.['$defs'].User.allOf[0]"]
       """
     When I run the generate command: `teds generate @complex_config.yaml`
     Then a test file "complex.tests.yaml" should be created with content:
@@ -193,7 +193,7 @@ Feature: JSONPath YAML Configuration Tests
     And I have a configuration file "multi_config.yaml" with content:
       """yaml
       multi.yaml:
-        paths: ["$.$defs.Base", "$.$defs.Extended.allOf[1]"]
+        paths: ["$.['$defs'].Base", "$.['$defs'].Extended.allOf[1]"]
       """
     When I run the generate command: `teds generate @multi_config.yaml`
     Then a test file "multi.tests.yaml" should be created with content:
@@ -260,7 +260,7 @@ Feature: JSONPath YAML Configuration Tests
     And I have a configuration file "generate.yaml" with content:
       """yaml
       user.yaml:
-        paths: ["$.$defs.User"]
+        paths: ["$.['$defs'].User"]
         target: "user_tests.yaml"
       """
     When I run the generate command: `teds generate @generate.yaml`
@@ -283,7 +283,7 @@ Feature: JSONPath YAML Configuration Tests
     And I have a configuration file "config.yaml" with content:
       """yaml
       user_model.yaml:
-        paths: ["$.$defs.User"]
+        paths: ["$.['$defs'].User"]
         target: "{base}_spec.yaml"
       """
     When I run the generate command: `teds generate @config.yaml`
@@ -306,7 +306,7 @@ Feature: JSONPath YAML Configuration Tests
     And I have a configuration file "conflict.yaml" with content:
       """yaml
       schema.yaml:
-        paths: ["$.$defs.Item", "$.$defs.Item"]
+        paths: ["$.['$defs'].Item", "$.['$defs'].Item"]
       """
     When I run the generate command: `teds generate @conflict.yaml`
     Then a test file "schema.tests.yaml" should be created with content:
@@ -329,7 +329,7 @@ Feature: JSONPath YAML Configuration Tests
     And I have a configuration file "config.yaml" with content:
       """yaml
       schemas/product.yaml:
-        paths: ["$.$defs.Product"]
+        paths: ["$.['$defs'].Product"]
       """
     When I run the generate command: `teds generate @config.yaml`
     Then a test file "schemas/product.tests.yaml" should be created with content:

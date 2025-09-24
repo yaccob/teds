@@ -290,7 +290,8 @@ def _default_filename(base: str, pointer: str, exact_ref: bool = False) -> str:
     pointer_raw = pointer.lstrip("/")
     if not pointer_raw:
         return f"{base}.tests.yaml"
-    return f"{base}.{_sanitize(pointer_raw)}.tests.yaml"
+    # Always use base filename for consistency with JSON-Path behavior
+    return f"{base}.tests.yaml"
 
 
 def _expand_target_template(target: str, file_part: str, pointer: str) -> str:

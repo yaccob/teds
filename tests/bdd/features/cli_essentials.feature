@@ -23,7 +23,7 @@ Feature: Essential CLI Functionality Tests
                 type: string
       """
     When I run the CLI command: `./teds.py generate api.yaml#/components/schemas`
-    Then a test file "api.components+schemas.tests.yaml" should be created
+    Then a test file "api.tests.yaml" should be created
     And the test file should contain exactly these test keys:
       """
       - "api.yaml#/components/schemas/User"
@@ -89,7 +89,7 @@ Feature: Essential CLI Functionality Tests
               type: string
       """
     When I run the CLI command: `./teds.py generate simple.yaml#/$defs/User`
-    Then a test file "simple.$defs+User.tests.yaml" should be created
+    Then a test file "simple.tests.yaml" should be created
     And the test file should contain exactly these test keys:
       """
       - "simple.yaml#/$defs/User/type"
@@ -132,7 +132,7 @@ Feature: Essential CLI Functionality Tests
           type: object
       """
     When I run the CLI command: `./teds.py generate models/user.yaml#/$defs`
-    Then a test file "models/user.$defs.tests.yaml" should be created
+    Then a test file "models/user.tests.yaml" should be created
     And the test file should contain exactly these test keys:
       """
       - "user.yaml#/$defs/User"
