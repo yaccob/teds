@@ -459,6 +459,8 @@ def generate_from_source_config(
                 unique_refs.append(ref)
 
         # Generate tests for each unique reference (exact nodes only, no children expansion)
+        if unique_refs:  # Only print if we're actually generating something
+            print(f"Generating {target_path}", file=sys.stderr)
         for ref in unique_refs:
             try:
                 generate_exact_node(ref, target_path)

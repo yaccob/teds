@@ -124,7 +124,7 @@ def create_existing_test_file(temp_workspace, filename, docstring):
 
 
 @when(parsers.parse("I run the generate command: `{command}`"))
-def run_generate_command(temp_workspace, command):
+def run_generate_command(temp_workspace, cli_result, command):
     """Execute the generate command."""
     # Extract command arguments
     # Remove 'teds generate ' prefix
@@ -135,27 +135,29 @@ def run_generate_command(temp_workspace, command):
 
     args = shlex.split(args_str)
 
-    # Prepare sys.argv for CLI
-    original_argv = sys.argv[:]
-    exit_code = None
-    try:
-        sys.argv = ["teds", "generate", *args]
-        cli_main()
-        exit_code = 0
-    except SystemExit as e:
-        exit_code = e.code
-    finally:
-        sys.argv = original_argv
+    # Run with subprocess to capture stderr
+    teds_path = Path(__file__).parent.parent.parent / "teds.py"
+    result = subprocess.run(
+        [sys.executable, str(teds_path), "generate", *args],
+        capture_output=True,
+        text=True,
+        cwd=str(temp_workspace),
+    )
+
+    # Store result in cli_result fixture
+    cli_result["returncode"] = result.returncode
+    cli_result["stdout"] = result.stdout
+    cli_result["stderr"] = result.stderr
 
     # Store result for later assertions
-    pytest.current_exit_code = exit_code
-    pytest.current_command_success = exit_code == 0
+    pytest.current_exit_code = result.returncode
+    pytest.current_command_success = result.returncode == 0
 
     # CRITICAL: The command must succeed for the BDD test to be valid
     # If exit code is not 0, the command failed and we should fail the test
-    if exit_code != 0:
+    if result.returncode != 0:
         raise AssertionError(
-            f"Generate command failed with exit code {exit_code}: teds generate {' '.join(args)}"
+            f"Generate command failed with exit code {result.returncode}: teds generate {' '.join(args)}. Stderr: {result.stderr}"
         )
 
 
@@ -345,6 +347,14 @@ def verify_exit_code(cli_result, exit_code):
     assert (
         cli_result["returncode"] == exit_code
     ), f"Expected exit code {exit_code}, got {cli_result['returncode']}. Stderr: {cli_result['stderr']}"
+
+
+@then("the command should succeed")
+def command_should_succeed(cli_result):
+    """Assert that the command succeeded."""
+    assert (
+        cli_result["returncode"] == 0
+    ), f"Command failed with exit code {cli_result['returncode']}. Stderr: {cli_result['stderr']}"
 
 
 @then(parsers.parse('the error output should contain "{expected_text}"'))

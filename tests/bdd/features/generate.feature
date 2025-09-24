@@ -866,3 +866,19 @@ Feature: Generate Command Tests
           valid: null
           invalid: null
       """
+
+  # ==========================================================================
+  # Status Message Tests
+  # ==========================================================================
+
+  Scenario: Generate command outputs status message to stderr
+    Given I have a schema file "simple.yaml" with content:
+      """yaml
+      type: string
+      examples:
+        - "test"
+      """
+    When I run the generate command: `teds generate simple.yaml#`
+    Then the command should succeed
+    And the error output should contain "Generating"
+    And the error output should contain "simple.tests.yaml"

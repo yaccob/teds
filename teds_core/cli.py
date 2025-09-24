@@ -118,6 +118,7 @@ class VerifyCommand(Command):
                     )
                     out_path = sp.parent / name
                 out_path.parent.mkdir(parents=True, exist_ok=True)
+                print(f"Generating report {out_path}", file=sys.stderr)
                 out_path.write_text(content, encoding="utf-8")
         except Exception:
             import traceback
@@ -131,8 +132,13 @@ class VerifyCommand(Command):
         """Handle standard verification mode."""
         rc_all = 0
         for spec in args.spec:
+            spec_path = Path(spec)
+            if args.in_place:
+                print(f"Updating {spec_path}", file=sys.stderr)
+            else:
+                print(f"Verifying {spec_path}", file=sys.stderr)
             rc_all = max(
-                rc_all, validate_file(Path(spec), args.output_level, args.in_place)
+                rc_all, validate_file(spec_path, args.output_level, args.in_place)
             )
         return rc_all
 
@@ -152,6 +158,7 @@ class GenerateCommand(Command):
                     # Source-centric YAML object format - use current working directory
                     # Note: This assumes relative paths in config are relative to cwd
                     base_dir = Path.cwd()
+                    # Status messages will be handled inside generate_from_source_config
                     generate_from_source_config(config, base_dir)
                 else:
                     # Backward compatibility: JSON Pointer string
@@ -191,6 +198,7 @@ class GenerateCommand(Command):
                             abs_ref_str = f"{schema_filename}#{pointer}"
                         target_path = schema_dir / _default_filename(base, pointer)
 
+                    print(f"Generating {target_path}", file=sys.stderr)
                     generate_from(abs_ref_str, target_path)
         except TedsError as e:
             print(str(e), file=sys.stderr)
