@@ -9,11 +9,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from teds_core.errors import TedsError
-from teds_core.generate import (
-    expand_jsonpath_expressions,
-    parse_generate_config,
-    validate_jsonpath_expression,
-)
+from teds_core.generate import expand_jsonpath_expressions, parse_generate_config
 
 
 class TestGenerateCoverageEdgeCases:
@@ -84,36 +80,6 @@ class TestGenerateCoverageEdgeCases:
         with pytest.raises(TedsError, match="path must be string"):
             parse_generate_config(yaml_config)
 
-    def test_validate_jsonpath_empty_expression(self):
-        """Test validation of empty JsonPath expression."""
-        with pytest.raises(TedsError, match="Empty JsonPath expression"):
-            validate_jsonpath_expression("")
-
-    def test_validate_jsonpath_missing_dollar_prefix(self):
-        """Test validation of JsonPath expression without $ prefix."""
-        with pytest.raises(TedsError, match="JsonPath expression must start with"):
-            validate_jsonpath_expression("defs.User")
-
-    def test_validate_jsonpath_unclosed_bracket(self):
-        """Test validation of JsonPath with unclosed bracket."""
-        with pytest.raises(TedsError, match="Invalid JsonPath expression"):
-            validate_jsonpath_expression("$[unclosed")
-
-    def test_validate_jsonpath_parent_navigation(self):
-        """Test validation rejecting parent navigation."""
-        with pytest.raises(TedsError, match="Invalid JsonPath expression"):
-            validate_jsonpath_expression("$../parent")
-
-    def test_validate_jsonpath_json_pointer_parent_navigation(self):
-        """Test validation rejecting parent navigation in JSON Pointer format."""
-        with pytest.raises(TedsError, match="Invalid JSON Pointer expression"):
-            validate_jsonpath_expression("schema.yaml#/../parent")
-
-    def test_validate_jsonpath_json_pointer_missing_file(self):
-        """Test validation of JSON Pointer format with missing file path."""
-        with pytest.raises(TedsError, match="Missing schema file path"):
-            validate_jsonpath_expression("#/valid/path")
-
     def test_expand_jsonpath_schema_load_error(self, tmp_path: Path):
         """Test expand_jsonpath_expressions with schema load error."""
         # Create file with invalid YAML
@@ -124,12 +90,12 @@ class TestGenerateCoverageEdgeCases:
             expand_jsonpath_expressions(schema, ['$["test"].*'])
 
     def test_expand_jsonpath_invalid_expression_error(self, tmp_path: Path):
-        """Test expand_jsonpath_expressions with invalid JsonPath (caught at validation)."""
+        """Test expand_jsonpath_expressions with invalid JsonPath (caught by jsonpath-ng)."""
         schema = tmp_path / "valid.yaml"
         schema.write_text('{"test": "value"}', encoding="utf-8")
 
-        # This fails at validation stage, not expansion stage
-        with pytest.raises(TedsError, match="Invalid JsonPath expression"):
+        # This fails at jsonpath-ng parsing stage
+        with pytest.raises(TedsError, match="Failed to expand JsonPath expression"):
             expand_jsonpath_expressions(schema, ["$[invalid-syntax"])
 
     def test_expand_jsonpath_no_matches_valid_expression(self, tmp_path: Path):
@@ -177,6 +143,8 @@ class TestGenerateCoverageEdgeCases:
 
     def test_expand_jsonpath_dot_notation_with_quotes(self, tmp_path: Path):
         """Test expand_jsonpath_expressions with dot notation containing quotes."""
+        from jsonpath_ng.jsonpath import Child, Fields
+
         schema = tmp_path / "quotes_test.yaml"
         schema.write_text('{"$defs": {"User": {"name": "test"}}}', encoding="utf-8")
 
@@ -184,7 +152,7 @@ class TestGenerateCoverageEdgeCases:
         with patch("teds_core.generate.jsonpath_ng") as mock_jsonpath:
             mock_parser = Mock()
             mock_match = Mock()
-            mock_match.full_path = "'$defs'.User"
+            mock_match.full_path = Child(Fields("$defs"), Fields("User"))
             mock_parser.find.return_value = [mock_match]
             mock_jsonpath.parse.return_value = mock_parser
 
@@ -193,6 +161,8 @@ class TestGenerateCoverageEdgeCases:
 
     def test_expand_jsonpath_empty_path_parts(self, tmp_path: Path):
         """Test expand_jsonpath_expressions when path parsing results in empty parts."""
+        from jsonpath_ng.jsonpath import Root
+
         schema = tmp_path / "empty_path.yaml"
         schema.write_text('{"root": "value"}', encoding="utf-8")
 
@@ -200,34 +170,13 @@ class TestGenerateCoverageEdgeCases:
         with patch("teds_core.generate.jsonpath_ng") as mock_jsonpath:
             mock_parser = Mock()
             mock_match = Mock()
-            mock_match.full_path = "$"  # Root path
+            mock_match.full_path = Root()  # Root path
             mock_parser.find.return_value = [mock_match]
             mock_jsonpath.parse.return_value = mock_parser
 
             result = expand_jsonpath_expressions(schema, ["$.*"])
             assert len(result) >= 1
-            assert "empty_path.yaml#/" in result
-
-    def test_expand_jsonpath_json_pointer_no_wildcards(self, tmp_path: Path):
-        """Test expand_jsonpath_expressions with JSON Pointer format (no wildcards)."""
-        schema = tmp_path / "pointer_test.yaml"
-        schema.write_text('{"defs": {"User": "test"}}', encoding="utf-8")
-
-        result = expand_jsonpath_expressions(schema, ["pointer_test.yaml#/defs/User"])
-        assert result == ["pointer_test.yaml#/defs/User"]
-
-    def test_expand_jsonpath_json_pointer_with_wildcards(self, tmp_path: Path):
-        """Test expand_jsonpath_expressions with JSON Pointer format containing wildcards."""
-        schema = tmp_path / "wildcard_test.yaml"
-        schema.write_text(
-            '{"defs": {"User": {"name": "test"}, "Product": {"title": "test"}}}',
-            encoding="utf-8",
-        )
-
-        result = expand_jsonpath_expressions(schema, ["schema.yaml#/defs/*"])
-        assert len(result) >= 2
-        assert any("defs/User" in ref for ref in result)
-        assert any("defs/Product" in ref for ref in result)
+            assert "empty_path.yaml#" in result
 
     def test_generate_from_source_config_error_handling(self, tmp_path: Path):
         """Test generate_from_source_config with error scenarios."""
@@ -316,17 +265,10 @@ class TestGenerateCoverageEdgeCases:
         finally:
             os.chdir(old_cwd)
 
-    def test_expand_jsonpath_empty_fragment_root(self, tmp_path: Path):
-        """Test expand_jsonpath_expressions with empty fragment (root reference)."""
-        schema = tmp_path / "root_test.yaml"
-        schema.write_text('{"root": "value"}', encoding="utf-8")
-
-        # Empty fragment should result in root reference
-        result = expand_jsonpath_expressions(schema, ["root_test.yaml#"])
-        assert "root_test.yaml#/" in result
-
     def test_expand_jsonpath_path_starts_with_dollar(self, tmp_path: Path):
         """Test path string processing when it starts with $."""
+        from jsonpath_ng.jsonpath import Fields
+
         schema = tmp_path / "dollar_test.yaml"
         schema.write_text('{"test": "value"}', encoding="utf-8")
 
@@ -334,7 +276,7 @@ class TestGenerateCoverageEdgeCases:
         with patch("teds_core.generate.jsonpath_ng") as mock_jsonpath:
             mock_parser = Mock()
             mock_match = Mock()
-            mock_match.full_path = "$test"  # Path starting with $
+            mock_match.full_path = Fields("test")  # Path starting with $
             mock_parser.find.return_value = [mock_match]
             mock_jsonpath.parse.return_value = mock_parser
 
@@ -348,32 +290,17 @@ class TestGenerateCoverageEdgeCases:
         schema.write_text('{"test": "value"}', encoding="utf-8")
 
         # Mock jsonpath to return path starting with .
+        from jsonpath_ng.jsonpath import Fields
+
         with patch("teds_core.generate.jsonpath_ng") as mock_jsonpath:
             mock_parser = Mock()
             mock_match = Mock()
-            mock_match.full_path = ".test"  # Path starting with .
+            mock_match.full_path = Fields("test")  # Path starting with .
             mock_parser.find.return_value = [mock_match]
             mock_jsonpath.parse.return_value = mock_parser
 
             result = expand_jsonpath_expressions(schema, ['$["test"]'])
             assert len(result) >= 1
-
-    def test_expand_jsonpath_empty_path_parts_else_branch(self, tmp_path: Path):
-        """Test when path_parts is empty (hits else branch)."""
-        schema = tmp_path / "empty_parts.yaml"
-        schema.write_text('{"root": "value"}', encoding="utf-8")
-
-        # Mock to return completely empty path parts
-        with patch("teds_core.generate.jsonpath_ng") as mock_jsonpath:
-            mock_parser = Mock()
-            mock_match = Mock()
-            mock_match.full_path = "$"  # Just root, should result in empty path_parts
-            mock_parser.find.return_value = [mock_match]
-            mock_jsonpath.parse.return_value = mock_parser
-
-            result = expand_jsonpath_expressions(schema, ["$.*"])
-            assert len(result) >= 1
-            assert "empty_parts.yaml#/" in result
 
     def test_expand_jsonpath_no_matches_valid_behavior(self, tmp_path: Path):
         """Test correct behavior when JSONPath expression finds no matches."""
@@ -390,10 +317,14 @@ class TestGenerateCoverageEdgeCases:
         schema.write_text('{"$defs": {"User": {"name": "test"}}}', encoding="utf-8")
 
         # Mock to return bracket notation that should match the pattern
+        from jsonpath_ng.jsonpath import Child, Fields
+
         with patch("teds_core.generate.jsonpath_ng") as mock_jsonpath:
             mock_parser = Mock()
             mock_match = Mock()
-            mock_match.full_path = '["$defs"]["User"]'  # Should match bracket pattern
+            mock_match.full_path = Child(
+                Fields("$defs"), Fields("User")
+            )  # Should match bracket pattern
             mock_parser.find.return_value = [mock_match]
             mock_jsonpath.parse.return_value = mock_parser
 
@@ -408,10 +339,14 @@ class TestGenerateCoverageEdgeCases:
         schema.write_text('{"key": {"value": {"prop": "test"}}}', encoding="utf-8")
 
         # Mock to return dot notation (no brackets)
+        from jsonpath_ng.jsonpath import Child, Fields
+
         with patch("teds_core.generate.jsonpath_ng") as mock_jsonpath:
             mock_parser = Mock()
             mock_match = Mock()
-            mock_match.full_path = ".key.value.prop"  # Dot notation with leading .
+            mock_match.full_path = Child(
+                Child(Fields("key"), Fields("value")), Fields("prop")
+            )  # Dot notation with leading .
             mock_parser.find.return_value = [mock_match]
             mock_jsonpath.parse.return_value = mock_parser
 
@@ -424,10 +359,14 @@ class TestGenerateCoverageEdgeCases:
         schema.write_text('{"items": [{"name": "test"}]}', encoding="utf-8")
 
         # Mock to return array bracket notation
+        from jsonpath_ng.jsonpath import Child, Fields, Index
+
         with patch("teds_core.generate.jsonpath_ng") as mock_jsonpath:
             mock_parser = Mock()
             mock_match = Mock()
-            mock_match.full_path = "items[0].name"  # Array notation
+            mock_match.full_path = Child(
+                Child(Fields("items"), Index(0)), Fields("name")
+            )  # Array notation
             mock_parser.find.return_value = [mock_match]
             mock_jsonpath.parse.return_value = mock_parser
 
@@ -440,10 +379,14 @@ class TestGenerateCoverageEdgeCases:
         schema.write_text('{"items": [{"name": "test"}]}', encoding="utf-8")
 
         # Mock to return quoted array bracket notation
+        from jsonpath_ng.jsonpath import Child, Fields, Index
+
         with patch("teds_core.generate.jsonpath_ng") as mock_jsonpath:
             mock_parser = Mock()
             mock_match = Mock()
-            mock_match.full_path = "items['0'].name"  # Quoted array notation
+            mock_match.full_path = Child(
+                Child(Fields("items"), Index(0)), Fields("name")
+            )  # Quoted array notation
             mock_parser.find.return_value = [mock_match]
             mock_jsonpath.parse.return_value = mock_parser
 

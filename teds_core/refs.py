@@ -81,6 +81,23 @@ def split_json_pointer(fragment: str) -> list[str]:
     return [p.replace("~1", "/").replace("~0", "~") for p in parts]
 
 
+def escape_json_pointer_part(part: str) -> str:
+    """Escape a single JSON Pointer part according to RFC 6901.
+
+    CRITICAL: Must be done in this exact order:
+    1. ~ becomes ~0 (first!)
+    2. / becomes ~1 (second!)
+
+    Args:
+        part: A single JSON Pointer token to escape
+
+    Returns:
+        RFC 6901 compliant escaped token
+    """
+    # MUST escape ~ first, then /, as per RFC 6901
+    return part.replace("~", "~0").replace("/", "~1")
+
+
 def jq_segment(seg: str) -> str:
     return f".{seg}" if re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", seg) else f'.["{seg}"]'
 

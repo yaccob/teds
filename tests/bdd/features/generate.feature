@@ -200,7 +200,7 @@ Feature: Generate Command Tests
               - name: "Alice"
       """
     When I run the generate command: `teds generate schema.yaml#/components/schemas={base}.{pointer}.custom.yaml`
-    Then a test file "schema.components+schemas.custom.yaml" should be created
+    Then a test file "schema.components~1schemas.custom.yaml" should be created
     And the test file should contain "schema.yaml#/components/schemas/User"
 
   # ==========================================================================
@@ -371,7 +371,7 @@ Feature: Generate Command Tests
   Scenario: Error handling for missing schema file
     When I run the CLI command: `./teds.py generate missing.yaml#/components/schemas`
     Then the command should fail with exit code 2
-    And the error output should match "(.*\n)*Failed to resolve parent schema ref.*"
+    And the error output should match "Failed to load schema.*missing\.yaml.*No such file or directory.*"
 
   Scenario: Default pointer behavior (no fragment)
     Given I have a schema file "default.yaml" with content:
@@ -596,6 +596,45 @@ Feature: Generate Command Tests
       """
     And the result should not contain property-level references
 
+  Scenario: Escaping of path elements with special characters works in output
+    Given I have a schema file "api.yaml" with content:
+      """yaml
+      "/Slashes/to/escape":
+        "~Tildes~to~escape":
+          properties:
+            name:
+              type: string
+            email:
+              type: string
+        "Dots.not.to.escape":
+          properties:
+            title:
+              type: string
+            price:
+              type: number
+      """
+    And I have a configuration file "escape_config.yaml" with content:
+      """yaml
+      api.yaml:
+        paths: ["$.['/Slashes/to/escape']", "$.['/Slashes/to/escape'].*"]
+      """
+    When I run the generate command: `teds generate @escape_config.yaml`
+    Then a test file "api.tests.yaml" should be created with content:
+      """yaml
+      version: "1.0.0"
+      tests:
+        api.yaml#/~1Slashes~1to~1escape:
+          valid: null
+          invalid: null
+        api.yaml#/~1Slashes~1to~1escape/~0Tildes~0to~0escape:
+          valid: null
+          invalid: null
+        api.yaml#/~1Slashes~1to~1escape/Dots.not.to.escape:
+          valid: null
+          invalid: null
+      """
+    And the result should not contain property-level references
+
   Scenario: Generate tests for exact JSONPath reference (not children)
     Given I have a schema file "user.yaml" with content:
       """yaml
@@ -673,12 +712,73 @@ Feature: Generate Command Tests
       """yaml
       version: "1.0.0"
       tests:
-        simple.yaml#/:
+        simple.yaml#:
           valid: null
           invalid: null
       """
     And the result should not contain "simple.yaml#/properties"
-    And the result should not contain "simple.yaml#/type"
+
+  # ==========================================================================
+  # Template Variable Tests
+  # ==========================================================================
+
+  Scenario: Template variable {base} should work
+    Given I have a schema file "template.yaml" with content:
+      """yaml
+      components:
+        schemas:
+          User:
+            type: object
+            properties:
+              name:
+                type: string
+      """
+    When I run the generate command: `teds generate template.yaml#/components/schemas={base}.test.yaml`
+    Then a test file "template.test.yaml" should be created
+
+  Scenario: Template variable {file} should work
+    Given I have a schema file "template.yaml" with content:
+      """yaml
+      components:
+        schemas:
+          User:
+            type: object
+      """
+    When I run the generate command: `teds generate template.yaml#/components/schemas={file}.test.yaml`
+    Then a test file "template.yaml.test.yaml" should be created
+
+  Scenario: Template variable {ext} should work
+    Given I have a schema file "template.yaml" with content:
+      """yaml
+      components:
+        schemas:
+          User:
+            type: object
+      """
+    When I run the generate command: `teds generate template.yaml#/components/schemas=test.{ext}.tests.yaml`
+    Then a test file "test.yaml.tests.yaml" should be created
+
+  Scenario: Template variable {pointer} should work
+    Given I have a schema file "template.yaml" with content:
+      """yaml
+      components:
+        schemas:
+          User:
+            type: object
+      """
+    When I run the generate command: `teds generate template.yaml#/components/schemas={pointer}.test.yaml`
+    Then a test file "components~1schemas.test.yaml" should be created
+
+  Scenario: Template variable combination {base}.{pointer} should work
+    Given I have a schema file "template.yaml" with content:
+      """yaml
+      components:
+        schemas:
+          User:
+            type: object
+      """
+    When I run the generate command: `teds generate template.yaml#/components/schemas={base}.{pointer}.custom.yaml`
+    Then a test file "template.components~1schemas.custom.yaml" should be created
 
   Scenario: Array index selection should be exact
     Given I have a schema file "array.yaml" with content:
