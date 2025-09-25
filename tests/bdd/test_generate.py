@@ -1,6 +1,7 @@
 """BDD tests for TeDS generate command - reorganized from original working files."""
 
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -357,76 +358,77 @@ def command_should_succeed(cli_result):
     ), f"Command failed with exit code {cli_result['returncode']}. Stderr: {cli_result['stderr']}"
 
 
-@then(parsers.parse('the error output should contain "{expected_text}"'))
+@then(parsers.parse('the error output should match "{expected_text}"'))
 def verify_error_output(cli_result, expected_text):
     """Verify that the error output contains the expected text."""
     stderr = cli_result["stderr"] or ""
-    assert (
-        expected_text in stderr
+    assert re.fullmatch(
+        expected_text, stderr, re.DOTALL
     ), f"Expected '{expected_text}' in stderr, but got: {stderr}"
 
 
-@then(
-    parsers.parse('a test file "{filename}" should be created with content:'),
-    target_fixture="verified_test_file",
-)
-def verify_test_file_created(temp_workspace, test_files, filename):
+@then(parsers.parse('a test file "{filename}" should be created with content:'))
+def verify_test_file_created_with_content(
+    temp_workspace, test_files, filename, docstring
+):
     """Verify that a test file was created with expected content."""
+    expected_content = docstring
+    test_path = temp_workspace / filename
 
-    def _verify_with_content(expected_content):
-        test_path = temp_workspace / filename
-        assert test_path.exists(), f"Test file {filename} was not created"
+    # Always check file existence first
+    if not test_path.exists():
+        available_files = [f.name for f in temp_workspace.iterdir()]
+        raise AssertionError(
+            f"Test file {filename} was not created!\n"
+            f"Expected file: {test_path}\n"
+            f"Available files: {available_files}"
+        )
 
-        # Read actual content
-        actual_content = test_path.read_text(encoding="utf-8")
+    # Read actual content
+    actual_content = test_path.read_text(encoding="utf-8")
 
-        # Remove yaml language marker if present
-        if expected_content.strip().startswith("yaml"):
-            expected_content = "\n".join(expected_content.strip().split("\n")[1:])
-
-        # Parse both as YAML for comparison
+    # Parse both as YAML for comparison (pytest-bdd already removes language markers)
+    try:
         actual_yaml = yaml_loader.load(actual_content)
-        expected_yaml = yaml_loader.load(expected_content.strip())
+        expected_yaml = yaml_loader.load(expected_content)
+    except Exception as e:
+        raise AssertionError(
+            f"YAML parsing error: {e}\n"
+            f"Expected content:\n{expected_content}\n"
+            f"Actual content:\n{actual_content}"
+        ) from e
 
-        assert (
-            actual_yaml == expected_yaml
-        ), f"Test file content mismatch.\nExpected:\n{expected_content}\nActual:\n{actual_content}"
+    if actual_yaml != expected_yaml:
+        raise AssertionError(
+            f"Test file content mismatch!\n"
+            f"Expected:\n{expected_content}\n"
+            f"Actual:\n{actual_content}"
+        )
 
-        # Store for further verification
-        test_files[filename] = test_path
-        return test_path
-
-    return _verify_with_content
+    # Store for further verification
+    test_files[filename] = test_path
 
 
 @then(parsers.parse('the test file "{filename}" should be updated with content:'))
-def verify_test_file_updated(temp_workspace, test_files, filename):
+def verify_test_file_updated(temp_workspace, test_files, filename, docstring):
     """Verify that a test file was updated with expected content."""
+    expected_content = docstring
+    test_path = temp_workspace / filename
+    assert test_path.exists(), f"Test file {filename} does not exist"
 
-    def _verify_updated_content(expected_content):
-        test_path = temp_workspace / filename
-        assert test_path.exists(), f"Test file {filename} does not exist"
+    # Read actual content
+    actual_content = test_path.read_text(encoding="utf-8")
 
-        # Read actual content
-        actual_content = test_path.read_text(encoding="utf-8")
+    # Parse both as YAML for comparison (pytest-bdd already removes language markers)
+    actual_yaml = yaml_loader.load(actual_content)
+    expected_yaml = yaml_loader.load(expected_content)
 
-        # Remove yaml language marker if present
-        if expected_content.strip().startswith("yaml"):
-            expected_content = "\n".join(expected_content.strip().split("\n")[1:])
+    assert (
+        actual_yaml == expected_yaml
+    ), f"Test file content mismatch.\nExpected:\n{expected_content}\nActual:\n{actual_content}"
 
-        # Parse both as YAML for comparison
-        actual_yaml = yaml_loader.load(actual_content)
-        expected_yaml = yaml_loader.load(expected_content.strip())
-
-        assert (
-            actual_yaml == expected_yaml
-        ), f"Test file content mismatch.\nExpected:\n{expected_content}\nActual:\n{actual_content}"
-
-        # Store for further verification
-        test_files[filename] = test_path
-        return test_path
-
-    return _verify_updated_content
+    # Store for further verification
+    test_files[filename] = test_path
 
 
 @then(parsers.parse('the result should not contain "{unwanted_ref}"'))

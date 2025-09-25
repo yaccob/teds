@@ -1,6 +1,7 @@
 """BDD tests for TeDS reports and CLI functionality - reorganized from original working files."""
 
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -96,10 +97,23 @@ def stored_files():
     return {}
 
 
+@pytest.fixture
+def cli_result():
+    """Store CLI command results."""
+    return {"returncode": None, "stdout": None, "stderr": None}
+
+
 @given("I have a working directory")
 def working_directory(temp_workspace):
     """Ensure we have a working directory."""
     assert temp_workspace.exists()
+
+
+@given(parsers.parse('I have a subdirectory "{dirname}"'))
+def create_subdirectory(temp_workspace, dirname):
+    """Create a subdirectory."""
+    subdir = temp_workspace / dirname
+    subdir.mkdir(parents=True, exist_ok=True)
 
 
 @given("I have a temporary workspace")
@@ -420,12 +434,12 @@ def command_should_fail():
     ), "Command should have failed but succeeded"
 
 
-@then(parsers.parse('the error output should contain "{expected_text}"'))
+@then(parsers.parse('the error output should match "{expected_text}"'))
 def verify_error_output(expected_text):
     """Verify that the error output contains the expected text."""
     stderr = getattr(pytest, "current_stderr", "")
-    assert (
-        expected_text in stderr
+    assert re.fullmatch(
+        expected_text, stderr, re.DOTALL
     ), f"Expected '{expected_text}' in stderr, but got: {stderr}"
 
 

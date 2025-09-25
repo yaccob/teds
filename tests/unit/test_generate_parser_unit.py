@@ -32,15 +32,59 @@ class TestGenerateConfigurationParser:
         assert isinstance(result["schema.yaml"]["paths"], list)
 
     def test_parse_yaml_string_to_json_pointer(self):
-        """Test parsing YAML string that evaluates to JSON Pointer string."""
+        """Test parsing YAML string that evaluates to JSON Pointer - now normalized to dict."""
         from teds_core.generate import parse_generate_config
 
         # Simple JSON Pointer string
         json_pointer_string = "schema.yaml#/components/schemas/User"
 
         result = parse_generate_config(json_pointer_string)
-        assert isinstance(result, str)
-        assert result == json_pointer_string
+        assert isinstance(result, dict)
+        expected = {
+            "schema.yaml": {
+                "paths": ['$["components"]["schemas"]["User"].*'],
+                "target": None,
+            }
+        }
+        assert result == expected
+
+    def test_parse_json_pointer_root_reference(self):
+        """Test JSON Pointer root reference normalization."""
+        from teds_core.generate import parse_generate_config
+
+        result = parse_generate_config("schema.yaml#/")
+        expected = {"schema.yaml": {"paths": ["$.*"], "target": None}}
+        assert result == expected
+
+    def test_parse_json_pointer_nested_path(self):
+        """Test JSON Pointer with nested path normalization."""
+        from teds_core.generate import parse_generate_config
+
+        result = parse_generate_config("api.yaml#/components/schemas/User/properties")
+        expected = {
+            "api.yaml": {
+                "paths": ['$["components"]["schemas"]["User"]["properties"].*'],
+                "target": None,
+            }
+        }
+        assert result == expected
+
+    def test_parse_json_pointer_missing_file_path(self):
+        """Test JSON Pointer without file path raises error."""
+        from teds_core.errors import TedsError
+        from teds_core.generate import parse_generate_config
+
+        # Use quotes to prevent YAML comment parsing
+        with pytest.raises(TedsError, match="Missing schema file path"):
+            parse_generate_config('"#/components/schemas"')
+
+    def test_parse_string_without_fragment_is_valid(self):
+        """Test string without # is valid per RFC 3986 (references whole document)."""
+        from teds_core.generate import parse_generate_config
+
+        result = parse_generate_config("just-a-string")
+        expected = {"just-a-string": {"paths": ["$.*"], "target": None}}
+        assert result == expected
 
     def test_parse_file_reference_syntax(self):
         """Test parsing @filename syntax for configuration files."""
@@ -106,22 +150,6 @@ class TestGenerateConfigurationParser:
         assert isinstance(result, dict)
         assert "user_schema.yaml" in result
         assert result["user_schema.yaml"]["target"] == "{base}.custom.tests.yaml"
-
-    def test_jsonpath_expression_validation(self):
-        """Test JsonPath expression validation."""
-        from teds_core.errors import TedsError
-        from teds_core.generate import validate_jsonpath_expression
-
-        # Valid expressions should not raise
-        validate_jsonpath_expression("schema.yaml#/$defs/User")
-        validate_jsonpath_expression("schema.yaml#/$defs/*/properties/*")
-
-        # Invalid expressions should raise TedsError
-        with pytest.raises(TedsError, match="JsonPath expression must start with"):
-            validate_jsonpath_expression("schema.yaml")  # Missing $ prefix
-
-        with pytest.raises(TedsError, match="Missing schema file path"):
-            validate_jsonpath_expression("#/$defs/User")  # Missing file path
 
     def test_conflict_detection_logic(self):
         """Test conflict detection between multiple sources."""

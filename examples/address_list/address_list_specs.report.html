@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeDS Default Validation Report</title>
+    <style>
+        /* AsciiDoc-inspired styling */
+        body {
+            font-family: "Noto Serif", "DejaVu Serif", serif;
+            line-height: 1.6;
+            color: #222;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: "Open Sans", "DejaVu Sans", sans-serif;
+            font-weight: 600;
+            line-height: 1.2;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            color: #ba3925;
+        }
+
+        h1 { font-size: 2.2em; border-bottom: 3px solid #ba3925; padding-bottom: 0.3em; }
+        h2 { font-size: 1.8em; border-bottom: 2px solid #ddd; padding-bottom: 0.2em; }
+        h3 { font-size: 1.4em; }
+        h4 { font-size: 1.1em; }
+
+        .lead {
+            font-size: 1.2em;
+            color: #555;
+            margin: 1em 0;
+            font-style: italic;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1em 0;
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #f5f5f5;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .status-success { color: #28a745; font-weight: bold; }
+        .status-warning { color: #ffc107; font-weight: bold; }
+        .status-error { color: #dc3545; font-weight: bold; }
+        .status-unknown { color: #6c757d; font-weight: bold; }
+
+        .admonition {
+            padding: 1em;
+            margin: 1em 0;
+            border-left: 4px solid;
+            background: #f8f9fa;
+        }
+
+        .admonition.warning {
+            border-left-color: #ffc107;
+            background: #fff3cd;
+        }
+
+        .admonition.caution {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .admonition.note {
+            border-left-color: #17a2b8;
+            background: #d1ecf1;
+        }
+
+        .code-block {
+            background: #f8f8f8;
+            border: 1px solid #e1e1e8;
+            border-radius: 4px;
+            padding: 0.75em;
+            font-family: "Liberation Mono", Consolas, monospace;
+            font-size: 0.9em;
+            line-height: 1.4;
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        code {
+            font-family: "Liberation Mono", Consolas, monospace;
+            background: #f8f8f8;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+
+        .anchor {
+            color: #ba3925;
+            text-decoration: none;
+        }
+
+        .footer {
+            margin-top: 3em;
+            padding-top: 1em;
+            border-top: 1px solid #ddd;
+            color: #777;
+            font-style: italic;
+            text-align: center;
+        }
+
+        .toc {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 1em;
+            margin: 1em 0;
+            border-radius: 4px;
+        }
+
+        .toc h3 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .toc ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .toc li {
+            margin: 0.3em 0;
+        }
+
+        .toc a {
+            color: #ba3925;
+            text-decoration: none;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="teds-default-validation-report">TeDS Default Validation Report</h1>
+
+    <div class="toc">
+        <h3>Table of Contents</h3>
+        <ul>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#executive-summary">Executive Summary</a></li>
+            <li><a href="#detailed-results">Detailed Results</a></li>
+            <li><a href="#appendix">Appendix</a></li>
+        </ul>
+    </div>
+
+    <h2 id="overview">Overview</h2>
+
+    <table>
+        <tbody>
+            <tr><th>Tool Version</th><td>teds 0.1.dev13+g9e84ef6db.d20250920</td></tr>
+            <tr><th>Specification Support</th><td>1.0-1.0</td></tr>
+            <tr><th>Recommended Version</th><td>1.0</td></tr>
+            <tr><th>Generated</th><td>2025-09-25T00:30:29.831970+02:00</td></tr>
+            <tr><th>Report File</th><td>examples/address_list/address_list_specs.yaml</td></tr>
+        </tbody>
+    </table>
+
+    
+    
+    
+    
+    
+
+    <h2 id="executive-summary">Executive Summary</h2>
+
+    
+    
+    
+    
+    
+
+    
+    
+      
+      
+      
+
+      
+        
+      
+      
+    
+
+    <p class="lead">
+        This report analyzes <strong>1</strong> schema(s) with a total of <strong>1</strong> test cases.
+    </p>
+
+    <h3>Results Summary</h3>
+
+    <table>
+        <thead>
+            <tr><th>Status</th><th>Count</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+            
+            
+            
+            <tr><td class="status-error">✗ ERROR</td><td>1</td><td>Test cases failed validation</td></tr>
+            
+            
+            <tr><td><strong>Total</strong></td><td><strong>1</strong></td><td>All test cases processed</td></tr>
+        </tbody>
+    </table>
+
+    
+    <h3>Schema Coverage Warnings</h3>
+
+    <div class="admonition warning">
+        <p><strong>Warning:</strong> The following schemas have incomplete test coverage:</p>
+        <ul>
+            
+            <li><a href="#address_list_yaml__$defs_AddressList" class="anchor">address_list.yaml#/$defs/AddressList has no valid test cases</a></li>
+            
+        </ul>
+        <p>Consider adding both valid and invalid test cases for comprehensive schema validation.</p>
+    </div>
+    
+
+    
+
+    <h2 id="detailed-results">Detailed Results</h2>
+
+    
+    
+    
+    <h3 id="address_list_yaml__$defs_AddressList">address_list.yaml#/$defs/AddressList</h3>
+
+    
+    
+    
+
+    <h4>Schema Summary</h4>
+
+    <table>
+        <tbody>
+            <tr><th>Valid Cases</th><td>0</td></tr>
+            <tr><th>Invalid Cases</th><td>1</td></tr>
+            <tr><th>Total Cases</th><td>1</td></tr>
+        </tbody>
+    </table>
+
+    
+
+    
+    <h4>Invalid Test Cases</h4>
+
+    <table>
+        <thead>
+            <tr><th>Test Case</th><th>Payload</th><th>Status</th><th>Message</th></tr>
+        </thead>
+        <tbody>
+            
+            <tr>
+                <td><code>mixup</code></td>
+                <td><div class="code-block">- one_line_address: Meine-Strasse 1, 76136 Anytown
+  street_and_housenumber: Meine-Strasse 1
+  zip_and_city: 76136 Anytown</div></td>
+                <td>
+                    
+                    <span class="status-error">✗ ERROR</span>
+                    
+                </td>
+                <td>UNEXPECTEDLY VALID</td>
+            </tr>
+            
+        </tbody>
+    </table>
+    
+
+    
+
+    
+    
+
+    <h2 id="appendix">Appendix</h2>
+
+    <h3>Tool Information</h3>
+
+    <table>
+        <tbody>
+            <tr><th>TeDS Version</th><td>0.1.dev13+g9e84ef6db.d20250920</td></tr>
+            <tr><th>Supported Spec Range</th><td>1.0-1.0</td></tr>
+            <tr><th>Recommended Spec Version</th><td>1.0</td></tr>
+            <tr><th>Report Generation Time</th><td>2025-09-25T00:30:29.831970+02:00</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Report Scope</h3>
+
+    <p>This default report includes:</p>
+
+    <ul>
+        <li><strong>Executive Summary</strong> - High-level overview of validation results</li>
+        <li><strong>Schema Coverage Analysis</strong> - Warnings for incomplete test coverage</li>
+        <li><strong>Detailed Results</strong> - Complete breakdown of all test cases by schema</li>
+        <li><strong>Color-coded Status Indicators</strong> - Visual distinction between SUCCESS, WARNING, and ERROR states</li>
+        <li><strong>Tabular Format</strong> - Structured presentation for easy analysis</li>
+    </ul>
+
+    <p>For questions about this report or TeDS functionality, please refer to the TeDS documentation.</p>
+
+    <div class="footer">
+        <p>This report was generated automatically by TeDS (Test-Driven Schema Development Tool).</p>
+    </div>
+
+</body>
+</html>
