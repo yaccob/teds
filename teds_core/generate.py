@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -11,7 +10,7 @@ from ruamel.yaml.comments import CommentedMap
 
 from .errors import TedsError
 from .refs import collect_examples, join_fragment, resolve_schema_node
-from .utils import to_relative_path
+from .utils import expand_target_template, json_path_to_json_pointer
 from .version import RECOMMENDED_TESTSPEC_VERSION
 from .yamlio import yaml_dumper, yaml_loader
 
@@ -21,6 +20,20 @@ def _ensure_group(group: Any) -> dict[str, Any]:
     group.setdefault("valid", None)
     group.setdefault("invalid", None)
     return group
+
+
+def _create_empty_test_file(testspec_path: Path) -> None:
+    """Create an empty test file with basic structure for visibility in batch mode."""
+    doc = {"version": RECOMMENDED_TESTSPEC_VERSION, "tests": {}}
+
+    # Write the empty test file
+    try:
+        with testspec_path.open("w", encoding="utf-8") as f:
+            yaml_loader.dump(doc, f)
+    except Exception as e:
+        raise TedsError(
+            f"Failed to create empty testspec: {testspec_path}\n  error: {type(e).__name__}: {e}"
+        ) from e
 
 
 def generate_exact_node(node_ref: str, testspec_path: Path) -> None:
@@ -225,54 +238,57 @@ def parse_generate_config(config_str: str) -> dict[str, dict[str, Any]] | str:
 
         return normalized_config
     elif isinstance(parsed, str):
-        # Backward compatibility: JSON Pointer string
-        return parsed
+        # Check for REF[=TARGET] syntax first
+        if "=" in parsed:
+            ref_part, target_part = parsed.split("=", 1)
+        else:
+            ref_part = parsed
+            target_part = None
+
+        # JSON Pointer string - convert to normalized JSON-Path configuration
+        if "#" in ref_part:
+            file_part, fragment = ref_part.split("#", 1)
+            if not file_part:
+                raise TedsError(f"Missing schema file path: {ref_part}")
+
+            # Convert JSON Pointer to JSON-Path with mandatory wildcard for children
+            fragment = fragment.lstrip("/")
+            if fragment:
+                # Convert /path/to/property to $["path"]["to"]["property"].*
+                parts = fragment.split("/")
+                quoted_parts = [f'["{part}"]' for part in parts]
+                jsonpath = "$" + "".join(quoted_parts) + ".*"
+            else:
+                # Root reference becomes $.*
+                jsonpath = "$.*"
+
+            # Expand template variables in target if present
+            expanded_target = None
+            if target_part:
+                expanded_target = expand_target_template(
+                    target_part, file_part, fragment
+                )
+
+            # Return normalized configuration with expanded target
+            return {file_part: {"paths": [jsonpath], "target": expanded_target}}
+        else:
+            # String without fragment - RFC 3986 compliant: references whole document
+            # Both "schema.yaml" and "schema.yaml#" reference the entire document
+            jsonpath = "$.*"
+
+            # Expand template variables in target if present
+            expanded_target = None
+            if target_part:
+                expanded_target = expand_target_template(target_part, ref_part, "")
+
+            return {ref_part: {"paths": [jsonpath], "target": expanded_target}}
     else:
         raise TedsError(
             f"Configuration must be object or string, got {type(parsed).__name__}"
         )
 
 
-def validate_jsonpath_expression(expr: str) -> None:
-    """Validate a JsonPath expression for basic syntax."""
-    # Handle backward compatibility: JSON Pointer format (with #)
-    if "#" in expr:
-        file_part, fragment = expr.split("#", 1)
-        if not file_part:
-            raise TedsError(f"Missing schema file path: {expr}")
-
-        # Convert to JsonPath for validation
-        if fragment.startswith("/"):
-            fragment = fragment[1:]  # Remove leading slash
-        if not fragment:
-            return  # Root reference is valid
-
-        # Check for basic syntax errors in JSON Pointer format
-        invalid_patterns = [
-            r"\.\./",  # Parent navigation (not supported)
-        ]
-        for pattern in invalid_patterns:
-            if re.search(pattern, fragment):
-                raise TedsError(f"Invalid JSON Pointer expression: {expr}")
-        return
-
-    # Pure JsonPath expression validation
-    if not expr:
-        raise TedsError("Empty JsonPath expression")
-
-    # Basic JsonPath validation - must start with $ for root
-    if not expr.startswith("$"):
-        raise TedsError(f"JsonPath expression must start with '$': {expr}")
-
-    # Check for basic syntax errors
-    invalid_patterns = [
-        r"\[([^]]+$)",  # Unclosed bracket
-        r"\.\./",  # Parent navigation (not supported)
-    ]
-
-    for pattern in invalid_patterns:
-        if re.search(pattern, expr):
-            raise TedsError(f"Invalid JsonPath expression: {expr}")
+# validate_jsonpath_expression() function removed - redundant to jsonpath-ng validation
 
 
 def _find_schema_file(base_dir: Path, filename: str) -> Path | None:
@@ -297,8 +313,8 @@ def _find_schema_file(base_dir: Path, filename: str) -> Path | None:
 def expand_jsonpath_expressions(source_file: Path, expressions: list[str]) -> list[str]:
     """Expand JsonPath expressions to concrete JSON Pointer references.
 
-    This function follows the JSONPath specification exactly - no interpretation,
-    no "intelligent" fallback logic. jsonpath-ng does the work correctly.
+    This function processes only JSON-Path expressions. JSON-Pointer conversion
+    should happen at the CLI boundary via parse_generate_config().
     """
     expanded = []
 
@@ -308,88 +324,23 @@ def expand_jsonpath_expressions(source_file: Path, expressions: list[str]) -> li
     except Exception as e:
         raise TedsError(f"Failed to load schema {source_file}: {e}") from e
 
-    for expr in expressions:
-        validate_jsonpath_expression(expr)
-
-        # Handle backward compatibility: JSON Pointer format
-        if "#" in expr:
-            file_part, fragment = expr.split("#", 1)
-            if "*" not in fragment:
-                # No wildcards - append wildcard for backward compatibility (children expansion)
-                expr = f"{file_part}#{fragment}/*" if fragment else f"{file_part}#/*"
-
-            # Convert JSON Pointer to JsonPath format for expansion
-            jsonpath_expr = fragment.lstrip("/")
-            if jsonpath_expr:
-                # Convert /path/to/property to $["path"]["to"]["property"]
-                parts = jsonpath_expr.split("/")
-                quoted_parts = [f'["{part}"]' for part in parts]
-                jsonpath_expr = "$" + "".join(quoted_parts)
-            else:
-                jsonpath_expr = "$"
-        else:
-            # Pure JsonPath expression - let jsonpath-ng handle it exactly
-            jsonpath_expr = expr
-
+    for jsonpath_expr in expressions:
         try:
-            # Parse and find matches - jsonpath-ng knows what it's doing
+            # Parse and find matches - jsonpath-ng handles all validation
             jsonpath_parser = jsonpath_ng.parse(jsonpath_expr)
             matches = jsonpath_parser.find(schema_doc)
 
             for match in matches:
-                # Convert path back to JSON Pointer
-                path_parts = _convert_jsonpath_match_to_json_pointer_parts(
-                    match.full_path
-                )
-
-                if path_parts:
-                    json_pointer = "/" + "/".join(path_parts)
-                    expanded.append(f"{source_file.name}#{json_pointer}")
-                else:
-                    expanded.append(f"{source_file.name}#/")
+                # Use the clean utils function for JSONPath -> JSON Pointer conversion
+                json_pointer = json_path_to_json_pointer(match.full_path)
+                expanded.append(f"{source_file.name}#{json_pointer}")
 
         except Exception as e:
             raise TedsError(
-                f"Failed to expand JsonPath expression '{expr}': {e}"
+                f"Failed to expand JsonPath expression '{jsonpath_expr}': {e}"
             ) from e
 
     return expanded
-
-
-def _convert_jsonpath_match_to_json_pointer_parts(full_path: str) -> list[str]:
-    """Convert jsonpath-ng full_path to JSON Pointer parts.
-
-    jsonpath-ng returns paths in formats like:
-    - '$defs'.User -> ['$defs', 'User']
-    - items.[0] -> ['items', '0']  (convert [0] to 0)
-    - key.nested.prop -> ['key', 'nested', 'prop']
-    """
-    path_str = str(full_path)
-    if path_str.startswith("$"):
-        path_str = path_str[1:]  # Remove $
-
-    if not path_str:
-        return []
-
-    path_parts = []
-
-    # Handle dot notation parsing
-    if path_str.startswith("."):
-        path_str = path_str[1:]  # Remove leading .
-
-    for part in path_str.split("."):
-        # Handle quoted parts like '$defs' -> $defs
-        if part.startswith("'") and part.endswith("'"):
-            part = part[1:-1]
-        # Convert array bracket notation [0] -> 0
-        elif part.startswith("[") and part.endswith("]"):
-            # Remove brackets and quotes if present
-            part = part[1:-1]
-            if part.startswith("'") and part.endswith("'"):
-                part = part[1:-1]
-        path_parts.append(part)
-
-    return path_parts
 
 
 def detect_conflicts(expanded_refs: list[str]) -> list[tuple[str, list[int]]]:
@@ -431,7 +382,7 @@ def generate_from_source_config(
 
         # Determine target file
         if source_config["target"]:
-            # Explicit target: relative to cwd (standard CLI behavior)
+            # Explicit target: relative to cwd (only {base} template supported for YAML configs)
             target_name = source_config["target"].replace("{base}", source_file.stem)
             target_path = base_dir / target_name
         else:
@@ -460,10 +411,23 @@ def generate_from_source_config(
                 unique_refs.append(ref)
 
         # Generate tests for each unique reference (exact nodes only, no children expansion)
-        if unique_refs:  # Only print if we're actually generating something
-            print(f"Generating {to_relative_path(target_path)}", file=sys.stderr)
-        for ref in unique_refs:
-            try:
-                generate_exact_node(ref, target_path)
-            except Exception as e:
-                print(f"Warning: Failed to generate from '{ref}': {e}", file=sys.stderr)
+        try:
+            display_path = str(target_path.relative_to(Path.cwd()))
+        except ValueError:
+            # Fall back to absolute path if relative conversion fails (e.g., symlinks)
+            display_path = str(target_path)
+        print(f"Generating {display_path}", file=sys.stderr)
+
+        if unique_refs:
+            # Generate for each found reference
+            for ref in unique_refs:
+                try:
+                    generate_exact_node(ref, target_path)
+                except Exception as e:
+                    print(
+                        f"Warning: Failed to generate from '{ref}': {e}",
+                        file=sys.stderr,
+                    )
+        else:
+            # No references found - create empty test file for visibility and batch-mode feedback
+            _create_empty_test_file(target_path)

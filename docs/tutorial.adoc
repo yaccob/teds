@@ -309,13 +309,13 @@ echo 'api_spec.yaml: ["$.components.schemas.*"]' > config.yaml
 teds generate @config.yaml
 ----
 
-This creates `api_spec.components+schemas.tests.yaml` with test cases derived from the `examples` in each schema found at the specified location.
+This creates `api_spec.components~1schemas.tests.yaml` with test cases derived from the `examples` in each schema found at the specified location.
 
 === Inspect Generated Tests
 
 [source,bash]
 ----
-cat api_spec.components+schemas.tests.yaml
+cat api_spec.components~1schemas.tests.yaml
 ----
 
 Notice:
@@ -688,37 +688,36 @@ Control where generated test files are created using template variables:
 [source,bash]
 ----
 # Available template variables (JSON Pointer only - not JSON Path)
-teds generate schema.yaml#/components/schemas --target-template "{base}.{pointer}.custom.yaml"
+teds generate schema.yaml#/components/schemas={base}.{pointer}.custom.yaml
 
 # Variables:
 # {file}     - schema.yaml
 # {base}     - schema
 # {ext}      - yaml
 # {dir}      - directory path
-# {pointer}  - components+schemas (sanitized)
-# {index}    - 1, 2, 3... (for multiple targets)
+# {pointer}  - components~1schemas (RFC 6901 escaped)
 ----
 
-**Important**: Template variables only work with JSON Pointer syntax (`#/path`), not with JSON Path configuration objects.
+**Important**: All template variables work with JSON Pointer syntax (`REF=TARGET` format). YAML configuration objects only support the `{base}` template variable.
 
-==== Pointer Sanitization with Plus Signs
+==== JSON Pointer RFC 6901 Escaping
 
-The `{pointer}` variable automatically converts JSON Pointer slashes to plus signs for safe filenames:
+The `{pointer}` variable automatically applies RFC 6901 escaping for safe filenames:
 
 [source,bash]
 ----
 # JSON Pointer: #/components/schemas
-# Sanitized:    components+schemas
+# RFC 6901 escaped: components~1schemas
 teds generate api.yaml#/components/schemas
-# Creates: api.components+schemas.tests.yaml
+# Creates: api.components~1schemas.tests.yaml
 
 # JSON Pointer: #/$defs/Address
-# Sanitized:    $defs+Address
+# RFC 6901 escaped: $defs~1Address
 teds generate schema.yaml#/$defs/Address
-# Creates: schema.$defs+Address.tests.yaml
+# Creates: schema.$defs~1Address.tests.yaml
 ----
 
-**Why sanitization?** Slashes (`/`) are directory separators in file systems, so `components/schemas/User` would create subdirectories. The plus sign (`+`) replacement ensures the entire pointer becomes part of the filename, keeping all generated files in the same directory while preserving the hierarchical information from the JSON Pointer.
+**Why RFC 6901 escaping?** Slashes (`/`) are directory separators in file systems, so `components/schemas/User` would create subdirectories. RFC 6901 escaping (`~1` for `/`, `~0` for `~`) ensures the entire pointer becomes part of the filename, keeping all generated files in the same directory while preserving the hierarchical information from the JSON Pointer.
 
 === Configuration Files for Complex Generation
 
@@ -728,10 +727,10 @@ Use YAML configuration files for complex generation scenarios:
 ----
 # generation-config.yaml
 api_spec.yaml:
-  paths: ["/components/schemas", "/components/responses"]
+  paths: ["$.components.schemas.*", "$.components.responses.*"]
   target: "api_validation.tests.yaml"
 
-legacy_schema.yaml: ["/definitions"]
+legacy_schema.yaml: ["$.definitions.*"]
 ----
 
 [source,bash]

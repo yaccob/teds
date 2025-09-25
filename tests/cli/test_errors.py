@@ -44,7 +44,7 @@ def test_generate_reports_missing_schema_file(tmp_path: Path):
         ["generate", "missing.yaml#/components/schemas=out.yaml"], cwd=tmp_path
     )
     assert rc == 2
-    assert "Failed to resolve parent schema ref" in err
+    assert "Failed to load schema" in err and "No such file or directory" in err
 
 
 def test_verify_reports_unsupported_ref_scheme(tmp_path: Path):

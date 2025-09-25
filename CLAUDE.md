@@ -6,6 +6,39 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 TeDS (Test-Driven Schema Development Tool) is a CLI for verifying JSON Schema contracts using YAML test specifications. The tool validates both positive cases (data that should be accepted) and negative cases (data that must be rejected).
 
+## 🚨 URGENT TODO FOR NEXT SESSION 🚨
+
+**YAML-Config Template Support Extension Required:**
+
+**Current Issue**: YAML-config template support is artificially limited to only `{base}` variable, but user wants ALL non-pointer variables supported (`{file}`, `{ext}`, `{dir}`).
+
+**Current Implementation** (`generate.py:387`):
+```python
+target_name = source_config["target"].replace("{base}", source_file.stem)
+```
+
+**Required Change**:
+```python
+target_name = expand_target_template(source_config["target"], source_file_str, "")
+```
+
+**Why this works**: Empty `pointer=""` makes pointer-related variables (`{pointer}`, `{pointer_raw}`, `{pointer_strict}`) become empty/ignored, but file-related variables (`{file}`, `{ext}`, `{dir}`, `{base}`) work perfectly.
+
+**Implementation Steps**:
+1. Change line 387 in `generate.py` as shown above
+2. Add BDD tests for YAML-config templates: `{file}`, `{ext}`, `{dir}`
+3. Update tutorial documentation after implementation
+4. Verify all 242+ tests still pass
+
+**User Expectation**: YAML configs should support templates like:
+```yaml
+schema.yaml:
+  paths: ["$.components.schemas.*"]
+  target: "{base}_{ext}_tests.yaml"  # Should become "schema_yaml_tests.yaml"
+```
+
+**REMINDER**: User specifically requested this be visible in next session!
+
 ## 🚨 CRITICAL: Coverage Must Be Maintained!
 
 **MANDATORY BEFORE EVERY COMMIT:**
@@ -20,6 +53,45 @@ pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=term-miss
 
 **Baseline Branch:** `working-baseline-94percent-coverage` (94.64% coverage, 59 tests)
 **The tests exist for a reason - USE THEM!**
+
+## 🎯 CRITICAL: Always Use Tutorial as Reference
+
+**MANDATORY for ALL analysis and implementation tasks:**
+
+⚠️ **ALWAYS read and reference `docs/tutorial.adoc` FIRST** before making ANY changes or analyses related to TeDS functionality. The tutorial is the authoritative documentation for:
+
+- JSON-Pointer vs JSON-Path behavior differences
+- CLI argument parsing and configuration formats
+- Feature specifications and intended behavior
+- Examples and usage patterns
+
+**Never assume functionality - VERIFY against tutorial first!**
+
+### Key JSON-Pointer vs JSON-Path Architecture Rules
+
+**🔥 CRITICAL implementation rules from tutorial analysis:**
+
+1. **JSON-Pointer ALWAYS needs wildcard appending**:
+   - `schema.yaml#/components/schemas` → `schema.yaml#/components/schemas/*`
+   - **Mandatory for "children" behavior as specified in tutorial**
+
+2. **validate_jsonpath_expression() is REDUNDANT**:
+   - jsonpath-ng already validates all expressions during parsing
+   - Manual validation only duplicates what jsonpath-ng does better
+   - **Only useful validation is syntax checks before jsonpath-ng parsing**
+
+3. **Two EQUAL features, NOT backward compatibility**:
+   - JSON-Pointer: `#/path` → references children of node
+   - JSON-Path: `$.path.*` → references nodes directly with wildcards
+   - **Never call anything "backward compatibility" - both are primary features**
+
+4. **Architecture: Early normalization to JSON-Path**:
+   - **Functional correctness ≠ Clean architecture**
+   - **MANDATORY**: JSON-Pointer → JSON-Path conversion at CLI boundary
+   - **Once converted, everything processes uniformly as JSON-Path**
+   - **No artificial separation of processing by feature type**
+   - **Clean, single processing pipeline after normalization**
+   - **Maintainability through unified processing, not parallel paths**
 
 ## Core Commands
 
