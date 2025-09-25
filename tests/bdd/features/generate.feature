@@ -371,7 +371,7 @@ Feature: Generate Command Tests
   Scenario: Error handling for missing schema file
     When I run the CLI command: `./teds.py generate missing.yaml#/components/schemas`
     Then the command should fail with exit code 2
-    And the error output should contain "Failed to resolve parent schema ref"
+    And the error output should match "(.*\n)*Failed to resolve parent schema ref.*"
 
   Scenario: Default pointer behavior (no fragment)
     Given I have a schema file "default.yaml" with content:
@@ -872,13 +872,13 @@ Feature: Generate Command Tests
   # ==========================================================================
 
   Scenario: Generate command outputs status message to stderr
-    Given I have a schema file "simple.yaml" with content:
+    Given I have a subdirectory "models"
+    Given I have a schema file "models/simple.yaml" with content:
       """yaml
       type: string
       examples:
         - "test"
       """
-    When I run the generate command: `teds generate simple.yaml#`
+    When I run the generate command: `teds generate models/simple.yaml#`
     Then the command should succeed
-    And the error output should contain "Generating"
-    And the error output should contain "simple.tests.yaml"
+    And the error output should match "^Generating models/simple.tests.yaml\n$"

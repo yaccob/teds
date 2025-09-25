@@ -11,6 +11,7 @@ from ruamel.yaml.comments import CommentedMap
 
 from .errors import TedsError
 from .refs import collect_examples, join_fragment, resolve_schema_node
+from .utils import to_relative_path
 from .version import RECOMMENDED_TESTSPEC_VERSION
 from .yamlio import yaml_dumper, yaml_loader
 
@@ -460,7 +461,7 @@ def generate_from_source_config(
 
         # Generate tests for each unique reference (exact nodes only, no children expansion)
         if unique_refs:  # Only print if we're actually generating something
-            print(f"Generating {target_path}", file=sys.stderr)
+            print(f"Generating {to_relative_path(target_path)}", file=sys.stderr)
         for ref in unique_refs:
             try:
                 generate_exact_node(ref, target_path)
