@@ -296,6 +296,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p_verify.add_argument("spec", nargs="+", help="YAML testspec file(s)")
     p_verify.add_argument(
+        "-l",
         "--output-level",
         choices=["all", "warning", "error"],
         default="warning",
