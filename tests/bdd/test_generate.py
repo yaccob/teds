@@ -1,6 +1,7 @@
 """BDD tests for TeDS generate command - reorganized from original working files."""
 
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -357,12 +358,12 @@ def command_should_succeed(cli_result):
     ), f"Command failed with exit code {cli_result['returncode']}. Stderr: {cli_result['stderr']}"
 
 
-@then(parsers.parse('the error output should contain "{expected_text}"'))
+@then(parsers.parse('the error output should match "{expected_text}"'))
 def verify_error_output(cli_result, expected_text):
     """Verify that the error output contains the expected text."""
     stderr = cli_result["stderr"] or ""
-    assert (
-        expected_text in stderr
+    assert re.fullmatch(
+        expected_text, stderr, re.DOTALL
     ), f"Expected '{expected_text}' in stderr, but got: {stderr}"
 
 

@@ -506,11 +506,12 @@ Feature: Reports and CLI Tests
   # ==========================================================================
 
   Scenario: Report generation outputs status message to stderr
-    Given I have a schema file "simple.yaml" with content:
+    Given I have a subdirectory "models"
+    Given I have a schema file "models/simple.yaml" with content:
       """yaml
       type: string
       """
-    And I have a test specification file "simple.tests.yaml" with content:
+    And I have a test specification file "models/simple.tests.yaml" with content:
       """yaml
       version: "1.0.0"
       tests:
@@ -519,6 +520,6 @@ Feature: Reports and CLI Tests
             test_case:
               payload: "test"
       """
-    When I run the verify command: `teds verify simple.tests.yaml --report default.html`
+    When I run the verify command: `teds verify models/simple.tests.yaml --report default.html`
     Then the command should succeed
-    And the error output should contain "Generating report simple.tests.report.html"
+    And the error output should match "^Generating report models/simple.tests.report.html\n$"

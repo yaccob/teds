@@ -8,6 +8,7 @@ from pathlib import Path
 
 from .errors import TedsError
 from .generate import generate_from, generate_from_source_config, parse_generate_config
+from .utils import to_relative_path
 from .validate import validate_file
 from .version import get_version, recommended_minor_str, supported_spec_range_str
 
@@ -198,7 +199,9 @@ class GenerateCommand(Command):
                             abs_ref_str = f"{schema_filename}#{pointer}"
                         target_path = schema_dir / _default_filename(base, pointer)
 
-                    print(f"Generating {target_path}", file=sys.stderr)
+                    print(
+                        f"Generating {to_relative_path(target_path)}", file=sys.stderr
+                    )
                     generate_from(abs_ref_str, target_path)
         except TedsError as e:
             print(str(e), file=sys.stderr)
