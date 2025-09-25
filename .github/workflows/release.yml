@@ -80,7 +80,9 @@ jobs:
           set -e
           echo "verify rc: $rc"
           test "$rc" -eq 1
-          teds generate "$REPO/demo/sample_schemas.yaml=$run_dir/smoke.tests.yaml"
+          # Copy schema file to temp dir to avoid path resolution issues
+          cp "$REPO/demo/sample_schemas.yaml" "$run_dir/sample_schemas.yaml"
+          teds generate "sample_schemas.yaml=$run_dir/smoke.tests.yaml"
           test -f "$run_dir/smoke.tests.yaml"
           deactivate
       - name: Publish to PyPI (trusted publishing)
