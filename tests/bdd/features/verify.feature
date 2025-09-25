@@ -455,14 +455,15 @@ Feature: Verify Command Tests
       """
     When I run the verify command: `teds verify simple.tests.yaml`
     Then the command should succeed
-    And the error output should contain "Verifying simple.tests.yaml"
+    And the error output should match "^Verifying simple.tests.yaml.*"
 
   Scenario: Verify command with in-place update outputs status message to stderr
-    Given I have a schema file "simple.yaml" with content:
+    Given I have a subdirectory "models"
+    Given I have a schema file "models/simple.yaml" with content:
       """yaml
       type: string
       """
-    And I have a test specification file "simple.tests.yaml" with content:
+    And I have a test specification file "models/simple.tests.yaml" with content:
       """yaml
       version: "1.0.0"
       tests:
@@ -471,6 +472,6 @@ Feature: Verify Command Tests
             test_case:
               payload: "test"
       """
-    When I run the verify command: `teds verify simple.tests.yaml --in-place`
+    When I run the verify command: `teds verify models/simple.tests.yaml --in-place`
     Then the command should succeed
-    And the error output should contain "Updating simple.tests.yaml"
+    And the error output should match "^Updating models/simple.tests.yaml\n$"
