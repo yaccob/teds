@@ -13,12 +13,15 @@ test-unit: ## Run unit tests only (fast, always required)
 test-cli: ## Run CLI integration tests
 	pytest tests/cli -v
 
+test-bdd: ## Run BDD feature tests (no coverage requirement)
+	pytest tests/bdd -v
+
 test-schema: ## Validate spec_schema.yaml against spec_schema.tests.yaml
 	python -m teds_core.cli verify spec_schema.tests.yaml --output-level error
 
 test: test-unit ## Default test target (unit tests only)
 
-test-full: test-unit test-cli test-schema ## Run all tests (required for packaging)
+test-full: test-unit test-cli test-bdd test-schema ## Run all tests (required for packaging)
 	@echo "✅ All tests passed - ready for packaging"
 
 # Coverage
