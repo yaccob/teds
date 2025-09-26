@@ -47,7 +47,6 @@ Successfully identified and removed dead code branches in `generate.py`:
 ### Branch & PR Details
 - **Branch**: `feature/improve-test-coverage-refactor-generate`
 - **Pull Request**: #27 - https://github.com/yaccob/teds/pull/27
-- **Remote**: `upstream` (not `origin`)
 
 ### Commit Standards Learned
 - **NEVER bypass pre-commit hooks** (no `PRE_COMMIT_ALLOW_NO_CONFIG=1`)

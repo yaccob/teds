@@ -118,8 +118,7 @@ release-major: check-clean test-full ## Create major release (0.2.5 → 1.0.0)
 	$(call do_release,major)
 
 # Git Workflow
-check-branch: ## Verify we're on correct branch and up-to-date
-	@git fetch upstream 2>/dev/null || echo "⚠️  Could not fetch from remote"
+check-branch: ## Verify we're on correct branch
 	@BRANCH=$$(git branch --show-current); \
 	if [ "$$BRANCH" = "master" ]; then \
 		echo "❌ Cannot create PR from master branch"; \
