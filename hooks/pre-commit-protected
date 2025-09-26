@@ -27,7 +27,7 @@ if [ -n "$GIT_HOOKS_BYPASSED" ]; then
 fi
 
 # 🛡️ QUALITY GATE: Ensure virtual environment
-INSTALL_PYTHON=/Users/yaccob/repos/github.com/yaccob/contest/.venv/bin/python3.13
+INSTALL_PYTHON=.venv/bin/python3.13
 if [ ! -x "$INSTALL_PYTHON" ]; then
     echo "🚫 ERROR: Virtual environment not found at $INSTALL_PYTHON"
     echo "💡 Please activate the virtual environment: source .venv/bin/activate"

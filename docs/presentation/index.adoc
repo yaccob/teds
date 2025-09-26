@@ -1645,11 +1645,11 @@ Questions? Let's connect!
 
 [.contact-info]
 📧 **Contact & Support**: +
-   • GitHub Issues: https://github.com/yaccob/contest/issues +
-   • Discussions: https://github.com/yaccob/contest/discussions +
+   • GitHub Issues: https://github.com/yaccob/teds/issues +
+   • Discussions: https://github.com/yaccob/teds/discussions +
 
 🌐 **Resources**: +
-   • Repository: https://github.com/yaccob/contest +
+   • Repository: https://github.com/yaccob/teds +
    • Documentation: Complete guides and tutorials +
    • Examples: Real-world use cases and templates +
 
