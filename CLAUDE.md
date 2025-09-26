@@ -43,12 +43,12 @@ schema.yaml:
 
 **MANDATORY BEFORE EVERY COMMIT:**
 ```bash
-pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing --cov-fail-under=75 -q
+pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing --cov-fail-under=85 -q
 ```
 
 **Never commit unless:**
 1. ✅ All tests pass
-2. ✅ Coverage ≥ 75% (maintain 94%+ if possible)
+2. ✅ Coverage ≥ 85% (maintain 94%+ if possible)
 3. ✅ Coverage report reviewed
 
 **Baseline Branch:** `working-baseline-94percent-coverage` (94.64% coverage, 59 tests)
@@ -107,8 +107,8 @@ pip install -r requirements.txt
 # Run all tests (quick)
 pytest -q
 
-# Run unit tests with coverage (fail-under=73%)
-pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing --cov-fail-under=73 -q
+# Run unit tests with coverage (fail-under=85%)
+pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing --cov-fail-under=85 -q
 
 # Run CLI integration tests (no coverage requirement)
 pytest tests/cli -v
@@ -155,7 +155,7 @@ hatch build
 - **Templates**: Jinja2 templates for report generation (in `templates/` directory)
 
 ### Test Structure
-- `tests/unit/`: Fast unit tests for individual modules (target: 73%+ coverage, achieved: 94%+)
+- `tests/unit/`: Fast unit tests for individual modules (target: 85%+ coverage, achieved: 94%+)
 - `tests/cli/`: End-to-end CLI integration tests (no coverage requirement - focus on workflow validation)
 - Unit tests provide comprehensive coverage; CLI tests validate end-to-end functionality
 
