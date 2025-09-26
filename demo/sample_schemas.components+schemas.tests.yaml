@@ -1,6 +1,6 @@
 version: 1.0.0
 tests:
-  /Users/yaccob/repos/github.com/yaccob/contest/demo/sample_schemas.yaml#/components/schemas/Email:
+  sample_schemas.yaml#/components/schemas/Email:
     valid:
       .components.schemas.Email.examples[0]:
         payload: alice@example.com
@@ -9,7 +9,7 @@ tests:
         payload: not-an-email
         from_examples: true
     invalid:
-  /Users/yaccob/repos/github.com/yaccob/contest/demo/sample_schemas.yaml#/components/schemas/User:
+  sample_schemas.yaml#/components/schemas/User:
     valid:
       .components.schemas.User.examples[0]:
         payload:
@@ -24,7 +24,7 @@ tests:
           email: x
         from_examples: true
     invalid:
-  /Users/yaccob/repos/github.com/yaccob/contest/demo/sample_schemas.yaml#/components/schemas/Tag:
+  sample_schemas.yaml#/components/schemas/Tag:
     valid:
       .components.schemas.Tag.examples[0]:
         payload:
@@ -32,7 +32,7 @@ tests:
           value: prod
         from_examples: true
     invalid:
-  /Users/yaccob/repos/github.com/yaccob/contest/demo/sample_schemas.yaml#/components/schemas/Identifier:
+  sample_schemas.yaml#/components/schemas/Identifier:
     valid:
       .components.schemas.Identifier.examples[0]:
         payload: AB-123
@@ -41,19 +41,19 @@ tests:
         payload: 99
         from_examples: true
     invalid:
-  /Users/yaccob/repos/github.com/yaccob/contest/demo/sample_schemas.yaml#/components/schemas/Color:
+  sample_schemas.yaml#/components/schemas/Color:
     valid:
       .components.schemas.Color.examples[0]:
         payload: green
         from_examples: true
     invalid:
-  /Users/yaccob/repos/github.com/yaccob/contest/demo/sample_schemas.yaml#/components/schemas/Regexy:
+  sample_schemas.yaml#/components/schemas/Regexy:
     valid:
       .components.schemas.Regexy.examples[0]:
         payload: abc12
         from_examples: true
     invalid:
-  /Users/yaccob/repos/github.com/yaccob/contest/demo/sample_schemas.yaml#/components/schemas/Product:
+  sample_schemas.yaml#/components/schemas/Product:
     valid:
       .components.schemas.Product.examples[0]:
         payload:
@@ -65,10 +65,10 @@ tests:
           color: red
         from_examples: true
     invalid:
-  /Users/yaccob/repos/github.com/yaccob/contest/demo/sample_schemas.yaml#/components/schemas/Phone:
+  sample_schemas.yaml#/components/schemas/Phone:
     valid:
     invalid:
-  /Users/yaccob/repos/github.com/yaccob/contest/demo/sample_schemas.yaml#/components/schemas/Contact:
+  sample_schemas.yaml#/components/schemas/Contact:
     valid:
       .components.schemas.Contact.examples[0]:
         payload:
@@ -84,7 +84,7 @@ tests:
           phone: +49 621 1234567
         from_examples: true
     invalid:
-  /Users/yaccob/repos/github.com/yaccob/contest/demo/sample_schemas.yaml#/components/schemas/OrderLine:
+  sample_schemas.yaml#/components/schemas/OrderLine:
     valid:
       .components.schemas.OrderLine.examples[0]:
         payload:
@@ -109,13 +109,13 @@ tests:
             quantity: 1
         from_examples: true
     invalid:
-  /Users/yaccob/repos/github.com/yaccob/contest/demo/sample_schemas.yaml#/components/schemas/URI:
+  sample_schemas.yaml#/components/schemas/URI:
     valid:
       .components.schemas.URI.examples[0]:
         payload: https://example.com
         from_examples: true
     invalid:
-  /Users/yaccob/repos/github.com/yaccob/contest/demo/sample_schemas.yaml#/components/schemas/DateISO:
+  sample_schemas.yaml#/components/schemas/DateISO:
     valid:
       .components.schemas.DateISO.examples[0]:
         payload: '2025-08-31'

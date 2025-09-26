@@ -48,7 +48,7 @@ test-package: ## Test that package includes required files
 	@.pkg-test/bin/pip install -q dist/*.whl
 	@echo "Testing installed package functionality..."
 	@cd /tmp && echo 'version: "1.0.0"\ntests: {}' > test.yaml
-	@cd /tmp && /Users/yaccob/repos/github.com/yaccob/contest/.pkg-test/bin/teds verify test.yaml --output-level error >/dev/null 2>&1 && echo "✅ Package test PASSED" || (echo "❌ Package test FAILED - missing files in package" && exit 1)
+	@cd /tmp && $(PWD)/.pkg-test/bin/teds verify test.yaml --output-level error >/dev/null 2>&1 && echo "✅ Package test PASSED" || (echo "❌ Package test FAILED - missing files in package" && exit 1)
 	@rm -rf .pkg-test/ /tmp/test.yaml
 
 package: clean test-full test-package ## Build distribution packages (requires all tests to pass)
@@ -118,8 +118,7 @@ release-major: check-clean test-full ## Create major release (0.2.5 → 1.0.0)
 	$(call do_release,major)
 
 # Git Workflow
-check-branch: ## Verify we're on correct branch and up-to-date
-	@git fetch upstream 2>/dev/null || echo "⚠️  Could not fetch from remote"
+check-branch: ## Verify we're on correct branch
 	@BRANCH=$$(git branch --show-current); \
 	if [ "$$BRANCH" = "master" ]; then \
 		echo "❌ Cannot create PR from master branch"; \
