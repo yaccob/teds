@@ -1,0 +1,25 @@
+version: 1
+disable_existing_loggers: false
+
+formatters:
+  simple:
+    format: '%(name)s:%(levelname)s: %(message)s'
+  detailed:
+    format: '%(asctime)s - %(name)s:%(levelname)s - %(filename)s:%(lineno)d - %(message)s'
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: DEBUG
+    formatter: simple
+    stream: ext://sys.stderr
+
+loggers:
+  teds_core:
+    level: INFO  # Default level, can be overridden by LOGLEVEL env var
+    handlers: [console]
+    propagate: false
+
+root:
+  level: WARNING
+  handlers: [console]

@@ -1,14 +1,47 @@
 from __future__ import annotations
 
 import argparse
+import logging
+import logging.config
+import os
 import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
+
+from ruamel.yaml import YAML
 
 from .errors import TedsError
 from .generate import generate_from_source_config, parse_generate_config
 from .validate import validate_file
 from .version import get_version, recommended_minor_str, supported_spec_range_str
+
+
+def setup_logging():
+    """Setup logging from YAML config with environment variable override."""
+    # Find the logging config file
+    config_path = Path(__file__).parent.parent / "logging.yaml"
+    
+    if config_path.exists():
+        yaml = YAML(typ='safe', pure=True)
+        with open(config_path, 'r') as f:
+            config = yaml.load(f)
+        
+        # Override log level from environment variable if set
+        env_level = os.getenv('LOGLEVEL', '').upper()
+        if env_level in ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']:
+            # Set the teds_core logger level from environment
+            if 'loggers' in config and 'teds_core' in config['loggers']:
+                config['loggers']['teds_core']['level'] = env_level
+        
+        logging.config.dictConfig(config)
+    else:
+        # Fallback to basic config
+        level = os.getenv('LOGLEVEL', 'INFO').upper()
+        logging.basicConfig(
+            level=getattr(logging, level, logging.INFO),
+            format='%(name)s:%(levelname)s: %(message)s',
+            stream=sys.stderr
+        )
 
 
 class Command(ABC):
@@ -352,6 +385,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
 def main() -> None:
     """Main CLI entry point using Command pattern."""
+    setup_logging()  # Initialize logging first
     argv = sys.argv[1:]
     registry = CommandRegistry()
 

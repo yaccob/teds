@@ -1,5 +1,6 @@
 """BDD tests for TeDS generate command - reorganized from original working files."""
 
+import logging
 import os
 import re
 import subprocess
@@ -12,6 +13,10 @@ from pytest_bdd import given, parsers, scenarios, then, when
 
 from teds_core.cli import main as cli_main
 from teds_core.yamlio import yaml_loader
+
+# Set up logging for test debugging
+logging.basicConfig(level=logging.DEBUG, format='TEST:%(levelname)s: %(message)s', stream=sys.stderr)
+test_logger = logging.getLogger('test_bdd')
 
 
 def run_teds_command(*args):
@@ -78,6 +83,7 @@ def working_directory(temp_workspace):
 def create_subdirectory(temp_workspace, dirname):
     """Create a subdirectory."""
     subdir = temp_workspace / dirname
+    test_logger.debug(f"Creating subdirectory: {dirname} at {subdir}")
     subdir.mkdir(parents=True, exist_ok=True)
 
 
@@ -85,6 +91,7 @@ def create_subdirectory(temp_workspace, dirname):
 def create_schema_file(temp_workspace, schema_files, filename, docstring):
     """Create a schema file with specified content."""
     schema_path = temp_workspace / filename
+    test_logger.debug(f"Creating schema file: {filename} at {schema_path}")
     schema_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Remove yaml language marker if present
@@ -92,7 +99,10 @@ def create_schema_file(temp_workspace, schema_files, filename, docstring):
     if content and content.strip().startswith("yaml"):
         content = "\n".join(content.strip().split("\n")[1:])
 
-    schema_path.write_text(content.strip() if content else "", encoding="utf-8")
+    final_content = content.strip() if content else ""
+    test_logger.debug(f"Schema file {filename} content: {repr(final_content)}")
+    schema_path.write_text(final_content, encoding="utf-8")
+    test_logger.debug(f"Schema file written to: {schema_path}")
     schema_files[filename] = schema_path
 
 
@@ -106,7 +116,10 @@ def create_config_file(temp_workspace, config_files, filename, docstring):
     if content.strip().startswith("yaml"):
         content = "\n".join(content.strip().split("\n")[1:])
 
-    config_path.write_text(content.strip(), encoding="utf-8")
+    final_content = content.strip()
+    test_logger.debug(f"Creating config file {filename} with content: {repr(final_content)}")
+    config_path.write_text(final_content, encoding="utf-8")
+    test_logger.debug(f"Config file created at: {config_path}")
     config_files[filename] = config_path
 
 
@@ -127,6 +140,7 @@ def create_existing_test_file(temp_workspace, filename, docstring):
 @when(parsers.parse("I run the generate command: `{command}`"))
 def run_generate_command(temp_workspace, cli_result, command):
     """Execute the generate command."""
+    test_logger.debug(f"Running command: {command} in workspace: {temp_workspace}")
     # Extract command arguments
     # Remove 'teds generate ' prefix
     args_str = command.replace("teds generate ", "").strip()
@@ -149,6 +163,17 @@ def run_generate_command(temp_workspace, cli_result, command):
     cli_result["returncode"] = result.returncode
     cli_result["stdout"] = result.stdout
     cli_result["stderr"] = result.stderr
+    
+    # Debug output for comparison between working and failing tests
+    test_logger.debug(f"Command result: returncode={result.returncode}")
+    test_logger.debug(f"Stderr: {result.stderr}")
+    test_logger.debug(f"Files created: {[f.name for f in temp_workspace.iterdir() if f.is_file()]}")
+    print(f"DEBUG: Command: {command}")
+    print(f"DEBUG: Args: {args}")
+    print(f"DEBUG: Return code: {result.returncode}")
+    print(f"DEBUG: Stderr: {result.stderr}")
+    print(f"DEBUG: Working directory: {temp_workspace}")
+    print(f"DEBUG: Files created: {[f.name for f in temp_workspace.iterdir() if f.is_file()]}")
 
     # Store result for later assertions
     pytest.current_exit_code = result.returncode
@@ -213,7 +238,7 @@ def verify_test_file_exists(temp_workspace, test_files, filename):
     test_files_found = [
         f for f in actual_files if f.endswith(".tests.yaml") or f.endswith(".yaml")
     ]
-
+    
     assert test_path.exists(), (
         f"Test file '{filename}' was not created.\n"
         f"Expected: {filename}\n"
@@ -224,17 +249,13 @@ def verify_test_file_exists(temp_workspace, test_files, filename):
 
 
 @then(parsers.parse('the test file should contain "{content}"'))
-def step_test_file_should_contain(temp_workspace, content):
+def step_test_file_should_contain(temp_workspace, test_files, content):
     """Assert that the most recently created test file contains specific content."""
-    # Find the most recent .tests.yaml file
-    test_files = list(temp_workspace.glob("*.tests.yaml"))
-    if not test_files:
-        test_files = list(temp_workspace.glob("*.yaml"))
-
-    assert test_files, "No test files found"
-
-    # Use the most recently created file
-    latest_file = max(test_files, key=lambda f: f.stat().st_mtime)
+    # Use the test files from context (stored by previous steps)
+    assert test_files, "No test files found in context"
+    
+    # Use the most recently added file from context
+    latest_file = max(test_files.values(), key=lambda f: f.stat().st_mtime)
     file_content = latest_file.read_text()
     assert (
         content in file_content

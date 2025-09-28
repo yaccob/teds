@@ -7,12 +7,12 @@ import sys
 from pathlib import Path
 
 from teds_core.cli import main as cli_main
-from teds_core.generate import generate_from
+from teds_core.generate import generate_from_source_config, parse_generate_config
 from tests.utils import load_yaml_file
 
 
 def test_generate_from_produces_relative_paths_in_testspec(tmp_path: Path):
-    """Test that generate_from() produces relative schema references in generated testspec."""
+    """Test that generate_from_source_config() produces relative schema references in generated testspec."""
     # Create schema in subdirectory
     subdir = tmp_path / "models"
     subdir.mkdir()
@@ -31,11 +31,19 @@ $defs:
         encoding="utf-8",
     )
 
-    # Create testspec in same subdirectory
-    testspec = subdir / "user.tests.yaml"
-
-    # Generate tests for $defs children
-    generate_from("user.yaml#/$defs", testspec)
+    # Change to subdirectory to match the expected working directory behavior
+    original_cwd = Path.cwd()
+    os.chdir(subdir)
+    
+    try:
+        # Generate tests using the new logic (JSON-Pointer format)
+        config = parse_generate_config("user.yaml#/$defs")
+        generate_from_source_config(config, subdir)
+        
+        # The testspec should be created in the same directory as the schema
+        testspec = subdir / "user.tests.yaml"
+    finally:
+        os.chdir(original_cwd)
 
     # Verify testspec was created
     assert testspec.exists()
@@ -90,9 +98,19 @@ components:
         encoding="utf-8",
     )
 
-    # Generate testspec in same directory
-    testspec = api_dir / "user.tests.yaml"
-    generate_from("user.yaml#/components/schemas", testspec)
+    # Change to the schema directory to match expected working directory behavior
+    original_cwd = Path.cwd()
+    os.chdir(api_dir)
+    
+    try:
+        # Generate tests using the new logic
+        config = parse_generate_config("user.yaml#/components/schemas")
+        generate_from_source_config(config, api_dir)
+        
+        # The testspec should be created in the same directory as the schema
+        testspec = api_dir / "user.tests.yaml"
+    finally:
+        os.chdir(original_cwd)
 
     # Verify relative paths
     assert testspec.exists()
@@ -136,11 +154,20 @@ $defs:
     # Testspec in different directory
     test_dir = tmp_path / "tests"
     test_dir.mkdir()
-    testspec = test_dir / "model.tests.yaml"
 
-    # Generate with relative reference that crosses directories
-    # This simulates CLI behavior where we provide relative paths
-    generate_from("../schemas/model.yaml#/$defs", testspec)
+    # Change to test directory to match CLI behavior
+    original_cwd = Path.cwd()
+    os.chdir(test_dir)
+    
+    try:
+        # Generate with relative reference that crosses directories
+        config = parse_generate_config("../schemas/model.yaml#/$defs")
+        generate_from_source_config(config, test_dir)
+        
+        # The testspec should be created next to the schema file
+        testspec = schema_dir / "model.tests.yaml"
+    finally:
+        os.chdir(original_cwd)
 
     assert testspec.exists()
     doc = load_yaml_file(testspec)
@@ -150,10 +177,11 @@ $defs:
     assert len(schema_refs) == 1
     schema_ref = schema_refs[0]
 
-    # Should preserve the relative path structure used in the reference
+    # Should have relative path within the schema directory (not cross-directory)
+    # The test file is now created next to the schema, so reference should be relative
     assert (
-        schema_ref == "../schemas/model.yaml#/$defs/Item"
-    ), f"Expected relative cross-directory path, got '{schema_ref}'"
+        schema_ref == "model.yaml#/$defs/Item"
+    ), f"Expected relative path within schema directory, got '{schema_ref}'"
     assert not schema_ref.startswith(
         "/"
     ), f"Schema reference contains absolute path: {schema_ref}"

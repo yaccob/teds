@@ -968,6 +968,199 @@ Feature: Generate Command Tests
       """
 
   # ==========================================================================
+  # YAML Config Template Variable Tests
+  # ==========================================================================
+
+  Scenario: YAML Config template variable {file} should work
+    Given I have a schema file "template.yaml" with content:
+      """yaml
+      $defs:
+        User:
+          type: object
+      """
+    And I have a configuration file "config.yaml" with content:
+      """yaml
+      template.yaml:
+        paths: ["$.['$defs'].User"]
+        target: "{file}_tests.yaml"
+      """
+    When I run the generate command: `teds generate @config.yaml`
+    Then a test file "template.yaml_tests.yaml" should be created
+
+  Scenario: YAML Config template variable {ext} should work
+    Given I have a schema file "template.yaml" with content:
+      """yaml
+      $defs:
+        User:
+          type: object
+      """
+    And I have a configuration file "config.yaml" with content:
+      """yaml
+      template.yaml:
+        paths: ["$.['$defs'].User"]
+        target: "test_{ext}_spec.yaml"
+      """
+    When I run the generate command: `teds generate @config.yaml`
+    Then a test file "test_yaml_spec.yaml" should be created
+
+  Scenario: YAML Config template variable {dir} should work
+    Given I have a subdirectory "models"
+    And I have a schema file "models/template.yaml" with content:
+      """yaml
+      $defs:
+        User:
+          type: object
+      """
+    And I have a configuration file "config.yaml" with content:
+      """yaml
+      models/template.yaml:
+        paths: ["$.['$defs'].User"]
+        target: "{dir}_tests.yaml"
+      """
+    When I run the generate command: `teds generate @config.yaml`
+    Then a test file "models_tests.yaml" should be created
+
+  Scenario: YAML Config template variable {base} should continue working
+    Given I have a schema file "template.yaml" with content:
+      """yaml
+      $defs:
+        User:
+          type: object
+      """
+    And I have a configuration file "config.yaml" with content:
+      """yaml
+      template.yaml:
+        paths: ["$.['$defs'].User"]
+        target: "{base}_tests.yaml"
+      """
+    When I run the generate command: `teds generate @config.yaml`
+    Then a test file "template_tests.yaml" should be created
+
+  Scenario: YAML Config template variable combination should work
+    Given I have a schema file "template.yaml" with content:
+      """yaml
+      $defs:
+        User:
+          type: object
+      """
+    And I have a configuration file "config.yaml" with content:
+      """yaml
+      template.yaml:
+        paths: ["$.['$defs'].User"]
+        target: "{base}_{ext}_tests.yaml"
+      """
+    When I run the generate command: `teds generate @config.yaml`
+    Then a test file "template_yaml_tests.yaml" should be created
+
+  # ==========================================================================
+  # Path Resolution Tests
+  # ==========================================================================
+
+  Scenario: YAML Config should handle schema file and test file in cwd correctly
+    Given I have a schema file "api.yaml" with content:
+      """yaml
+      $defs:
+        User:
+          type: object
+          properties:
+            name:
+              type: string
+      """
+    And I have a configuration file "config.yaml" with content:
+      """yaml
+      api.yaml:
+        paths: ["$.['$defs'].User"]
+        target: "api_tests.yaml"
+      """
+    When I run the generate command: `teds generate @config.yaml`
+    Then a test file "api_tests.yaml" should be created
+    And the test file should contain "api.yaml#/$defs/User"
+
+  Scenario: YAML Config should handle schema file and test file in subdirectory correctly
+    Given I have a subdirectory "schemas"
+    And I have a schema file "schemas/api.yaml" with content:
+      """yaml
+      $defs:
+        User:
+          type: object
+          properties:
+            name:
+              type: string
+      """
+    And I have a configuration file "config.yaml" with content:
+      """yaml
+      api.yaml:
+        paths: ["$.['$defs'].User"]
+        target: "schemas/api_tests.yaml"
+      """
+    When I run the generate command: `teds generate @config.yaml`
+    Then a test file "schemas/api_tests.yaml" should be created
+    And the test file should contain "api.yaml#/$defs/User"
+
+  Scenario: YAML Config should handle schema file in subdirectory and test file in cwd correctly
+    Given I have a subdirectory "schemas"
+    And I have a schema file "schemas/api.yaml" with content:
+      """yaml
+      $defs:
+        User:
+          type: object
+          properties:
+            name:
+              type: string
+      """
+    And I have a configuration file "config.yaml" with content:
+      """yaml
+      schemas/api.yaml:
+        paths: ["$.['$defs'].User"]
+        target: "api_tests.yaml"
+      """
+    When I run the generate command: `teds generate @config.yaml`
+    Then a test file "api_tests.yaml" should be created
+    And the test file should contain "schemas/api.yaml#/$defs/User"
+
+  Scenario: YAML Config should handle schema file in cwd and test file in subdirectory correctly
+    Given I have a subdirectory "tests"
+    And I have a schema file "api.yaml" with content:
+      """yaml
+      $defs:
+        User:
+          type: object
+          properties:
+            name:
+              type: string
+      """
+    And I have a configuration file "config.yaml" with content:
+      """yaml
+      ../api.yaml:
+        paths: ["$.['$defs'].User"]
+        target: "tests/api_tests.yaml"
+      """
+    When I run the generate command: `teds generate @config.yaml`
+    Then a test file "tests/api_tests.yaml" should be created
+    And the test file should contain "../api.yaml#/$defs/User"
+
+  Scenario: YAML Config path resolution should work with template variables
+    Given I have a subdirectory "models"
+    And I have a schema file "models/user.yaml" with content:
+      """yaml
+      $defs:
+        User:
+          type: object
+          properties:
+            id:
+              type: string
+      """
+    And I have a configuration file "config.yaml" with content:
+      """yaml
+      models/user.yaml:
+        paths: ["$.['$defs'].User"]
+        target: "{dir}_{base}_tests.yaml"
+      """
+    When I run the generate command: `teds generate @config.yaml`
+    Then a test file "models_user_tests.yaml" should be created
+    And the test file should contain "models/user.yaml#/$defs/User"
+
+  # ==========================================================================
   # Status Message Tests
   # ==========================================================================
 

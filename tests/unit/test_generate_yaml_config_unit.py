@@ -422,3 +422,138 @@ $defs:
             assert "$defs/User" in content or "$defs/Product" in content
         finally:
             os.chdir(old_cwd)
+
+    def test_yaml_config_with_schema_in_subdirectory(self, tmp_path: Path):
+        """Test YAML config processing with schema files located in subdirectories."""
+        import os
+        
+        # Create subdirectory structure
+        models_dir = tmp_path / "models"
+        models_dir.mkdir()
+        
+        # Create schema in subdirectory
+        schema = models_dir / "user.yaml"
+        schema.write_text(
+            """
+$defs:
+  User:
+    type: object
+    properties:
+      name:
+        type: string
+        examples: ["Alice"]
+      email:
+        type: string
+        format: email
+        examples: ["alice@example.com"]
+""",
+            encoding="utf-8",
+        )
+
+        # Create YAML config that references schema in subdirectory
+        config_file = tmp_path / "config.yaml"
+        config_file.write_text(
+            """
+models/user.yaml:
+  paths: ["$.['$defs'].User"]
+  target: "user_tests.yaml"
+""",
+            encoding="utf-8",
+        )
+
+        # Change to tmp_path directory for execution
+        old_cwd = os.getcwd()
+        try:
+            os.chdir(tmp_path)
+            
+            command = GenerateCommand()
+            args = type(
+                "Args",
+                (),
+                {
+                    "mapping": ["@config.yaml"],  # Use relative path since we're in tmp_path
+                    "allow_network": False,
+                    "network_timeout": None,
+                    "network_max_bytes": None,
+                },
+            )()
+
+            result = command.execute(args)
+            assert result == 0
+        finally:
+            os.chdir(old_cwd)
+
+        # Check that target file was created
+        target_file = tmp_path / "user_tests.yaml"
+        assert target_file.exists()
+        
+        # Verify content contains correct schema reference with subdirectory path
+        content = target_file.read_text(encoding="utf-8")
+        assert "models/user.yaml#/$defs/User" in content
+
+    def test_yaml_config_with_template_variables_and_subdirectory(self, tmp_path: Path):
+        """Test YAML config template variable expansion with schema files in subdirectories."""
+        import os
+        
+        # Create subdirectory structure
+        schemas_dir = tmp_path / "schemas"
+        schemas_dir.mkdir()
+        
+        # Create schema in subdirectory
+        schema = schemas_dir / "product.yaml"
+        schema.write_text(
+            """
+$defs:
+  Product:
+    type: object
+    properties:
+      title:
+        type: string
+        examples: ["Laptop"]
+      price:
+        type: number
+        examples: [999.99]
+""",
+            encoding="utf-8",
+        )
+
+        # Create YAML config with template variables
+        config_file = tmp_path / "config.yaml"
+        config_file.write_text(
+            """
+schemas/product.yaml:
+  paths: ["$.['$defs'].Product"]
+  target: "{dir}_{base}_tests.yaml"
+""",
+            encoding="utf-8",
+        )
+
+        # Change to tmp_path directory for execution
+        old_cwd = os.getcwd()
+        try:
+            os.chdir(tmp_path)
+            
+            command = GenerateCommand()
+            args = type(
+                "Args",
+                (),
+                {
+                    "mapping": ["@config.yaml"],  # Use relative path since we're in tmp_path
+                    "allow_network": False,
+                    "network_timeout": None,
+                    "network_max_bytes": None,
+                },
+            )()
+
+            result = command.execute(args)
+            assert result == 0
+        finally:
+            os.chdir(old_cwd)
+
+        # Check that target file was created with expanded template
+        target_file = tmp_path / "schemas_product_tests.yaml"
+        assert target_file.exists()
+        
+        # Verify content contains correct schema reference
+        content = target_file.read_text(encoding="utf-8")
+        assert "schemas/product.yaml#/$defs/Product" in content

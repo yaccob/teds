@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
-from teds_core.generate import generate_from
+from teds_core.generate import generate_from, generate_from_source_config, parse_generate_config
 from tests.utils import load_yaml_file
 
 
@@ -32,7 +33,7 @@ components:
 
 
 def test_generate_from_with_relative_reference_in_subdirectory(tmp_path: Path):
-    """Test generate_from() with relative schema reference in subdirectory."""
+    """Test generate_from_source_config() with relative schema reference in subdirectory."""
     # Create schema in subdirectory
     subdir = tmp_path / "schemas"
     subdir.mkdir()
@@ -50,11 +51,19 @@ $defs:
         encoding="utf-8",
     )
 
-    # Create testspec file in project root
-    testspec = tmp_path / "api.tests.yaml"
-
-    # Should successfully resolve relative reference and generate tests
-    generate_from("api.yaml#/$defs/User/properties/name", testspec)
+    # Change to tmp_path to match expected working directory behavior
+    original_cwd = Path.cwd()
+    os.chdir(tmp_path)
+    
+    try:
+        # Use new logic - the test will be created next to schema
+        config = parse_generate_config("schemas/api.yaml#/$defs/User/properties/name")
+        generate_from_source_config(config, tmp_path)
+        
+        # The testspec should be created next to the schema file
+        testspec = subdir / "api.tests.yaml"
+    finally:
+        os.chdir(original_cwd)
 
     # Verify testspec was created and contains expected content
     assert testspec.exists()
@@ -62,10 +71,10 @@ $defs:
     assert "tests" in doc
     tests = doc["tests"]
 
-    # generate_from() creates tests for children of the referenced node
+    # generate_from_source_config() with JSON-Pointer creates tests for children (due to .* wildcard)
     expected_tests = [
         "api.yaml#/$defs/User/properties/name/type",
-        "api.yaml#/$defs/User/properties/name/examples",
+        "api.yaml#/$defs/User/properties/name/examples"
     ]
     for expected_test in expected_tests:
         assert expected_test in tests
