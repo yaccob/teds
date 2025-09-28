@@ -1,0 +1,1852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.23">
+<title>TeDS Tutorial — Test-Driven Schema Development</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<style>
+/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+/* Uncomment the following line when using as a custom stylesheet */
+/* @import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"; */
+html{font-family:sans-serif;-webkit-text-size-adjust:100%}
+a{background:none}
+a:focus{outline:thin dotted}
+a:active,a:hover{outline:0}
+h1{font-size:2em;margin:.67em 0}
+b,strong{font-weight:bold}
+abbr{font-size:.9em}
+abbr[title]{cursor:help;border-bottom:1px dotted #dddddf;text-decoration:none}
+dfn{font-style:italic}
+hr{height:0}
+mark{background:#ff0;color:#000}
+code,kbd,pre,samp{font-family:monospace;font-size:1em}
+pre{white-space:pre-wrap}
+q{quotes:"\201C" "\201D" "\2018" "\2019"}
+small{font-size:80%}
+sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
+sup{top:-.5em}
+sub{bottom:-.25em}
+img{border:0}
+svg:not(:root){overflow:hidden}
+figure{margin:0}
+audio,video{display:inline-block}
+audio:not([controls]){display:none;height:0}
+fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}
+legend{border:0;padding:0}
+button,input,select,textarea{font-family:inherit;font-size:100%;margin:0}
+button,input{line-height:normal}
+button,select{text-transform:none}
+button,html input[type=button],input[type=reset],input[type=submit]{-webkit-appearance:button;cursor:pointer}
+button[disabled],html input[disabled]{cursor:default}
+input[type=checkbox],input[type=radio]{padding:0}
+button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}
+textarea{overflow:auto;vertical-align:top}
+table{border-collapse:collapse;border-spacing:0}
+*,::before,::after{box-sizing:border-box}
+html,body{font-size:100%}
+body{background:#fff;color:rgba(0,0,0,.8);padding:0;margin:0;font-family:"Noto Serif","DejaVu Serif",serif;line-height:1;position:relative;cursor:auto;-moz-tab-size:4;-o-tab-size:4;tab-size:4;word-wrap:anywhere;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased}
+a:hover{cursor:pointer}
+img,object,embed{max-width:100%;height:auto}
+object,embed{height:100%}
+img{-ms-interpolation-mode:bicubic}
+.left{float:left!important}
+.right{float:right!important}
+.text-left{text-align:left!important}
+.text-right{text-align:right!important}
+.text-center{text-align:center!important}
+.text-justify{text-align:justify!important}
+.hide{display:none}
+img,object,svg{display:inline-block;vertical-align:middle}
+textarea{height:auto;min-height:50px}
+select{width:100%}
+.subheader,.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{line-height:1.45;color:#7a2518;font-weight:400;margin-top:0;margin-bottom:.25em}
+div,dl,dt,dd,ul,ol,li,h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6,pre,form,p,blockquote,th,td{margin:0;padding:0}
+a{color:#2156a5;text-decoration:underline;line-height:inherit}
+a:hover,a:focus{color:#1d4b8f}
+a img{border:0}
+p{line-height:1.6;margin-bottom:1.25em;text-rendering:optimizeLegibility}
+p aside{font-size:.875em;line-height:1.35;font-style:italic}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{font-family:"Open Sans","DejaVu Sans",sans-serif;font-weight:300;font-style:normal;color:#ba3925;text-rendering:optimizeLegibility;margin-top:1em;margin-bottom:.5em;line-height:1.0125em}
+h1 small,h2 small,h3 small,#toctitle small,.sidebarblock>.content>.title small,h4 small,h5 small,h6 small{font-size:60%;color:#e99b8f;line-height:0}
+h1{font-size:2.125em}
+h2{font-size:1.6875em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.375em}
+h4,h5{font-size:1.125em}
+h6{font-size:1em}
+hr{border:solid #dddddf;border-width:1px 0 0;clear:both;margin:1.25em 0 1.1875em}
+em,i{font-style:italic;line-height:inherit}
+strong,b{font-weight:bold;line-height:inherit}
+small{font-size:60%;line-height:inherit}
+code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;color:rgba(0,0,0,.9)}
+ul,ol,dl{line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
+ul,ol{margin-left:1.5em}
+ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0}
+ul.circle{list-style-type:circle}
+ul.disc{list-style-type:disc}
+ul.square{list-style-type:square}
+ul.circle ul:not([class]),ul.disc ul:not([class]),ul.square ul:not([class]){list-style:inherit}
+ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
+dl dt{margin-bottom:.3125em;font-weight:bold}
+dl dd{margin-bottom:1.25em}
+blockquote{margin:0 0 1.25em;padding:.5625em 1.25em 0 1.1875em;border-left:1px solid #ddd}
+blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
+@media screen and (min-width:768px){h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2}
+h1{font-size:2.75em}
+h2{font-size:2.3125em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.6875em}
+h4{font-size:1.4375em}}
+table{background:#fff;margin-bottom:1.25em;border:1px solid #dedede;word-wrap:normal}
+table thead,table tfoot{background:#f7f8f7}
+table thead tr th,table thead tr td,table tfoot tr th,table tfoot tr td{padding:.5em .625em .625em;font-size:inherit;color:rgba(0,0,0,.8);text-align:left}
+table tr th,table tr td{padding:.5625em .625em;font-size:inherit;color:rgba(0,0,0,.8)}
+table tr.even,table tr.alt{background:#f8f8f7}
+table thead tr th,table tfoot tr th,table tbody tr td,table tr td,table tfoot tr td{line-height:1.6}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2;word-spacing:-.05em}
+h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title strong,h4 strong,h5 strong,h6 strong{font-weight:400}
+.center{margin-left:auto;margin-right:auto}
+.stretch{width:100%}
+.clearfix::before,.clearfix::after,.float-group::before,.float-group::after{content:" ";display:table}
+.clearfix::after,.float-group::after{clear:both}
+:not(pre).nobreak{word-wrap:normal}
+:not(pre).nowrap{white-space:nowrap}
+:not(pre).pre-wrap{white-space:pre-wrap}
+:not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
+pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
+pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
+pre>code{display:block}
+pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
+em em{font-style:normal}
+strong strong{font-weight:400}
+.keyseq{color:rgba(51,51,51,.8)}
+kbd{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;display:inline-block;color:rgba(0,0,0,.8);font-size:.65em;line-height:1.45;background:#f7f7f7;border:1px solid #ccc;border-radius:3px;box-shadow:0 1px 0 rgba(0,0,0,.2),inset 0 0 0 .1em #fff;margin:0 .15em;padding:.2em .5em;vertical-align:middle;position:relative;top:-.1em;white-space:nowrap}
+.keyseq kbd:first-child{margin-left:0}
+.keyseq kbd:last-child{margin-right:0}
+.menuseq,.menuref{color:#000}
+.menuseq b:not(.caret),.menuref{font-weight:inherit}
+.menuseq{word-spacing:-.02em}
+.menuseq b.caret{font-size:1.25em;line-height:.8}
+.menuseq i.caret{font-weight:bold;text-align:center;width:.45em}
+b.button::before,b.button::after{position:relative;top:-1px;font-weight:400}
+b.button::before{content:"[";padding:0 3px 0 2px}
+b.button::after{content:"]";padding:0 2px 0 3px}
+p a>code:hover{color:rgba(0,0,0,.9)}
+#header,#content,#footnotes,#footer{width:100%;margin:0 auto;max-width:62.5em;*zoom:1;position:relative;padding-left:.9375em;padding-right:.9375em}
+#header::before,#header::after,#content::before,#content::after,#footnotes::before,#footnotes::after,#footer::before,#footer::after{content:" ";display:table}
+#header::after,#content::after,#footnotes::after,#footer::after{clear:both}
+#content{margin-top:1.25em}
+#content::before{content:none}
+#header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
+#header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
+#header .details span:first-child{margin-left:-.125em}
+#header .details span.email a{color:rgba(0,0,0,.85)}
+#header .details br{display:none}
+#header .details br+span::before{content:"\00a0\2013\00a0"}
+#header .details br+span.author::before{content:"\00a0\22c5\00a0";color:rgba(0,0,0,.85)}
+#header .details br+span#revremark::before{content:"\00a0|\00a0"}
+#header #revnumber{text-transform:capitalize}
+#header #revnumber::after{content:"\00a0"}
+#content>h1:first-child:not([class]){color:rgba(0,0,0,.85);border-bottom:1px solid #dddddf;padding-bottom:8px;margin-top:0;padding-top:1rem;margin-bottom:1.25rem}
+#toc{border-bottom:1px solid #e7e7e9;padding-bottom:.5em}
+#toc>ul{margin-left:.125em}
+#toc ul.sectlevel0>li>a{font-style:italic}
+#toc ul.sectlevel0 ul.sectlevel1{margin:.5em 0}
+#toc ul{font-family:"Open Sans","DejaVu Sans",sans-serif;list-style-type:none}
+#toc li{line-height:1.3334;margin-top:.3334em}
+#toc a{text-decoration:none}
+#toc a:active{text-decoration:underline}
+#toctitle{color:#7a2518;font-size:1.2em}
+@media screen and (min-width:768px){#toctitle{font-size:1.375em}
+body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
+#toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
+#toc.toc2>ul{font-size:.9em;margin-bottom:0}
+#toc.toc2 ul ul{margin-left:0;padding-left:1em}
+#toc.toc2 ul.sectlevel0 ul.sectlevel1{padding-left:0;margin-top:.5em;margin-bottom:.5em}
+body.toc2.toc-right{padding-left:0;padding-right:15em}
+body.toc2.toc-right #toc.toc2{border-right-width:0;border-left:1px solid #e7e7e9;left:auto;right:0}}
+@media screen and (min-width:1280px){body.toc2{padding-left:20em;padding-right:0}
+#toc.toc2{width:20em}
+#toc.toc2 #toctitle{font-size:1.375em}
+#toc.toc2>ul{font-size:.95em}
+#toc.toc2 ul ul{padding-left:1.25em}
+body.toc2.toc-right{padding-left:0;padding-right:20em}}
+#content #toc{border:1px solid #e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;border-radius:4px}
+#content #toc>:first-child{margin-top:0}
+#content #toc>:last-child{margin-bottom:0}
+#footer{max-width:none;background:rgba(0,0,0,.8);padding:1.25em}
+#footer-text{color:hsla(0,0%,100%,.8);line-height:1.44}
+#content{margin-bottom:.625em}
+.sect1{padding-bottom:.625em}
+@media screen and (min-width:768px){#content{margin-bottom:1.25em}
+.sect1{padding-bottom:1.25em}}
+.sect1:last-child{padding-bottom:0}
+.sect1+.sect1{border-top:1px solid #e7e7e9}
+#content h1>a.anchor,h2>a.anchor,h3>a.anchor,#toctitle>a.anchor,.sidebarblock>.content>.title>a.anchor,h4>a.anchor,h5>a.anchor,h6>a.anchor{position:absolute;z-index:1001;width:1.5ex;margin-left:-1.5ex;display:block;text-decoration:none!important;visibility:hidden;text-align:center;font-weight:400}
+#content h1>a.anchor::before,h2>a.anchor::before,h3>a.anchor::before,#toctitle>a.anchor::before,.sidebarblock>.content>.title>a.anchor::before,h4>a.anchor::before,h5>a.anchor::before,h6>a.anchor::before{content:"\00A7";font-size:.85em;display:block;padding-top:.1em}
+#content h1:hover>a.anchor,#content h1>a.anchor:hover,h2:hover>a.anchor,h2>a.anchor:hover,h3:hover>a.anchor,#toctitle:hover>a.anchor,.sidebarblock>.content>.title:hover>a.anchor,h3>a.anchor:hover,#toctitle>a.anchor:hover,.sidebarblock>.content>.title>a.anchor:hover,h4:hover>a.anchor,h4>a.anchor:hover,h5:hover>a.anchor,h5>a.anchor:hover,h6:hover>a.anchor,h6>a.anchor:hover{visibility:visible}
+#content h1>a.link,h2>a.link,h3>a.link,#toctitle>a.link,.sidebarblock>.content>.title>a.link,h4>a.link,h5>a.link,h6>a.link{color:#ba3925;text-decoration:none}
+#content h1>a.link:hover,h2>a.link:hover,h3>a.link:hover,#toctitle>a.link:hover,.sidebarblock>.content>.title>a.link:hover,h4>a.link:hover,h5>a.link:hover,h6>a.link:hover{color:#a53221}
+details,.audioblock,.imageblock,.literalblock,.listingblock,.stemblock,.videoblock{margin-bottom:1.25em}
+details{margin-left:1.25rem}
+details>summary{cursor:pointer;display:block;position:relative;line-height:1.6;margin-bottom:.625rem;outline:none;-webkit-tap-highlight-color:transparent}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"";border:solid transparent;border-left:solid;border-width:.3em 0 .3em .5em;position:absolute;top:.5em;left:-1.25rem;transform:translateX(15%)}
+details[open]>summary::before{border:solid transparent;border-top:solid;border-width:.5em .3em 0;transform:translateY(15%)}
+details>summary::after{content:"";width:1.25rem;height:1em;position:absolute;top:.3em;left:-1.25rem}
+.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{text-rendering:optimizeLegibility;text-align:left;font-family:"Noto Serif","DejaVu Serif",serif;font-size:1rem;font-style:italic}
+table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
+.paragraph.lead>p,#preamble>.sectionbody>[class=paragraph]:first-of-type p{font-size:1.21875em;line-height:1.6;color:rgba(0,0,0,.85)}
+.admonitionblock>table{border-collapse:separate;border:0;background:none;width:100%}
+.admonitionblock>table td.icon{text-align:center;width:80px}
+.admonitionblock>table td.icon img{max-width:none}
+.admonitionblock>table td.icon .title{font-weight:bold;font-family:"Open Sans","DejaVu Sans",sans-serif;text-transform:uppercase}
+.admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
+.admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
+.sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
+.sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
+.exampleblock>.content>:first-child,.sidebarblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child,.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
+@media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
+@media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
+.literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
+.literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
+.listingblock>.content{position:relative}
+.listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
+.listingblock:hover code[data-lang]::before{display:block}
+.listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
+.listingblock.terminal pre .command:not([data-prompt])::before{content:"$"}
+.listingblock pre.highlightjs{padding:0}
+.listingblock pre.highlightjs>code{padding:1em;border-radius:4px}
+.listingblock pre.prettyprint{border-width:0}
+.prettyprint{background:#f7f7f8}
+pre.prettyprint .linenums{line-height:1.45;margin-left:2em}
+pre.prettyprint li{background:none;list-style-type:inherit;padding-left:0}
+pre.prettyprint li code[data-lang]::before{opacity:1}
+pre.prettyprint li:not(:first-child) code[data-lang]::before{display:none}
+table.linenotable{border-collapse:separate;border:0;margin-bottom:0;background:none}
+table.linenotable td[class]{color:inherit;vertical-align:top;padding:0;line-height:inherit;white-space:normal}
+table.linenotable td.code{padding-left:.75em}
+table.linenotable td.linenos,pre.pygments .linenos{border-right:1px solid;opacity:.35;padding-right:.5em;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
+pre.pygments span.linenos{display:inline-block;margin-right:.75em}
+.quoteblock{margin:0 1em 1.25em 1.5em;display:table}
+.quoteblock:not(.excerpt)>.title{margin-left:-1.5em;margin-bottom:.75em}
+.quoteblock blockquote,.quoteblock p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
+.quoteblock blockquote{margin:0;padding:0;border:0}
+.quoteblock blockquote::before{content:"\201c";float:left;font-size:2.75em;font-weight:bold;line-height:.6em;margin-left:-.6em;color:#7a2518;text-shadow:0 1px 2px rgba(0,0,0,.1)}
+.quoteblock blockquote>.paragraph:last-child p{margin-bottom:0}
+.quoteblock .attribution{margin-top:.75em;margin-right:.5ex;text-align:right}
+.verseblock{margin:0 1em 1.25em}
+.verseblock pre{font-family:"Open Sans","DejaVu Sans",sans-serif;font-size:1.15rem;color:rgba(0,0,0,.85);font-weight:300;text-rendering:optimizeLegibility}
+.verseblock pre strong{font-weight:400}
+.verseblock .attribution{margin-top:1.25rem;margin-left:.5ex}
+.quoteblock .attribution,.verseblock .attribution{font-size:.9375em;line-height:1.45;font-style:italic}
+.quoteblock .attribution br,.verseblock .attribution br{display:none}
+.quoteblock .attribution cite,.verseblock .attribution cite{display:block;letter-spacing:-.025em;color:rgba(0,0,0,.6)}
+.quoteblock.abstract blockquote::before,.quoteblock.excerpt blockquote::before,.quoteblock .quoteblock blockquote::before{display:none}
+.quoteblock.abstract blockquote,.quoteblock.abstract p,.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{line-height:1.6;word-spacing:0}
+.quoteblock.abstract{margin:0 1em 1.25em;display:block}
+.quoteblock.abstract>.title{margin:0 0 .375em;font-size:1.15em;text-align:center}
+.quoteblock.excerpt>blockquote,.quoteblock .quoteblock{padding:0 0 .25em 1em;border-left:.25em solid #dddddf}
+.quoteblock.excerpt,.quoteblock .quoteblock{margin-left:0}
+.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{color:inherit;font-size:1.0625rem}
+.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;font-size:.85rem;text-align:left;margin-right:0}
+p.tableblock:last-child{margin-bottom:0}
+td.tableblock>.content{margin-bottom:1.25em;word-wrap:anywhere}
+td.tableblock>.content>:last-child{margin-bottom:-1.25em}
+table.tableblock,th.tableblock,td.tableblock{border:0 solid #dedede}
+table.grid-all>*>tr>*{border-width:1px}
+table.grid-cols>*>tr>*{border-width:0 1px}
+table.grid-rows>*>tr>*{border-width:1px 0}
+table.frame-all{border-width:1px}
+table.frame-ends{border-width:1px 0}
+table.frame-sides{border-width:0 1px}
+table.frame-none>colgroup+*>:first-child>*,table.frame-sides>colgroup+*>:first-child>*{border-top-width:0}
+table.frame-none>:last-child>:last-child>*,table.frame-sides>:last-child>:last-child>*{border-bottom-width:0}
+table.frame-none>*>tr>:first-child,table.frame-ends>*>tr>:first-child{border-left-width:0}
+table.frame-none>*>tr>:last-child,table.frame-ends>*>tr>:last-child{border-right-width:0}
+table.stripes-all>*>tr,table.stripes-odd>*>tr:nth-of-type(odd),table.stripes-even>*>tr:nth-of-type(even),table.stripes-hover>*>tr:hover{background:#f8f8f7}
+th.halign-left,td.halign-left{text-align:left}
+th.halign-right,td.halign-right{text-align:right}
+th.halign-center,td.halign-center{text-align:center}
+th.valign-top,td.valign-top{vertical-align:top}
+th.valign-bottom,td.valign-bottom{vertical-align:bottom}
+th.valign-middle,td.valign-middle{vertical-align:middle}
+table thead th,table tfoot th{font-weight:bold}
+tbody tr th{background:#f7f8f7}
+tbody tr th,tbody tr th p,tfoot tr th,tfoot tr th p{color:rgba(0,0,0,.8);font-weight:bold}
+p.tableblock>code:only-child{background:none;padding:0}
+p.tableblock{font-size:1em}
+ol{margin-left:1.75em}
+ul li ol{margin-left:1.5em}
+dl dd{margin-left:1.125em}
+dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
+li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
+ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
+ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
+ul.unstyled,ol.unstyled{margin-left:0}
+li>p:empty:only-child::before{content:"";display:inline-block}
+ul.checklist>li>p:first-child{margin-left:-1em}
+ul.checklist>li>p:first-child>.fa-square-o:first-child,ul.checklist>li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
+ul.checklist>li>p:first-child>input[type=checkbox]:first-child{margin-right:.25em}
+ul.inline{display:flex;flex-flow:row wrap;list-style:none;margin:0 0 .625em -1.25em}
+ul.inline>li{margin-left:1.25em}
+.unstyled dl dt{font-weight:400;font-style:normal}
+ol.arabic{list-style-type:decimal}
+ol.decimal{list-style-type:decimal-leading-zero}
+ol.loweralpha{list-style-type:lower-alpha}
+ol.upperalpha{list-style-type:upper-alpha}
+ol.lowerroman{list-style-type:lower-roman}
+ol.upperroman{list-style-type:upper-roman}
+ol.lowergreek{list-style-type:lower-greek}
+.hdlist>table,.colist>table{border:0;background:none}
+.hdlist>table>tbody>tr,.colist>table>tbody>tr{background:none}
+td.hdlist1,td.hdlist2{vertical-align:top;padding:0 .625em}
+td.hdlist1{font-weight:bold;padding-bottom:1.25em}
+td.hdlist2{word-wrap:anywhere}
+.literalblock+.colist,.listingblock+.colist{margin-top:-.5em}
+.colist td:not([class]):first-child{padding:.4em .75em 0;line-height:1;vertical-align:top}
+.colist td:not([class]):first-child img{max-width:none}
+.colist td:not([class]):last-child{padding:.25em 0}
+.thumb,.th{line-height:0;display:inline-block;border:4px solid #fff;box-shadow:0 0 0 1px #ddd}
+.imageblock.left{margin:.25em .625em 1.25em 0}
+.imageblock.right{margin:.25em 0 1.25em .625em}
+.imageblock>.title{margin-bottom:0}
+.imageblock.thumb,.imageblock.th{border-width:6px}
+.imageblock.thumb>.title,.imageblock.th>.title{padding:0 .125em}
+.image.left,.image.right{margin-top:.25em;margin-bottom:.25em;display:inline-block;line-height:0}
+.image.left{margin-right:.625em}
+.image.right{margin-left:.625em}
+a.image{text-decoration:none;display:inline-block}
+a.image object{pointer-events:none}
+sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
+sup.footnote a,sup.footnoteref a{text-decoration:none}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
+#footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
+#footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
+#footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
+#footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none;margin-left:-1.05em}
+#footnotes .footnote:last-of-type{margin-bottom:0}
+#content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
+div.unbreakable{page-break-inside:avoid}
+.big{font-size:larger}
+.small{font-size:smaller}
+.underline{text-decoration:underline}
+.overline{text-decoration:overline}
+.line-through{text-decoration:line-through}
+.aqua{color:#00bfbf}
+.aqua-background{background:#00fafa}
+.black{color:#000}
+.black-background{background:#000}
+.blue{color:#0000bf}
+.blue-background{background:#0000fa}
+.fuchsia{color:#bf00bf}
+.fuchsia-background{background:#fa00fa}
+.gray{color:#606060}
+.gray-background{background:#7d7d7d}
+.green{color:#006000}
+.green-background{background:#007d00}
+.lime{color:#00bf00}
+.lime-background{background:#00fa00}
+.maroon{color:#600000}
+.maroon-background{background:#7d0000}
+.navy{color:#000060}
+.navy-background{background:#00007d}
+.olive{color:#606000}
+.olive-background{background:#7d7d00}
+.purple{color:#600060}
+.purple-background{background:#7d007d}
+.red{color:#bf0000}
+.red-background{background:#fa0000}
+.silver{color:#909090}
+.silver-background{background:#bcbcbc}
+.teal{color:#006060}
+.teal-background{background:#007d7d}
+.white{color:#bfbfbf}
+.white-background{background:#fafafa}
+.yellow{color:#bfbf00}
+.yellow-background{background:#fafa00}
+span.icon>.fa{cursor:default}
+a span.icon>.fa{cursor:inherit}
+.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
+.admonitionblock td.icon .icon-note::before{content:"\f05a";color:#19407c}
+.admonitionblock td.icon .icon-tip::before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
+.admonitionblock td.icon .icon-warning::before{content:"\f071";color:#bf6900}
+.admonitionblock td.icon .icon-caution::before{content:"\f06d";color:#bf3400}
+.admonitionblock td.icon .icon-important::before{content:"\f06a";color:#bf0000}
+.conum[data-value]{display:inline-block;color:#fff!important;background:rgba(0,0,0,.8);border-radius:50%;text-align:center;font-size:.75em;width:1.67em;height:1.67em;line-height:1.67em;font-family:"Open Sans","DejaVu Sans",sans-serif;font-style:normal;font-weight:bold}
+.conum[data-value] *{color:#fff!important}
+.conum[data-value]+b{display:none}
+.conum[data-value]::after{content:attr(data-value)}
+pre .conum[data-value]{position:relative;top:-.125em}
+b.conum *{color:inherit!important}
+.conum:not([data-value]):empty{display:none}
+dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
+h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
+p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
+p,blockquote,dt,td.content,td.hdlist1,span.alt,summary{font-size:1.0625rem}
+p{margin-bottom:1.25rem}
+.sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
+.exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
+.print-only{display:none!important}
+@page{margin:1.25cm .75cm}
+@media print{*{box-shadow:none!important;text-shadow:none!important}
+html{font-size:80%}
+a{color:inherit!important;text-decoration:underline!important}
+a.bare,a[href^="#"],a[href^="mailto:"]{text-decoration:none!important}
+a[href^="http:"]:not(.bare)::after,a[href^="https:"]:not(.bare)::after{content:"(" attr(href) ")";display:inline-block;font-size:.875em;padding-left:.25em}
+abbr[title]{border-bottom:1px dotted}
+abbr[title]::after{content:" (" attr(title) ")"}
+pre,blockquote,tr,img,object,svg{page-break-inside:avoid}
+thead{display:table-header-group}
+svg{max-width:100%}
+p,blockquote,dt,td.content{font-size:1em;orphans:3;widows:3}
+h2,h3,#toctitle,.sidebarblock>.content>.title{page-break-after:avoid}
+#header,#content,#footnotes,#footer{max-width:none}
+#toc,.sidebarblock,.exampleblock>.content{background:none!important}
+#toc{border-bottom:1px solid #dddddf!important;padding-bottom:0!important}
+body.book #header{text-align:center}
+body.book #header>h1:first-child{border:0!important;margin:2.5em 0 1em}
+body.book #header .details{border:0!important;display:block;padding:0!important}
+body.book #header .details span:first-child{margin-left:0!important}
+body.book #header .details br{display:block}
+body.book #header .details br+span::before{content:none!important}
+body.book #toc{border:0!important;text-align:left!important;padding:0!important;margin:0!important}
+body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-break-before:always}
+.listingblock code[data-lang]::before{display:block}
+#footer{padding:0 .9375em}
+.hide-on-print{display:none!important}
+.print-only{display:block!important}
+.hide-for-print{display:none!important}
+.show-for-print{display:inherit!important}}
+@media amzn-kf8,print{#header>h1:first-child{margin-top:1.25rem}
+.sect1{padding:0!important}
+.sect1+.sect1{border:0}
+#footer{background:none}
+#footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/github.min.css">
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<h1>TeDS Tutorial — Test-Driven Schema Development</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_prerequisites">1. Prerequisites</a></li>
+<li><a href="#_setup">2. Setup</a>
+<ul class="sectlevel2">
+<li><a href="#_standard_installation_recommended">2.1. Standard Installation (Recommended)</a></li>
+<li><a href="#_development_installation_alternative">2.2. Development Installation (Alternative)</a></li>
+</ul>
+</li>
+<li><a href="#_chapter_1_your_first_test_specification">3. Chapter 1: Your First Test Specification</a>
+<ul class="sectlevel2">
+<li><a href="#_understanding_the_problem">3.1. Understanding the Problem</a></li>
+<li><a href="#_create_your_first_testspec">3.2. Create Your First Testspec</a></li>
+<li><a href="#_key_as_payload_quick_testing_without_payload_field">3.3. Key-as-Payload: Quick Testing without Payload Field</a></li>
+<li><a href="#_run_your_first_verification">3.4. Run Your First Verification</a></li>
+<li><a href="#_understanding_the_warning">3.5. Understanding the Warning</a></li>
+</ul>
+</li>
+<li><a href="#_chapter_2_generating_tests_from_existing_schemas">4. Chapter 2: Generating Tests from Existing Schemas</a>
+<ul class="sectlevel2">
+<li><a href="#_working_with_the_demo_schema">4.1. Working with the Demo Schema</a></li>
+<li><a href="#_generate_tests_from_schema_examples">4.2. Generate Tests from Schema Examples</a>
+<ul class="sectlevel3">
+<li><a href="#_json_pointer_default_method">4.2.1. JSON Pointer (Default Method)</a></li>
+<li><a href="#_json_path_alternative_method">4.2.2. JSON Path (Alternative Method)</a></li>
+<li><a href="#_practical_examples">4.2.3. Practical Examples</a></li>
+</ul>
+</li>
+<li><a href="#_inspect_generated_tests">4.3. Inspect Generated Tests</a></li>
+<li><a href="#_extend_with_manual_test_cases">4.4. Extend with Manual Test Cases</a></li>
+</ul>
+</li>
+<li><a href="#_chapter_3_advanced_schema_testing_patterns">5. Chapter 3: Advanced Schema Testing Patterns</a>
+<ul class="sectlevel2">
+<li><a href="#_testing_object_schemas_with_additionalproperties">5.1. Testing Object Schemas with additionalProperties</a></li>
+<li><a href="#_testing_boundary_conditions">5.2. Testing Boundary Conditions</a></li>
+<li><a href="#_testing_enums">5.3. Testing Enums</a></li>
+</ul>
+</li>
+<li><a href="#_chapter_4_working_with_complex_schemas">6. Chapter 4: Working with Complex Schemas</a>
+<ul class="sectlevel2">
+<li><a href="#_testing_oneof_compositions">6.1. Testing oneOf Compositions</a></li>
+</ul>
+</li>
+<li><a href="#_chapter_5_report_generation_and_ci_integration">7. Chapter 5: Report Generation and CI Integration</a>
+<ul class="sectlevel2">
+<li><a href="#_available_report_templates">7.1. Available Report Templates</a></li>
+<li><a href="#_generate_professional_reports">7.2. Generate Professional Reports</a></li>
+<li><a href="#_custom_output_paths">7.3. Custom Output Paths</a></li>
+<li><a href="#_understanding_report_content">7.4. Understanding Report Content</a></li>
+<li><a href="#_output_level_filtering">7.5. Output Level Filtering</a></li>
+<li><a href="#_ci_integration">7.6. CI Integration</a></li>
+<li><a href="#_in_place_updates">7.7. In-Place Updates</a></li>
+</ul>
+</li>
+<li><a href="#_chapter_6_advanced_features">8. Chapter 6: Advanced Features</a>
+<ul class="sectlevel2">
+<li><a href="#_using_multiple_test_files">8.1. Using Multiple Test Files</a></li>
+<li><a href="#_network_access_for_remote_schemas">8.2. Network Access for Remote Schemas</a></li>
+<li><a href="#_parse_payload_string_to_object_conversion">8.3. Parse Payload: String-to-Object Conversion</a></li>
+<li><a href="#_template_variables_for_custom_output_paths">8.4. Template Variables for Custom Output Paths</a>
+<ul class="sectlevel3">
+<li><a href="#_available_template_variables">8.4.1. Available Template Variables</a></li>
+<li><a href="#_json_pointer_rfc_6901_escaping">8.4.2. JSON Pointer RFC 6901 Escaping</a></li>
+</ul>
+</li>
+<li><a href="#_configuration_files_for_complex_generation">8.5. Configuration Files for Complex Generation</a></li>
+<li><a href="#_warning_system">8.6. Warning System</a></li>
+</ul>
+</li>
+<li><a href="#_chapter_7_environment_configuration_and_exit_codes">9. Chapter 7: Environment Configuration and Exit Codes</a>
+<ul class="sectlevel2">
+<li><a href="#_environment_variables">9.1. Environment Variables</a></li>
+<li><a href="#_exit_codes_for_ci_integration">9.2. Exit Codes for CI Integration</a></li>
+</ul>
+</li>
+<li><a href="#_chapter_8_best_practices_and_common_patterns">10. Chapter 8: Best Practices and Common Patterns</a>
+<ul class="sectlevel2">
+<li><a href="#_test_organization">10.1. Test Organization</a></li>
+<li><a href="#_naming_conventions">10.2. Naming Conventions</a></li>
+<li><a href="#_version_management">10.3. Version Management</a></li>
+<li><a href="#_schema_evolution">10.4. Schema Evolution</a></li>
+<li><a href="#_common_pitfalls">10.5. Common Pitfalls</a></li>
+</ul>
+</li>
+<li><a href="#_chapter_9_roundtrip_workflow_edit_and_reuse_verification_output">11. Chapter 9: Roundtrip Workflow - Edit and Reuse Verification Output</a>
+<ul class="sectlevel2">
+<li><a href="#_basic_roundtrip_workflow">11.1. Basic Roundtrip Workflow</a></li>
+<li><a href="#_practical_example_expanding_test_coverage">11.2. Practical Example: Expanding Test Coverage</a></li>
+<li><a href="#_advanced_roundtrip_pattern">11.3. Advanced Roundtrip Pattern</a></li>
+<li><a href="#_benefits_of_roundtrip_workflow">11.4. Benefits of Roundtrip Workflow</a></li>
+</ul>
+</li>
+<li><a href="#_conclusion">12. Conclusion</a></li>
+<li><a href="#_next_steps">13. Next Steps</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Learn TeDS through hands-on examples. This tutorial builds from basic verification to advanced schema testing patterns using real examples from the project.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_prerequisites"><a class="link" href="#_prerequisites">1. Prerequisites</a></h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Python 3.10+</p>
+</li>
+<li>
+<p>Basic understanding of JSON Schema</p>
+</li>
+<li>
+<p>Familiarity with YAML</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_setup"><a class="link" href="#_setup">2. Setup</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_standard_installation_recommended"><a class="link" href="#_standard_installation_recommended">2.1. Standard Installation (Recommended)</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Install from PyPI
+pip install teds
+
+# Verify installation
+teds --version</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Expected output: <code>teds X.Y.Z (spec supported: 1.0-1.0; recommended: 1.0)</code></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_development_installation_alternative"><a class="link" href="#_development_installation_alternative">2.2. Development Installation (Alternative)</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Clone and setup for development
+git clone https://github.com/yaccob/teds.git
+cd teds
+python3 -m venv .venv &amp;&amp; . .venv/bin/activate
+pip install -r requirements.txt -r requirements-dev.txt
+
+# Verify installation
+./teds.py --version</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_chapter_1_your_first_test_specification"><a class="link" href="#_chapter_1_your_first_test_specification">3. Chapter 1: Your First Test Specification</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_understanding_the_problem"><a class="link" href="#_understanding_the_problem">3.1. Understanding the Problem</a></h3>
+<div class="paragraph">
+<p>Consider this simple schema for a user email:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># user_email.yaml
+type: string
+format: email</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>How do you know it actually validates emails correctly? Let&#8217;s test it.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_create_your_first_testspec"><a class="link" href="#_create_your_first_testspec">3.2. Create Your First Testspec</a></h3>
+<div class="paragraph">
+<p>Create <code>user_email.tests.yaml</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">version: "1.0.0"
+tests:
+  user_email.yaml#/:
+    valid:
+      simple_email:
+        description: "Basic valid email"
+        payload: "alice@example.com"
+      email_with_subdomain:
+        description: "Email with subdomain"
+        payload: "bob@mail.company.com"
+    invalid:
+      missing_at:
+        description: "Email without @ symbol"
+        payload: "alice.example.com"
+      missing_domain:
+        description: "Email without domain"
+        payload: "alice@"</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_key_as_payload_quick_testing_without_payload_field"><a class="link" href="#_key_as_payload_quick_testing_without_payload_field">3.3. Key-as-Payload: Quick Testing without Payload Field</a></h3>
+<div class="paragraph">
+<p>TeDS offers a powerful shortcut: when the <code>payload</code> field is missing, the test case <strong>key</strong> is automatically parsed as YAML/JSON and used as the payload:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">version: "1.0.0"
+tests:
+  user_email.yaml#/:
+    valid:
+      '"alice@example.com"':    # Key becomes payload: "alice@example.com"
+        description: "Valid email from key"
+      '"bob@company.com"':      # Key becomes payload: "bob@company.com"
+        description: "Another valid email"
+    invalid:
+      '"alice.example.com"':    # Key becomes payload: "alice.example.com"
+        description: "Invalid: missing @"
+      '"@example.com"':         # Key becomes payload: "@example.com"
+        description: "Invalid: missing user"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Key advantages:</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Compact</strong>: Perfect for testing primitive values</p>
+</li>
+<li>
+<p><strong>Quick</strong>: No need to write <code>payload:</code> for simple cases</p>
+</li>
+<li>
+<p><strong>Clear</strong>: Test key shows exactly what&#8217;s being tested</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>Parsing rules:</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>"42"</code> → number 42</p>
+</li>
+<li>
+<p><code>"null"</code> → null value</p>
+</li>
+<li>
+<p><code>'"hello"'</code> → string "hello" (note the nested quotes)</p>
+</li>
+<li>
+<p><code>'{"name": "test"}'</code> → object with name property</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_run_your_first_verification"><a class="link" href="#_run_your_first_verification">3.4. Run Your First Verification</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">teds verify user_email.tests.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Note: Use <code>./teds.py</code> instead of <code>teds</code> if you&#8217;re using the development installation.</strong></p>
+</div>
+<div class="paragraph">
+<p>You&#8217;ll see output like:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">version: 1.0.0
+tests:
+  user_email.yaml#/:
+    valid:
+      simple_email:
+        payload: alice@example.com
+        result: SUCCESS
+      email_with_subdomain:
+        payload: bob@mail.company.com
+        result: SUCCESS
+    invalid:
+      missing_at:
+        payload: alice.example.com
+        result: WARNING
+        message: |
+          UNEXPECTEDLY VALID
+          A validator that *ignores* 'format' accepted this instance...</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_understanding_the_warning"><a class="link" href="#_understanding_the_warning">3.5. Understanding the Warning</a></h3>
+<div class="paragraph">
+<p>The <code>WARNING</code> tells us that <code>format: email</code> isn&#8217;t enforced by all validators. Some accept <code>alice.example.com</code> as valid, others reject it. This is a real-world issue!</p>
+</div>
+<div class="paragraph">
+<p><strong>Fix it by tightening the schema:</strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># user_email.yaml (improved)
+type: string
+format: email
+pattern: '^[^@]+@[^@]+\.[^@]+$'  # Basic email pattern</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Run the test again - the warning should disappear.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_chapter_2_generating_tests_from_existing_schemas"><a class="link" href="#_chapter_2_generating_tests_from_existing_schemas">4. Chapter 2: Generating Tests from Existing Schemas</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_working_with_the_demo_schema"><a class="link" href="#_working_with_the_demo_schema">4.1. Working with the Demo Schema</a></h3>
+<div class="paragraph">
+<p>Explore the demo schema:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cat demo/sample_schemas.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This contains multiple schema definitions with examples. Let&#8217;s generate tests from them.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_generate_tests_from_schema_examples"><a class="link" href="#_generate_tests_from_schema_examples">4.2. Generate Tests from Schema Examples</a></h3>
+<div class="paragraph">
+<p>The <code>generate</code> command creates test cases from schema definitions using two different addressing methods:</p>
+</div>
+<div class="sect3">
+<h4 id="_json_pointer_default_method"><a class="link" href="#_json_pointer_default_method">4.2.1. JSON Pointer (Default Method)</a></h4>
+<div class="paragraph">
+<p><strong>JSON Pointer</strong> uses the <code>#/path/to/element</code> format and points to a specific location in the document. <strong>TeDS generates tests for the schemas found directly under the specified path</strong>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Generate tests for schemas directly under components/schemas
+# This will find and process schema definitions at this level
+teds generate sample_schemas.yaml#/components/schemas
+
+# Generate tests for properties directly under User schema
+# This processes the properties defined at this level
+teds generate sample_schemas.yaml#/components/schemas/User/properties</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>How JSON Pointer works:</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Points to exactly one location in the document</p>
+</li>
+<li>
+<p>TeDS processes schemas found directly at that location</p>
+</li>
+<li>
+<p>No wildcards needed - the tool looks at the direct children of the specified path</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="title">🔍 Critical Difference: JSON-Pointer vs JSON-Path Reference Behavior</div>
+<div class="paragraph">
+<p><strong>JSON-Pointer</strong> (<code>#/path/to/element</code>) <strong>references the children</strong> of the specified node:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>#/components/schemas/User</code> → Returns <code>type</code>, <code>properties</code>, <code>required</code> (schema internals)</p>
+</li>
+<li>
+<p>❌ <strong>Problem</strong>: You get schema properties, not the schema itself</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>JSON-Path</strong> (<code>$.path.to.element</code>) <strong>references the node directly</strong>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>$.components.schemas.User</code> → Returns the complete User schema object</p>
+</li>
+<li>
+<p>✅ <strong>Correct</strong>: You get the actual schema for test generation</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>Key Rule</strong>: Use JSON-Path syntax (<code>$.components.schemas.User</code>) when you want to reference a schema directly. JSON-Pointer syntax (<code>#/components/schemas/User</code>) will give you the schema&#8217;s internal properties instead.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_json_path_alternative_method"><a class="link" href="#_json_path_alternative_method">4.2.2. JSON Path (Alternative Method)</a></h4>
+<div class="paragraph">
+<p><strong>JSON Path</strong> uses CSS-like selector syntax and requires <strong>explicit wildcards</strong> to select multiple elements. TeDS supports JSON Path through YAML/JSON configuration objects in three ways:</p>
+</div>
+<div class="sect4">
+<h5 id="_method_1_configuration_files"><a class="link" href="#_method_1_configuration_files">Method 1: Configuration Files</a></h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Create a configuration file
+cat &gt; config.yaml &lt;&lt; EOF
+sample_schemas.yaml:
+  paths: ["$.components.schemas.*"]
+EOF
+
+# Generate using @file syntax
+teds generate @config.yaml</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_method_2_direct_yamljson_arguments"><a class="link" href="#_method_2_direct_yamljson_arguments">Method 2: Direct YAML/JSON Arguments</a></h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Pass configuration directly as YAML/JSON string
+teds generate '{"sample_schemas.yaml": {"paths": ["$.components.schemas.*"]}}'
+
+# Multiple paths in one schema
+teds generate '{"api.yaml": {"paths": ["$.components.schemas.Product", "$.components.schemas.Order"]}}'
+
+# With custom target file
+teds generate '{"schema.yaml": {"paths": ["$[\"$defs\"].*"], "target": "custom_tests.yaml"}}'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_method_3_simple_list_format"><a class="link" href="#_method_3_simple_list_format">Method 3: Simple List Format</a></h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Simplified syntax for multiple paths
+teds generate '{"schema.yaml": ["$.components.schemas.*", "$[\"$defs\"].*"]}'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>JSON Path Examples:</strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># Configuration examples (can be in files or direct arguments)
+
+# Select ALL schemas under components/schemas
+sample_schemas.yaml:
+  paths: ["$.components.schemas.*"]
+
+# Select specific schemas by name
+api.yaml:
+  paths: ["$.components.schemas.Product", "$.components.schemas.Email"]
+
+# Array indices and wildcards
+complex.yaml:
+  paths: ["$[\"$defs\"].*", "$.allOf[0]", "$.items[1]"]
+  target: "complex_tests.yaml"
+
+# Nested selections
+nested.yaml:
+  paths: ["$.components.schemas.*.properties.*"]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Key differences:</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>JSON Pointer</strong>: <code>#/components/schemas</code> → finds schemas directly at this location</p>
+</li>
+<li>
+<p><strong>JSON Path</strong>: <code>$.components.schemas.*</code> → requires <code>*</code> wildcard to select multiple items</p>
+</li>
+<li>
+<p><strong>JSON Path usage</strong>: Via YAML/JSON config objects using <code>@file</code>, direct strings, or simple lists</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_practical_examples"><a class="link" href="#_practical_examples">4.2.3. Practical Examples</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># GOOD: Generate from schema container - finds schemas directly under this path
+teds generate api_spec.yaml#/components/schemas
+
+# GOOD: Generate from specific properties - processes properties at this level
+teds generate api_spec.yaml#/components/schemas/User/properties
+
+# AVOID: Single schema without properties - limited test generation
+# teds generate api_spec.yaml#/components/schemas/User
+
+# Using configuration file with JSON Path
+echo 'api_spec.yaml: ["$.components.schemas.*"]' &gt; config.yaml
+teds generate @config.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This creates <code>api_spec.components~1schemas.tests.yaml</code> with test cases derived from the <code>examples</code> in each schema found at the specified location.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_inspect_generated_tests"><a class="link" href="#_inspect_generated_tests">4.3. Inspect Generated Tests</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cat api_spec.components~1schemas.tests.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Notice:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Valid cases are created from schema <code>examples</code></p>
+</li>
+<li>
+<p>Test cases are marked with <code>from_examples: true</code></p>
+</li>
+<li>
+<p>No invalid cases are generated (you add these manually)</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_extend_with_manual_test_cases"><a class="link" href="#_extend_with_manual_test_cases">4.4. Extend with Manual Test Cases</a></h3>
+<div class="paragraph">
+<p>Edit the generated file to add negative cases:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># Add to existing generated file
+tests:
+  api_spec.yaml#/components/schemas/Email:
+    valid:
+      # ... generated cases here ...
+    invalid:
+      not_an_email:
+        description: "String without email format"
+        payload: "not-an-email"
+      empty_string:
+        description: "Empty string"
+        payload: ""</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_chapter_3_advanced_schema_testing_patterns"><a class="link" href="#_chapter_3_advanced_schema_testing_patterns">5. Chapter 3: Advanced Schema Testing Patterns</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_testing_object_schemas_with_additionalproperties"><a class="link" href="#_testing_object_schemas_with_additionalproperties">5.1. Testing Object Schemas with additionalProperties</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># schemas/user.yaml
+type: object
+additionalProperties: false
+required: [id, name, email]
+properties:
+  id:
+    type: string
+    format: uuid
+  name:
+    type: string
+    minLength: 1
+  email:
+    type: string
+    format: email</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Test it thoroughly:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># user.tests.yaml
+version: "1.0.0"
+tests:
+  schemas/user.yaml#/:
+    valid:
+      complete_user:
+        description: "User with all required fields"
+        payload:
+          id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          name: "Alice Example"
+          email: "alice@example.com"
+    invalid:
+      missing_email:
+        description: "Missing required email field"
+        payload:
+          id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          name: "Alice Example"
+      extra_field:
+        description: "Additional property not allowed"
+        payload:
+          id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          name: "Alice Example"
+          email: "alice@example.com"
+          age: 25  # This should be rejected
+      invalid_uuid:
+        description: "Invalid UUID format"
+        payload:
+          id: "not-a-uuid"
+          name: "Alice Example"
+          email: "alice@example.com"</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_testing_boundary_conditions"><a class="link" href="#_testing_boundary_conditions">5.2. Testing Boundary Conditions</a></h3>
+<div class="paragraph">
+<p>For numeric constraints, test the boundaries:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># schemas/age.yaml
+type: integer
+minimum: 0
+maximum: 150</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># age.tests.yaml
+version: "1.0.0"
+tests:
+  schemas/age.yaml#/:
+    valid:
+      minimum_age:
+        description: "Minimum valid age"
+        payload: 0
+      maximum_age:
+        description: "Maximum valid age"
+        payload: 150
+      typical_age:
+        description: "Typical age"
+        payload: 25
+    invalid:
+      negative_age:
+        description: "Below minimum"
+        payload: -1
+      too_old:
+        description: "Above maximum"
+        payload: 151
+      not_integer:
+        description: "Not an integer"
+        payload: 25.5</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_testing_enums"><a class="link" href="#_testing_enums">5.3. Testing Enums</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># schemas/status.yaml
+type: string
+enum: ["draft", "published", "archived"]</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># status.tests.yaml
+version: "1.0.0"
+tests:
+  schemas/status.yaml#/:
+    valid:
+      draft_status:
+        payload: "draft"
+      published_status:
+        payload: "published"
+      archived_status:
+        payload: "archived"
+    invalid:
+      wrong_case:
+        description: "Wrong case should be rejected"
+        payload: "Draft"
+      unknown_status:
+        description: "Status not in enum"
+        payload: "deleted"
+      empty_string:
+        description: "Empty string not in enum"
+        payload: ""</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_chapter_4_working_with_complex_schemas"><a class="link" href="#_chapter_4_working_with_complex_schemas">6. Chapter 4: Working with Complex Schemas</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_testing_oneof_compositions"><a class="link" href="#_testing_oneof_compositions">6.1. Testing oneOf Compositions</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># schemas/contact.yaml
+oneOf:
+  - type: object
+    required: [email]
+    properties:
+      email:
+        type: string
+        format: email
+  - type: object
+    required: [phone]
+    properties:
+      phone:
+        type: string
+        pattern: '^\+[1-9]\d{1,14}$'  # E.164 format</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># contact.tests.yaml
+version: "1.0.0"
+tests:
+  schemas/contact.yaml#/:
+    valid:
+      email_contact:
+        description: "Contact with email only"
+        payload:
+          email: "alice@example.com"
+      phone_contact:
+        description: "Contact with phone only"
+        payload:
+          phone: "+1234567890"
+    invalid:
+      both_fields:
+        description: "Both email and phone (should fail oneOf)"
+        payload:
+          email: "alice@example.com"
+          phone: "+1234567890"
+      neither_field:
+        description: "Neither email nor phone"
+        payload:
+          name: "Alice"
+      invalid_email:
+        description: "Invalid email format"
+        payload:
+          email: "not-an-email"
+      invalid_phone:
+        description: "Invalid phone format"
+        payload:
+          phone: "123"  # Too short for E.164</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_chapter_5_report_generation_and_ci_integration"><a class="link" href="#_chapter_5_report_generation_and_ci_integration">7. Chapter 5: Report Generation and CI Integration</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_available_report_templates"><a class="link" href="#_available_report_templates">7.1. Available Report Templates</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># List all available templates
+teds verify tests.yaml --list-templates
+
+# Available built-in templates:
+# - default.html: Full HTML with syntax highlighting
+# - default.md: Markdown with emoji indicators
+# - default.adoc: AsciiDoc with color coding
+# - summary.html: Compact HTML overview
+# - summary.md: Brief Markdown summary</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_generate_professional_reports"><a class="link" href="#_generate_professional_reports">7.2. Generate Professional Reports</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Generate HTML report
+teds verify sample_tests.yaml --report default.html
+
+# Generate Markdown report
+teds verify sample_tests.yaml --report default.md
+
+# Generate AsciiDoc report
+teds verify sample_tests.yaml --report default.adoc
+
+# Generate compact summary
+teds verify sample_tests.yaml --report summary.md</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_custom_output_paths"><a class="link" href="#_custom_output_paths">7.3. Custom Output Paths</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Specify custom output filenames
+teds verify tests.yaml --report default.html=my_report.html
+teds verify tests.yaml --report summary.md=project_summary.md</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_understanding_report_content"><a class="link" href="#_understanding_report_content">7.4. Understanding Report Content</a></h3>
+<div class="paragraph">
+<p>Reports include:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Executive Summary</strong>: High-level test results with counts</p>
+</li>
+<li>
+<p><strong>Schema Coverage Warnings</strong>: Schemas missing valid or invalid tests</p>
+</li>
+<li>
+<p><strong>Detailed Results</strong>: Complete breakdown by schema with YAML payloads</p>
+</li>
+<li>
+<p><strong>Color-coded Status</strong>: Visual distinction between SUCCESS, WARNING, ERROR</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_output_level_filtering"><a class="link" href="#_output_level_filtering">7.5. Output Level Filtering</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Show only errors (CI-friendly)
+teds verify tests.yaml --output-level error
+
+# Show warnings and errors (default)
+teds verify tests.yaml --output-level warning
+
+# Show everything including successes
+teds verify tests.yaml --output-level all</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_ci_integration"><a class="link" href="#_ci_integration">7.6. CI Integration</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># CI-friendly: only show errors
+teds verify tests/**/*.yaml --output-level error
+
+# Exit code handling
+if teds verify tests/**/*.yaml --output-level error; then
+  echo "All schema tests passed!"
+else
+  case $? in
+    1) echo "Some tests failed - review ERROR cases" ;;
+    2) echo "Hard failure - check configuration/schemas" ;;
+  esac
+fi</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_in_place_updates"><a class="link" href="#_in_place_updates">7.7. In-Place Updates</a></h3>
+<div class="paragraph">
+<p>Keep test files clean and normalized:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Update test files with results
+teds verify my_tests.yaml --in-place
+
+# This updates only the 'tests' section, preserving version and comments</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_chapter_6_advanced_features"><a class="link" href="#_chapter_6_advanced_features">8. Chapter 6: Advanced Features</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_using_multiple_test_files"><a class="link" href="#_using_multiple_test_files">8.1. Using Multiple Test Files</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Verify multiple specifications
+teds verify user.tests.yaml product.tests.yaml order.tests.yaml
+
+# Generate reports for multiple files
+teds verify tests/*.yaml --report default.html</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_network_access_for_remote_schemas"><a class="link" href="#_network_access_for_remote_schemas">8.2. Network Access for Remote Schemas</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Enable network access for remote $ref resolution
+teds verify spec.yaml --allow-network
+
+# With custom timeouts
+TEDS_NETWORK_TIMEOUT=10 teds verify spec.yaml --allow-network</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_parse_payload_string_to_object_conversion"><a class="link" href="#_parse_payload_string_to_object_conversion">8.3. Parse Payload: String-to-Object Conversion</a></h3>
+<div class="paragraph">
+<p>Use <code>parse_payload: true</code> to parse string payloads as YAML/JSON before validation:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">tests:
+  schema.yaml#/User:
+    valid:
+      complex_from_string:
+        description: "User from JSON string"
+        parse_payload: true
+        payload: '{"id":"123","name":"Alice","email":"alice@example.com"}'
+
+      api_response_format:
+        description: "Testing JSON strings within YAML (common in API responses)"
+        parse_payload: true
+        payload: '{"user": {"profile": {"name": "Bob", "settings": {"theme": "dark"}}}}'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>When to use:</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Complex objects as JSON strings (e.g., from API responses)</p>
+</li>
+<li>
+<p>Testing JSON strings that come from external systems</p>
+</li>
+<li>
+<p>When you need to test string-encoded JSON data</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>Important</strong>: When <code>parse_payload: true</code>, the payload must be a string that contains valid YAML/JSON.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_template_variables_for_custom_output_paths"><a class="link" href="#_template_variables_for_custom_output_paths">8.4. Template Variables for Custom Output Paths</a></h3>
+<div class="paragraph">
+<p>Control where generated test files are created using template variables:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># JSON Pointer syntax with template variables
+teds generate schema.yaml#/components/schemas={base}.{pointer}.custom.yaml
+
+# JSON Path syntax with template variables
+teds generate '{"schema.yaml": {"paths": ["$.components.schemas.*"], "target": "{base}_{ext}_tests.yaml"}}'</code></pre>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_available_template_variables"><a class="link" href="#_available_template_variables">8.4.1. Available Template Variables</a></h4>
+<div class="paragraph">
+<p><strong>File-based variables</strong> (work with both JSON Pointer and JSON Path syntax):</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>{file}</code> - schema.yaml</p>
+</li>
+<li>
+<p><code>{base}</code> - schema</p>
+</li>
+<li>
+<p><code>{ext}</code> - yaml</p>
+</li>
+<li>
+<p><code>{dir}</code> - directory path</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>Pointer-based variables</strong> (work only with JSON Pointer syntax):</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>{pointer}</code> - components~1schemas (RFC 6901 escaped)</p>
+</li>
+<li>
+<p><code>{pointer_raw}</code> - components/schemas (unescaped)</p>
+</li>
+<li>
+<p><code>{pointer_strict}</code> - components%2Fschemas (URL encoded)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>Why pointer variables don&#8217;t work with JSON Path syntax:</strong> JSON Path expressions can match multiple locations in a schema (e.g., <code>$.components.schemas.*</code> matches multiple schemas), so there&#8217;s no single pointer value to use in templates. JSON Pointer syntax references exactly one location, making pointer-based templates meaningful.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># JSON Pointer: All variables available
+teds generate api.yaml#/components/schemas={dir}/{base}_{pointer}.yaml
+
+# JSON Path: Only file-based variables available
+teds generate '{"api.yaml": {"paths": ["$.components.schemas.*"], "target": "{dir}/{base}_tests.yaml"}}'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_json_pointer_rfc_6901_escaping"><a class="link" href="#_json_pointer_rfc_6901_escaping">8.4.2. JSON Pointer RFC 6901 Escaping</a></h4>
+<div class="paragraph">
+<p>The <code>{pointer}</code> variable automatically applies RFC 6901 escaping for safe filenames:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># JSON Pointer: #/components/schemas
+# RFC 6901 escaped: components~1schemas
+teds generate api.yaml#/components/schemas
+# Creates: api.components~1schemas.tests.yaml
+
+# JSON Pointer: #/$defs/Address
+# RFC 6901 escaped: $defs~1Address
+teds generate schema.yaml#/$defs/Address
+# Creates: schema.$defs~1Address.tests.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Why RFC 6901 escaping?</strong> Slashes (<code>/</code>) are directory separators in file systems, so <code>components/schemas/User</code> would create subdirectories. RFC 6901 escaping (<code>~1</code> for <code>/</code>, <code>~0</code> for <code>~</code>) ensures the entire pointer becomes part of the filename, keeping all generated files in the same directory while preserving the hierarchical information from the JSON Pointer.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_configuration_files_for_complex_generation"><a class="link" href="#_configuration_files_for_complex_generation">8.5. Configuration Files for Complex Generation</a></h3>
+<div class="paragraph">
+<p>Use YAML configuration files for complex generation scenarios:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># generation-config.yaml
+api_spec.yaml:
+  paths: ["$.components.schemas.*", "$.components.responses.*"]
+  target: "api_validation.tests.yaml"
+
+legacy_schema.yaml: ["$.definitions.*"]</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">teds generate @generation-config.yaml</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_warning_system"><a class="link" href="#_warning_system">8.6. Warning System</a></h3>
+<div class="paragraph">
+<p>Tests can include user warnings and TeDS generates system warnings:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">tests:
+  schema.yaml#/Email:
+    valid:
+      deprecated_format:
+        payload: "user@company.co.uk"
+        warnings: ["This email format will be deprecated in v2.0"]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>System warnings</strong> appear automatically for format divergence issues (when different validators disagree about <code>format</code> constraints).</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_chapter_7_environment_configuration_and_exit_codes"><a class="link" href="#_chapter_7_environment_configuration_and_exit_codes">9. Chapter 7: Environment Configuration and Exit Codes</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_environment_variables"><a class="link" href="#_environment_variables">9.1. Environment Variables</a></h3>
+<div class="paragraph">
+<p>Configure TeDS behavior via environment variables:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Network settings
+export TEDS_NETWORK_TIMEOUT=10        # seconds (default: 5)
+export TEDS_NETWORK_MAX_BYTES=10485760 # bytes (default: 5MB)
+
+# Use in commands
+teds verify remote_specs.yaml --allow-network</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_exit_codes_for_ci_integration"><a class="link" href="#_exit_codes_for_ci_integration">9.2. Exit Codes for CI Integration</a></h3>
+<div class="paragraph">
+<p>TeDS uses semantic exit codes for automation:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>0</strong>: All tests passed</p>
+</li>
+<li>
+<p><strong>1</strong>: Some tests failed (ERROR results)</p>
+</li>
+<li>
+<p><strong>2</strong>: Hard failures (file not found, invalid YAML, etc.)</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># CI script example
+if teds verify tests/*.yaml --output-level error; then
+  echo "✅ All schema contracts validated"
+else
+  exit_code=$?
+  case $exit_code in
+    1) echo "❌ Schema validation failures found" ;;
+    2) echo "🚨 Configuration or file errors" ;;
+  esac
+  exit $exit_code
+fi</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_chapter_8_best_practices_and_common_patterns"><a class="link" href="#_chapter_8_best_practices_and_common_patterns">10. Chapter 8: Best Practices and Common Patterns</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_test_organization"><a class="link" href="#_test_organization">10.1. Test Organization</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">project/
+├── schemas/
+│   ├── user.yaml
+│   ├── product.yaml
+│   └── order.yaml
+├── tests/
+│   ├── user.tests.yaml
+│   ├── product.tests.yaml
+│   └── order.tests.yaml
+└── docs/
+    └── api-validation-report.html</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_naming_conventions"><a class="link" href="#_naming_conventions">10.2. Naming Conventions</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Use descriptive test case names: <code>valid_email_with_subdomain</code> vs <code>test1</code></p>
+</li>
+<li>
+<p>Include purpose in descriptions: <code>"Email without @ symbol should be rejected"</code></p>
+</li>
+<li>
+<p>Group related schemas in the same test file when logical</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_version_management"><a class="link" href="#_version_management">10.3. Version Management</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Always specify <code>version: "1.0.0"</code> in testspecs</p>
+</li>
+<li>
+<p>Keep testspecs in version control alongside schemas</p>
+</li>
+<li>
+<p>Use <code>--in-place</code> updates to maintain clean, reviewable diffs</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_schema_evolution"><a class="link" href="#_schema_evolution">10.4. Schema Evolution</a></h3>
+<div class="paragraph">
+<p>When updating schemas:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>First</strong> add new test cases that capture the intended behavior</p>
+</li>
+<li>
+<p><strong>Then</strong> update the schema to satisfy the new tests</p>
+</li>
+<li>
+<p><strong>Finally</strong> run all tests to ensure no regressions</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_common_pitfalls"><a class="link" href="#_common_pitfalls">10.5. Common Pitfalls</a></h3>
+<div class="paragraph">
+<p><strong>Format vs Pattern Issues</strong>: If you see unexpected <code>WARNING</code> or <code>ERROR</code> results related to <code>format</code> constraints (like <code>format: email</code>, <code>format: date-time</code>, etc.), this is <strong>not a TeDS tool problem</strong>. Different JSON Schema validators handle <code>format</code> differently - some enforce it strictly, others treat it as advisory. This is a known JSON Schema ecosystem issue. Use <code>pattern</code> for strict validation:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># Weak - format may not be enforced by all validators
+type: string
+format: email
+
+# Strong - pattern ensures consistent validation across validators
+type: string
+format: email
+pattern: '^[^@]+@[^@]+\.[^@]+$'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>additionalProperties</strong>: Always be explicit:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># Ambiguous - might allow extra properties
+type: object
+properties:
+  name: {type: string}
+
+# Clear - extra properties forbidden
+type: object
+additionalProperties: false
+properties:
+  name: {type: string}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Boundary Testing</strong>: Test edge cases:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># For minimum: 1, test 0, 1, 2
+# For maximum: 100, test 99, 100, 101
+# For minLength: 3, test "", "ab", "abc", "abcd"</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_chapter_9_roundtrip_workflow_edit_and_reuse_verification_output"><a class="link" href="#_chapter_9_roundtrip_workflow_edit_and_reuse_verification_output">11. Chapter 9: Roundtrip Workflow - Edit and Reuse Verification Output</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>One of TeDS&#8217;s powerful features is <strong>roundtrip capability</strong>: verification output can be edited and reused as input, especially when combined with the <code>--in-place</code> flag.</p>
+</div>
+<div class="sect2">
+<h3 id="_basic_roundtrip_workflow"><a class="link" href="#_basic_roundtrip_workflow">11.1. Basic Roundtrip Workflow</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># 1. Run verification and save output
+teds verify my_tests.yaml &gt; verification_results.yaml
+
+# 2. Edit the results file to add new test cases or modify existing ones
+# (The output format is valid TeDS input format)
+
+# 3. Use edited results as new input
+teds verify verification_results.yaml --in-place</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_practical_example_expanding_test_coverage"><a class="link" href="#_practical_example_expanding_test_coverage">11.2. Practical Example: Expanding Test Coverage</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Start with basic tests
+teds verify user.tests.yaml --in-place
+
+# This updates user.tests.yaml with results. Now you can:
+# 1. Add more test cases directly to user.tests.yaml
+# 2. Copy successful patterns to new test sections
+# 3. Incrementally build comprehensive test suites
+
+# Re-run verification to validate new additions
+teds verify user.tests.yaml --in-place</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_advanced_roundtrip_pattern"><a class="link" href="#_advanced_roundtrip_pattern">11.3. Advanced Roundtrip Pattern</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Generate initial tests from schema
+teds generate schemas.yaml#/components/schemas &gt; user_generated.tests.yaml
+
+# Add manual test cases to generated file
+# (Edit user_generated.tests.yaml to add invalid cases)
+
+# Verify and clean up with in-place updates
+teds verify user_generated.tests.yaml --in-place
+
+# The file is now a clean, validated test specification
+# ready for version control and CI integration</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_benefits_of_roundtrip_workflow"><a class="link" href="#_benefits_of_roundtrip_workflow">11.4. Benefits of Roundtrip Workflow</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Iterative Development</strong>: Build test suites incrementally</p>
+</li>
+<li>
+<p><strong>Clean Output</strong>: <code>--in-place</code> normalizes formatting and removes temporary fields</p>
+</li>
+<li>
+<p><strong>Version Control Friendly</strong>: Consistent file format for meaningful diffs</p>
+</li>
+<li>
+<p><strong>Team Collaboration</strong>: Share test results that others can extend and modify</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion"><a class="link" href="#_conclusion">12. Conclusion</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You now know how to:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Create comprehensive test specifications for JSON Schemas</p>
+</li>
+<li>
+<p>Generate initial tests from schema examples using JSON Pointer syntax</p>
+</li>
+<li>
+<p>Test complex scenarios like oneOf, boundaries, and formats</p>
+</li>
+<li>
+<p>Generate professional validation reports</p>
+</li>
+<li>
+<p>Integrate TeDS into CI/CD pipelines</p>
+</li>
+<li>
+<p>Use roundtrip workflows for iterative test development</p>
+</li>
+<li>
+<p>Follow best practices for maintainable schema testing</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>TeDS helps you catch schema issues early and maintain high-quality API contracts. Use it to build confidence in your schema definitions and create living documentation for your APIs.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_next_steps"><a class="link" href="#_next_steps">13. Next Steps</a></h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Explore example directories for more patterns</p>
+</li>
+<li>
+<p>Set up TeDS in your CI pipeline</p>
+</li>
+<li>
+<p>Contribute test cases for edge cases you discover</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2025-09-28 04:13:34 +0200
+</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
+<script>
+if (!hljs.initHighlighting.called) {
+  hljs.initHighlighting.called = true
+  ;[].slice.call(document.querySelectorAll('pre.highlight > code[data-lang]')).forEach(function (el) { hljs.highlightBlock(el) })
+}
+</script>
+</body>
+</html>
