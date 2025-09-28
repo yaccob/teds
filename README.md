@@ -36,7 +36,7 @@ teds verify demo/sample_tests.yaml
 teds generate demo/sample_schemas.yaml#/components/schemas
 
 # Generate reports
-teds verify demo/sample_tests.yaml --report default.html
+teds verify demo/sample_tests.yaml --report default.html --output-level all
 ```
 
 ## Core Concepts
