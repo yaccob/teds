@@ -687,18 +687,38 @@ Control where generated test files are created using template variables:
 
 [source,bash]
 ----
-# Available template variables (JSON Pointer only - not JSON Path)
+# JSON Pointer syntax with template variables
 teds generate schema.yaml#/components/schemas={base}.{pointer}.custom.yaml
 
-# Variables:
-# {file}     - schema.yaml
-# {base}     - schema
-# {ext}      - yaml
-# {dir}      - directory path
-# {pointer}  - components~1schemas (RFC 6901 escaped)
+# JSON Path syntax with template variables
+teds generate '{"schema.yaml": {"paths": ["$.components.schemas.*"], "target": "{base}_{ext}_tests.yaml"}}'
 ----
 
-**Important**: All template variables work with JSON Pointer syntax (`REF=TARGET` format). YAML configuration objects only support the `{base}` template variable.
+==== Available Template Variables
+
+**File-based variables** (work with both JSON Pointer and JSON Path syntax):
+
+* `{file}` - schema.yaml
+* `{base}` - schema  
+* `{ext}` - yaml
+* `{dir}` - directory path
+
+**Pointer-based variables** (work only with JSON Pointer syntax):
+
+* `{pointer}` - components~1schemas (RFC 6901 escaped)
+* `{pointer_raw}` - components/schemas (unescaped)
+* `{pointer_strict}` - components%2Fschemas (URL encoded)
+
+**Why pointer variables don't work with JSON Path syntax:** JSON Path expressions can match multiple locations in a schema (e.g., `$.components.schemas.*` matches multiple schemas), so there's no single pointer value to use in templates. JSON Pointer syntax references exactly one location, making pointer-based templates meaningful.
+
+[source,bash]
+----
+# JSON Pointer: All variables available
+teds generate api.yaml#/components/schemas={dir}/{base}_{pointer}.yaml
+
+# JSON Path: Only file-based variables available  
+teds generate '{"api.yaml": {"paths": ["$.components.schemas.*"], "target": "{dir}/{base}_tests.yaml"}}'
+----
 
 ==== JSON Pointer RFC 6901 Escaping
 
