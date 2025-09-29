@@ -86,7 +86,6 @@ def expand_target_template(target: str, file_part: str, pointer: str) -> str:
         {pointer} - JSON Pointer (no leading '/'), sanitized for filenames
         {pointer_raw} - JSON Pointer without leading '/' (slashes preserved)
         {pointer_strict} - JSON Pointer without leading '/', percent-encoded
-        {index} - 1-based index (always "1" for single refs)
     """
     file_path = Path(file_part)
     base = file_path.stem

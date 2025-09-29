@@ -237,46 +237,6 @@ class CommandRegistry:
         return name in self._commands
 
 
-def _sanitize(s: str) -> str:
-    if not s:
-        return "root"
-    segs = s.split("/")
-    esc = [seg.replace("+", "++") for seg in segs]
-    return "+".join(esc)
-
-
-def _expand_target_template(target: str, file_part: str, pointer: str) -> str:
-    """Expand template variables in target path."""
-    import urllib.parse
-
-    file_path = Path(file_part)
-    base = file_path.stem
-    ext = file_path.suffix.lstrip(".")
-    file_name = file_path.name
-    dir_name = str(file_path.parent) if file_path.parent != Path(".") else ""
-
-    pointer_raw = pointer.lstrip("/")
-    pointer_sanitized = _sanitize(pointer_raw)
-    pointer_strict = urllib.parse.quote(pointer_raw, safe="")
-
-    # Template variables
-    variables = {
-        "base": base,
-        "ext": ext,
-        "file": file_name,
-        "dir": dir_name,
-        "pointer": pointer_sanitized,
-        "pointer_raw": pointer_raw,
-        "pointer_strict": pointer_strict,
-        "index": "1",  # Single ref, so index is always 1
-    }
-
-    # Expand templates
-    expanded = target
-    for var, value in variables.items():
-        expanded = expanded.replace(f"{{{var}}}", value)
-
-    return expanded
 
 
 def _build_parser() -> argparse.ArgumentParser:
