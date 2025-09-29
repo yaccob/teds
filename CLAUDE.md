@@ -335,8 +335,17 @@ pytest tests/unit/test_new_feature.py::test_my_feature -v  # Must pass
 
 ## Commit Standards
 
-- ❌ NO Claude attribution markers (`🤖 Generated with [Claude Code]`, `Co-Authored-By: Claude`, `via [Happy]`)
-- ❌ NO generated-with noise in commit messages - focus on technical content only
-- ✅ Focus on technical changes and their business purpose
-- ✅ Keep git history clean and informative
+**🚨 ABSOLUTE PROHIBITION - NEVER INCLUDE:**
+- ❌ `Generated with [Claude Code]`
+- ❌ `via [Happy]`
+- ❌ `Co-Authored-By: Claude`
+- ❌ `Co-Authored-By: Happy`
+- ❌ ANY attribution markers or generated-with text
+
+**MANDATORY COMMIT REQUIREMENTS:**
+- ✅ Clean, technical commit messages focused on the actual changes
+- ✅ Focus on business purpose and technical implementation
+- ✅ Keep git history professional and informative
 - ✅ Always run coverage verification before committing
+
+**This is a permanent, non-negotiable requirement that must ALWAYS be followed.**
