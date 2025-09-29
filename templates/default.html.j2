@@ -294,7 +294,7 @@
                     <span class="status-unknown">○ UNKNOWN</span>
                     {% endif %}
                 </td>
-                <td>{% if case_data.message %}{{ case_data.message }}{% endif %}</td>
+                <td>{% if case_data.message %}{{ case_data.message }}{% endif %}{% if case_data.warnings %}{% if case_data.message %}<br><br>{% endif %}<strong>Warnings:</strong><ul>{% for warning in case_data.warnings %}{% if warning is string %}<li>{{ warning }}</li>{% else %}<li>{{ warning.generated }}</li>{% endif %}{% endfor %}</ul>{% endif %}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -324,7 +324,7 @@
                     <span class="status-unknown">○ UNKNOWN</span>
                     {% endif %}
                 </td>
-                <td>{% if case_data.message %}{{ case_data.message }}{% endif %}</td>
+                <td>{% if case_data.message %}{{ case_data.message }}{% endif %}{% if case_data.warnings %}{% if case_data.message %}<br><br>{% endif %}<strong>Warnings:</strong><ul>{% for warning in case_data.warnings %}{% if warning is string %}<li>{{ warning }}</li>{% else %}<li>{{ warning.generated }}</li>{% endif %}{% endfor %}</ul>{% endif %}</td>
             </tr>
             {% endfor %}
         </tbody>

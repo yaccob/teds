@@ -138,7 +138,11 @@ a| [source,yaml]
 {% else %}
 | [gray]#○ UNKNOWN#
 {% endif %}
-| {% if case_data.message %}{{ case_data.message }}{% endif %}
+| {% if case_data.message %}{{ case_data.message }}{% endif %}{% if case_data.warnings %}{% if case_data.message %} +
++
+*Warnings:*{% else %}*Warnings:*{% endif %}{% for warning in case_data.warnings %}{% if warning is string %} +
+• {{ warning }}{% else %} +
+• {{ warning.generated }}{% endif %}{% endfor %}{% endif %}
 {% endfor %}
 |===
 {% endif %}
@@ -165,7 +169,11 @@ a| [source,yaml]
 {% else %}
 | [gray]#○ UNKNOWN#
 {% endif %}
-| {% if case_data.message %}{{ case_data.message }}{% endif %}
+| {% if case_data.message %}{{ case_data.message }}{% endif %}{% if case_data.warnings %}{% if case_data.message %} +
++
+*Warnings:*{% else %}*Warnings:*{% endif %}{% for warning in case_data.warnings %}{% if warning is string %} +
+• {{ warning }}{% else %} +
+• {{ warning.generated }}{% endif %}{% endfor %}{% endif %}
 {% endfor %}
 |===
 {% endif %}
