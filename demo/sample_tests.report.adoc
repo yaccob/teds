@@ -13,10 +13,10 @@
 
 [cols="1,3"]
 |===
-| Tool Version | teds 0.1.dev13+g9e84ef6db.d20250920
+| Tool Version | teds 0.7.5
 | Specification Support | 1.0-1.0
 | Recommended Version | 1.0
-| Generated | 2025-09-22T15:26:35.550549+02:00
+| Generated | 2025-09-29T15:20:11.095613+02:00
 | Report File | demo/sample_tests.yaml
 |===
 
@@ -36,75 +36,75 @@
 
 
 
+  
+  
+  
 
+  
+  
 
+  
+  
+  
 
+  
+  
 
+  
+  
+  
 
+  
+  
 
+  
+  
+  
 
+  
+  
 
+  
+  
+  
 
+  
+  
 
+  
+  
+  
 
+  
+  
 
+  
+  
+  
 
+  
+  
 
+  
+  
+  
 
+  
+  
 
+  
+  
+  
 
+  
+  
 
+  
+  
+  
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  
+  
 
 
 [.lead]
@@ -171,7 +171,7 @@ alice@example.com
 
 | [green]#✓ SUCCESS#
 
-|
+| 
 
 | `.components.schemas.Email.examples[1]`
 a| [source,yaml]
@@ -181,7 +181,11 @@ not-an-email
 
 | [yellow]#⚠ WARNING#
 
-|
+| *Warnings:* +
+• Relies on JSON Schema 'format' assertion (format: email).
+Validators that *enforce* 'format' will reject this instance.
+Consider enforcing the expected format by adding an explicit 'pattern' property to the schema.
+
 
 | `good email`
 a| [source,yaml]
@@ -191,7 +195,7 @@ alice@example.com
 
 | [green]#✓ SUCCESS#
 
-|
+| 
 
 |===
 
@@ -257,7 +261,7 @@ email: alice@example.com
 
 | [green]#✓ SUCCESS#
 
-|
+| 
 
 | `.components.schemas.User.examples[1]`
 a| [source,yaml]
@@ -281,7 +285,7 @@ email: alice@example.com
 
 | [green]#✓ SUCCESS#
 
-|
+| 
 
 | `parse as JSON string`
 a| [source,yaml]
@@ -291,7 +295,7 @@ a| [source,yaml]
 
 | [green]#✓ SUCCESS#
 
-|
+| 
 
 |===
 
@@ -393,7 +397,7 @@ AB-123
 
 | [green]#✓ SUCCESS#
 
-|
+| 
 
 | `.components.schemas.Identifier.examples[1]`
 a| [source,yaml]
@@ -403,7 +407,7 @@ a| [source,yaml]
 
 | [green]#✓ SUCCESS#
 
-|
+| 
 
 | `AB-777`
 a| [source,yaml]
@@ -413,7 +417,7 @@ undefined
 
 | [green]#✓ SUCCESS#
 
-|
+| 
 
 | `forty-two`
 a| [source,yaml]
@@ -423,7 +427,7 @@ a| [source,yaml]
 
 | [green]#✓ SUCCESS#
 
-|
+| 
 
 |===
 
@@ -495,7 +499,7 @@ green
 
 | [green]#✓ SUCCESS#
 
-|
+| 
 
 | `simple enum ok`
 a| [source,yaml]
@@ -505,7 +509,7 @@ red
 
 | [green]#✓ SUCCESS#
 
-|
+| 
 
 |===
 
@@ -567,7 +571,7 @@ abc12
 
 | [green]#✓ SUCCESS#
 
-|
+| 
 
 | `regex ok`
 a| [source,yaml]
@@ -577,7 +581,7 @@ abc12
 
 | [green]#✓ SUCCESS#
 
-|
+| 
 
 |===
 
@@ -644,7 +648,7 @@ color: red
 
 | [green]#✓ SUCCESS#
 
-|
+| 
 
 | `full product`
 a| [source,yaml]
@@ -659,7 +663,7 @@ color: blue
 
 | [green]#✓ SUCCESS#
 
-|
+| 
 
 | `json string`
 a| [source,yaml]
@@ -669,7 +673,7 @@ a| [source,yaml]
 
 | [green]#✓ SUCCESS#
 
-|
+| 
 
 |===
 
@@ -707,7 +711,10 @@ tags:
 
 | [yellow]#⚠ WARNING#
 
-| [{'key': 'env', 'value': 'prod'}, {'key': 'env', 'value': 'prod'}] has non-unique elements
+| [{'key': 'env', 'value': 'prod'}, {'key': 'env', 'value': 'prod'}] has non-unique elements +
++
+*Warnings:* +
+• Hyphenated SKUs are common in some systems; consider relaxing the pattern to allow '-' if business rules permit.
 
 |===
 
@@ -748,7 +755,7 @@ email: someone@example.com
 
 | [green]#✓ SUCCESS#
 
-|
+| 
 
 | `.components.schemas.Contact.examples[1]`
 a| [source,yaml]
@@ -758,7 +765,7 @@ phone: +49 621 1234567
 
 | [green]#✓ SUCCESS#
 
-|
+| 
 
 | `.components.schemas.Contact.examples[2]`
 a| [source,yaml]
@@ -779,7 +786,8 @@ email: someone@example.com
 
 | [yellow]#⚠ WARNING#
 
-|
+| *Warnings:* +
+• If E.164-only is desired, tighten the schema (e.g., require '+' and country code) and normalize producers.
 
 | `parse json string`
 a| [source,yaml]
@@ -789,7 +797,7 @@ a| [source,yaml]
 
 | [green]#✓ SUCCESS#
 
-|
+| 
 
 |===
 
@@ -854,7 +862,7 @@ quantity: 2
 
 | [green]#✓ SUCCESS#
 
-|
+| 
 
 | `.components.schemas.OrderLine.examples[1]`
 a| [source,yaml]
@@ -867,7 +875,7 @@ items:
 
 | [green]#✓ SUCCESS#
 
-|
+| 
 
 | `.components.schemas.OrderLine.examples[2]`
 a| [source,yaml]
@@ -894,7 +902,7 @@ quantity: 2
 
 | [green]#✓ SUCCESS#
 
-|
+| 
 
 | `bundled ok`
 a| [source,yaml]
@@ -907,7 +915,7 @@ items:
 
 | [green]#✓ SUCCESS#
 
-|
+| 
 
 | `priced via json string`
 a| [source,yaml]
@@ -917,7 +925,7 @@ a| [source,yaml]
 
 | [green]#✓ SUCCESS#
 
-|
+| 
 
 |===
 
@@ -1006,7 +1014,7 @@ https://example.com
 
 | [green]#✓ SUCCESS#
 
-|
+| 
 
 | `good uri`
 a| [source,yaml]
@@ -1016,7 +1024,7 @@ https://example.com
 
 | [green]#✓ SUCCESS#
 
-|
+| 
 
 |===
 
@@ -1080,7 +1088,7 @@ a| [source,yaml]
 
 | [green]#✓ SUCCESS#
 
-|
+| 
 
 | `good date`
 a| [source,yaml]
@@ -1090,7 +1098,7 @@ a| [source,yaml]
 
 | [green]#✓ SUCCESS#
 
-|
+| 
 
 |===
 
@@ -1129,10 +1137,10 @@ Consider enforcing the expected format by adding an explicit 'pattern' property 
 
 [cols="1,3"]
 |===
-| TeDS Version | 0.1.dev13+g9e84ef6db.d20250920
+| TeDS Version | 0.7.5
 | Supported Spec Range | 1.0-1.0
 | Recommended Spec Version | 1.0
-| Report Generation Time | 2025-09-22T15:26:35.550549+02:00
+| Report Generation Time | 2025-09-29T15:20:11.095613+02:00
 |===
 
 === Report Scope
