@@ -115,7 +115,11 @@ This report analyzes **{{ doc.tests|length }}** schema(s) with a total of **{{ s
 
 {% if case_data.message %}
 **Message:** {{ case_data.message }}
-{% endif %}
+{% endif %}{% if case_data.warnings %}
+**Warnings:**
+{% for warning in case_data.warnings %}{% if warning is string %}• {{ warning }}
+{% else %}• {{ warning.generated }}
+{% endif %}{% endfor %}{% endif %}
 
 ---
 
@@ -137,7 +141,11 @@ This report analyzes **{{ doc.tests|length }}** schema(s) with a total of **{{ s
 
 {% if case_data.message %}
 **Message:** {{ case_data.message }}
-{% endif %}
+{% endif %}{% if case_data.warnings %}
+**Warnings:**
+{% for warning in case_data.warnings %}{% if warning is string %}• {{ warning }}
+{% else %}• {{ warning.generated }}
+{% endif %}{% endfor %}{% endif %}
 
 ---
 
