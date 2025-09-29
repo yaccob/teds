@@ -10,10 +10,10 @@
             font-family: "Noto Serif", "DejaVu Serif", serif;
             line-height: 1.6;
             color: #222;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+            margin: 0;
+            padding: 0;
             background: #fff;
+            display: flex;
         }
 
         h1, h2, h3, h4 {
@@ -120,10 +120,16 @@
 
         .toc {
             background: #f8f9fa;
-            border: 1px solid #ddd;
+            border-right: 1px solid #ddd;
             padding: 1em;
-            margin: 1em 0;
-            border-radius: 4px;
+            margin: 0;
+            border-radius: 0;
+            width: 300px;
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow-y: auto;
         }
 
         .toc h3 {
@@ -148,20 +154,163 @@
         .toc a:hover {
             text-decoration: underline;
         }
+
+        .content {
+            margin-left: 320px;
+            padding: 20px;
+            max-width: 1200px;
+            flex: 1;
+        }
+
+        .toc ul ul {
+            padding-left: 1em;
+        }
+
+        .toc ul ul ul {
+            padding-left: 2em;
+        }
     </style>
 </head>
 <body>
-    <h1 id="teds-default-validation-report">TeDS Default Validation Report</h1>
-
     <div class="toc">
         <h3>Table of Contents</h3>
         <ul>
+            <li><a href="#teds-default-validation-report">TeDS Default Validation Report</a></li>
             <li><a href="#overview">Overview</a></li>
             <li><a href="#executive-summary">Executive Summary</a></li>
-            <li><a href="#detailed-results">Detailed Results</a></li>
+            <li><a href="#detailed-results">Detailed Results</a>
+                
+                <ul>
+                    
+                    
+                    <li><a href="#sample_schemas_yaml__components_schemas_Email">sample_schemas.yaml#/components/schemas/Email</a>
+                        
+                        
+                        
+                        <ul>
+                            <li><a href="#sample_schemas_yaml__components_schemas_Email-valid">Valid Cases (3)</a></li>
+                            <li><a href="#sample_schemas_yaml__components_schemas_Email-invalid">Invalid Cases (1)</a></li>
+                        </ul>
+                        
+                    </li>
+                    
+                    
+                    <li><a href="#sample_schemas_yaml__components_schemas_User">sample_schemas.yaml#/components/schemas/User</a>
+                        
+                        
+                        
+                        <ul>
+                            <li><a href="#sample_schemas_yaml__components_schemas_User-valid">Valid Cases (4)</a></li>
+                            <li><a href="#sample_schemas_yaml__components_schemas_User-invalid">Invalid Cases (4)</a></li>
+                        </ul>
+                        
+                    </li>
+                    
+                    
+                    <li><a href="#sample_schemas_yaml__components_schemas_Identifier">sample_schemas.yaml#/components/schemas/Identifier</a>
+                        
+                        
+                        
+                        <ul>
+                            <li><a href="#sample_schemas_yaml__components_schemas_Identifier-valid">Valid Cases (4)</a></li>
+                            <li><a href="#sample_schemas_yaml__components_schemas_Identifier-invalid">Invalid Cases (2)</a></li>
+                        </ul>
+                        
+                    </li>
+                    
+                    
+                    <li><a href="#sample_schemas_yaml__components_schemas_Color">sample_schemas.yaml#/components/schemas/Color</a>
+                        
+                        
+                        
+                        <ul>
+                            <li><a href="#sample_schemas_yaml__components_schemas_Color-valid">Valid Cases (2)</a></li>
+                            <li><a href="#sample_schemas_yaml__components_schemas_Color-invalid">Invalid Cases (1)</a></li>
+                        </ul>
+                        
+                    </li>
+                    
+                    
+                    <li><a href="#sample_schemas_yaml__components_schemas_Regexy">sample_schemas.yaml#/components/schemas/Regexy</a>
+                        
+                        
+                        
+                        <ul>
+                            <li><a href="#sample_schemas_yaml__components_schemas_Regexy-valid">Valid Cases (2)</a></li>
+                            <li><a href="#sample_schemas_yaml__components_schemas_Regexy-invalid">Invalid Cases (1)</a></li>
+                        </ul>
+                        
+                    </li>
+                    
+                    
+                    <li><a href="#sample_schemas_yaml__components_schemas_Product">sample_schemas.yaml#/components/schemas/Product</a>
+                        
+                        
+                        
+                        <ul>
+                            <li><a href="#sample_schemas_yaml__components_schemas_Product-valid">Valid Cases (3)</a></li>
+                            <li><a href="#sample_schemas_yaml__components_schemas_Product-invalid">Invalid Cases (2)</a></li>
+                        </ul>
+                        
+                    </li>
+                    
+                    
+                    <li><a href="#sample_schemas_yaml__components_schemas_Contact">sample_schemas.yaml#/components/schemas/Contact</a>
+                        
+                        
+                        
+                        <ul>
+                            <li><a href="#sample_schemas_yaml__components_schemas_Contact-valid">Valid Cases (5)</a></li>
+                            <li><a href="#sample_schemas_yaml__components_schemas_Contact-invalid">Invalid Cases (1)</a></li>
+                        </ul>
+                        
+                    </li>
+                    
+                    
+                    <li><a href="#sample_schemas_yaml__components_schemas_OrderLine">sample_schemas.yaml#/components/schemas/OrderLine</a>
+                        
+                        
+                        
+                        <ul>
+                            <li><a href="#sample_schemas_yaml__components_schemas_OrderLine-valid">Valid Cases (6)</a></li>
+                            <li><a href="#sample_schemas_yaml__components_schemas_OrderLine-invalid">Invalid Cases (3)</a></li>
+                        </ul>
+                        
+                    </li>
+                    
+                    
+                    <li><a href="#sample_schemas_yaml__components_schemas_URI">sample_schemas.yaml#/components/schemas/URI</a>
+                        
+                        
+                        
+                        <ul>
+                            <li><a href="#sample_schemas_yaml__components_schemas_URI-valid">Valid Cases (2)</a></li>
+                            <li><a href="#sample_schemas_yaml__components_schemas_URI-invalid">Invalid Cases (1)</a></li>
+                        </ul>
+                        
+                    </li>
+                    
+                    
+                    <li><a href="#sample_schemas_yaml__components_schemas_DateISO">sample_schemas.yaml#/components/schemas/DateISO</a>
+                        
+                        
+                        
+                        <ul>
+                            <li><a href="#sample_schemas_yaml__components_schemas_DateISO-valid">Valid Cases (2)</a></li>
+                            <li><a href="#sample_schemas_yaml__components_schemas_DateISO-invalid">Invalid Cases (1)</a></li>
+                        </ul>
+                        
+                    </li>
+                    
+                </ul>
+                
+            </li>
             <li><a href="#appendix">Appendix</a></li>
         </ul>
     </div>
+
+    <div class="content">
+        <h1 id="teds-default-validation-report">TeDS Default Validation Report</h1>
 
     <h2 id="overview">Overview</h2>
 
@@ -170,7 +319,7 @@
             <tr><th>Tool Version</th><td>teds 0.7.5</td></tr>
             <tr><th>Specification Support</th><td>1.0-1.0</td></tr>
             <tr><th>Recommended Version</th><td>1.0</td></tr>
-            <tr><th>Generated</th><td>2025-09-28T23:30:05.515323+02:00</td></tr>
+            <tr><th>Generated</th><td>2025-09-29T18:21:19.412623+02:00</td></tr>
             <tr><th>Report File</th><td>demo/sample_tests.yaml</td></tr>
         </tbody>
     </table>
@@ -313,7 +462,7 @@
     </table>
 
     
-    <h4>Valid Test Cases</h4>
+    <h4 id="sample_schemas_yaml__components_schemas_Email-valid">Valid Test Cases</h4>
 
     <table>
         <thead>
@@ -340,7 +489,10 @@
                     <span class="status-warning">⚠ WARNING</span>
                     
                 </td>
-                <td></td>
+                <td><strong>Warnings:</strong><ul><li>Relies on JSON Schema 'format' assertion (format: email).
+Validators that *enforce* 'format' will reject this instance.
+Consider enforcing the expected format by adding an explicit 'pattern' property to the schema.
+</li></ul></td>
             </tr>
             
             <tr>
@@ -359,7 +511,7 @@
     
 
     
-    <h4>Invalid Test Cases</h4>
+    <h4 id="sample_schemas_yaml__components_schemas_Email-invalid">Invalid Test Cases</h4>
 
     <table>
         <thead>
@@ -405,7 +557,7 @@ Consider enforcing the expected format by adding an explicit 'pattern' property 
     </table>
 
     
-    <h4>Valid Test Cases</h4>
+    <h4 id="sample_schemas_yaml__components_schemas_User-valid">Valid Test Cases</h4>
 
     <table>
         <thead>
@@ -468,7 +620,7 @@ email: alice@example.com</div></td>
     
 
     
-    <h4>Invalid Test Cases</h4>
+    <h4 id="sample_schemas_yaml__components_schemas_User-invalid">Invalid Test Cases</h4>
 
     <table>
         <thead>
@@ -555,7 +707,7 @@ email: alice@example.com</div></td>
     </table>
 
     
-    <h4>Valid Test Cases</h4>
+    <h4 id="sample_schemas_yaml__components_schemas_Identifier-valid">Valid Test Cases</h4>
 
     <table>
         <thead>
@@ -612,7 +764,7 @@ email: alice@example.com</div></td>
     
 
     
-    <h4>Invalid Test Cases</h4>
+    <h4 id="sample_schemas_yaml__components_schemas_Identifier-invalid">Invalid Test Cases</h4>
 
     <table>
         <thead>
@@ -667,7 +819,7 @@ email: alice@example.com</div></td>
     </table>
 
     
-    <h4>Valid Test Cases</h4>
+    <h4 id="sample_schemas_yaml__components_schemas_Color-valid">Valid Test Cases</h4>
 
     <table>
         <thead>
@@ -702,7 +854,7 @@ email: alice@example.com</div></td>
     
 
     
-    <h4>Invalid Test Cases</h4>
+    <h4 id="sample_schemas_yaml__components_schemas_Color-invalid">Invalid Test Cases</h4>
 
     <table>
         <thead>
@@ -746,7 +898,7 @@ email: alice@example.com</div></td>
     </table>
 
     
-    <h4>Valid Test Cases</h4>
+    <h4 id="sample_schemas_yaml__components_schemas_Regexy-valid">Valid Test Cases</h4>
 
     <table>
         <thead>
@@ -781,7 +933,7 @@ email: alice@example.com</div></td>
     
 
     
-    <h4>Invalid Test Cases</h4>
+    <h4 id="sample_schemas_yaml__components_schemas_Regexy-invalid">Invalid Test Cases</h4>
 
     <table>
         <thead>
@@ -825,7 +977,7 @@ email: alice@example.com</div></td>
     </table>
 
     
-    <h4>Valid Test Cases</h4>
+    <h4 id="sample_schemas_yaml__components_schemas_Product-valid">Valid Test Cases</h4>
 
     <table>
         <thead>
@@ -881,7 +1033,7 @@ color: blue</div></td>
     
 
     
-    <h4>Invalid Test Cases</h4>
+    <h4 id="sample_schemas_yaml__components_schemas_Product-invalid">Invalid Test Cases</h4>
 
     <table>
         <thead>
@@ -915,7 +1067,7 @@ tags:
                     <span class="status-warning">⚠ WARNING</span>
                     
                 </td>
-                <td>[{'key': 'env', 'value': 'prod'}, {'key': 'env', 'value': 'prod'}] has non-unique elements</td>
+                <td>[{'key': 'env', 'value': 'prod'}, {'key': 'env', 'value': 'prod'}] has non-unique elements<br><br><strong>Warnings:</strong><ul><li>Hyphenated SKUs are common in some systems; consider relaxing the pattern to allow '-' if business rules permit.</li></ul></td>
             </tr>
             
         </tbody>
@@ -943,7 +1095,7 @@ tags:
     </table>
 
     
-    <h4>Valid Test Cases</h4>
+    <h4 id="sample_schemas_yaml__components_schemas_Contact-valid">Valid Test Cases</h4>
 
     <table>
         <thead>
@@ -993,7 +1145,7 @@ phone: +49 621 1234567</div></td>
                     <span class="status-warning">⚠ WARNING</span>
                     
                 </td>
-                <td></td>
+                <td><strong>Warnings:</strong><ul><li>If E.164-only is desired, tighten the schema (e.g., require '+' and country code) and normalize producers.</li></ul></td>
             </tr>
             
             <tr>
@@ -1012,7 +1164,7 @@ phone: +49 621 1234567</div></td>
     
 
     
-    <h4>Invalid Test Cases</h4>
+    <h4 id="sample_schemas_yaml__components_schemas_Contact-invalid">Invalid Test Cases</h4>
 
     <table>
         <thead>
@@ -1057,7 +1209,7 @@ phone: +49 621 1234567</div></td>
     </table>
 
     
-    <h4>Valid Test Cases</h4>
+    <h4 id="sample_schemas_yaml__components_schemas_OrderLine-valid">Valid Test Cases</h4>
 
     <table>
         <thead>
@@ -1151,7 +1303,7 @@ items:
     
 
     
-    <h4>Invalid Test Cases</h4>
+    <h4 id="sample_schemas_yaml__components_schemas_OrderLine-invalid">Invalid Test Cases</h4>
 
     <table>
         <thead>
@@ -1224,7 +1376,7 @@ quantity: 0</div></td>
     </table>
 
     
-    <h4>Valid Test Cases</h4>
+    <h4 id="sample_schemas_yaml__components_schemas_URI-valid">Valid Test Cases</h4>
 
     <table>
         <thead>
@@ -1259,7 +1411,7 @@ quantity: 0</div></td>
     
 
     
-    <h4>Invalid Test Cases</h4>
+    <h4 id="sample_schemas_yaml__components_schemas_URI-invalid">Invalid Test Cases</h4>
 
     <table>
         <thead>
@@ -1305,7 +1457,7 @@ Consider enforcing the expected format by adding an explicit 'pattern' property 
     </table>
 
     
-    <h4>Valid Test Cases</h4>
+    <h4 id="sample_schemas_yaml__components_schemas_DateISO-valid">Valid Test Cases</h4>
 
     <table>
         <thead>
@@ -1340,7 +1492,7 @@ Consider enforcing the expected format by adding an explicit 'pattern' property 
     
 
     
-    <h4>Invalid Test Cases</h4>
+    <h4 id="sample_schemas_yaml__components_schemas_DateISO-invalid">Invalid Test Cases</h4>
 
     <table>
         <thead>
@@ -1379,7 +1531,7 @@ Consider enforcing the expected format by adding an explicit 'pattern' property 
             <tr><th>TeDS Version</th><td>0.7.5</td></tr>
             <tr><th>Supported Spec Range</th><td>1.0-1.0</td></tr>
             <tr><th>Recommended Spec Version</th><td>1.0</td></tr>
-            <tr><th>Report Generation Time</th><td>2025-09-28T23:30:05.515323+02:00</td></tr>
+            <tr><th>Report Generation Time</th><td>2025-09-29T18:21:19.412623+02:00</td></tr>
         </tbody>
     </table>
 
@@ -1397,8 +1549,9 @@ Consider enforcing the expected format by adding an explicit 'pattern' property 
 
     <p>For questions about this report or TeDS functionality, please refer to the TeDS documentation.</p>
 
-    <div class="footer">
-        <p>This report was generated automatically by TeDS (Test-Driven Schema Development Tool).</p>
+        <div class="footer">
+            <p>This report was generated automatically by TeDS (Test-Driven Schema Development Tool).</p>
+        </div>
     </div>
 
 </body>

@@ -10,10 +10,10 @@
             font-family: "Noto Serif", "DejaVu Serif", serif;
             line-height: 1.6;
             color: #222;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+            margin: 0;
+            padding: 0;
             background: #fff;
+            display: flex;
         }
 
         h1, h2, h3, h4 {
@@ -120,10 +120,16 @@
 
         .toc {
             background: #f8f9fa;
-            border: 1px solid #ddd;
+            border-right: 1px solid #ddd;
             padding: 1em;
-            margin: 1em 0;
-            border-radius: 4px;
+            margin: 0;
+            border-radius: 0;
+            width: 300px;
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow-y: auto;
         }
 
         .toc h3 {
@@ -148,20 +154,55 @@
         .toc a:hover {
             text-decoration: underline;
         }
+
+        .content {
+            margin-left: 320px;
+            padding: 20px;
+            max-width: 1200px;
+            flex: 1;
+        }
+
+        .toc ul ul {
+            padding-left: 1em;
+        }
+
+        .toc ul ul ul {
+            padding-left: 2em;
+        }
     </style>
 </head>
 <body>
-    <h1 id="teds-default-validation-report">TeDS Default Validation Report</h1>
-
     <div class="toc">
         <h3>Table of Contents</h3>
         <ul>
+            <li><a href="#teds-default-validation-report">TeDS Default Validation Report</a></li>
             <li><a href="#overview">Overview</a></li>
             <li><a href="#executive-summary">Executive Summary</a></li>
-            <li><a href="#detailed-results">Detailed Results</a></li>
+            <li><a href="#detailed-results">Detailed Results</a>
+                {% if inputs[0].doc.tests %}
+                <ul>
+                    {% for ref, grp in inputs[0].doc.tests.items() %}
+                    {% set ref_anchor = ref.replace('/', '_').replace('#', '_').replace('.', '_') %}
+                    <li><a href="#{{ ref_anchor }}">{{ ref }}</a>
+                        {% set valid_cases = (grp.valid or {}) %}
+                        {% set invalid_cases = (grp.invalid or {}) %}
+                        {% if valid_cases or invalid_cases %}
+                        <ul>
+                            {% if valid_cases %}<li><a href="#{{ ref_anchor }}-valid">Valid Cases ({{ valid_cases|length }})</a></li>{% endif %}
+                            {% if invalid_cases %}<li><a href="#{{ ref_anchor }}-invalid">Invalid Cases ({{ invalid_cases|length }})</a></li>{% endif %}
+                        </ul>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </li>
             <li><a href="#appendix">Appendix</a></li>
         </ul>
     </div>
+
+    <div class="content">
+        <h1 id="teds-default-validation-report">TeDS Default Validation Report</h1>
 
     <h2 id="overview">Overview</h2>
 
@@ -272,7 +313,7 @@
     </table>
 
     {% if valid_cases %}
-    <h4>Valid Test Cases</h4>
+    <h4 id="{{ ref_anchor }}-valid">Valid Test Cases</h4>
 
     <table>
         <thead>
@@ -302,7 +343,7 @@
     {% endif %}
 
     {% if invalid_cases %}
-    <h4>Invalid Test Cases</h4>
+    <h4 id="{{ ref_anchor }}-invalid">Invalid Test Cases</h4>
 
     <table>
         <thead>
@@ -367,8 +408,9 @@
 
     <p>For questions about this report or TeDS functionality, please refer to the TeDS documentation.</p>
 
-    <div class="footer">
-        <p>This report was generated automatically by TeDS (Test-Driven Schema Development Tool).</p>
+        <div class="footer">
+            <p>This report was generated automatically by TeDS (Test-Driven Schema Development Tool).</p>
+        </div>
     </div>
 
 </body>
