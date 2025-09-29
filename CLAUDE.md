@@ -6,38 +6,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 TeDS (Test-Driven Schema Development Tool) is a CLI for verifying JSON Schema contracts using YAML test specifications. The tool validates both positive cases (data that should be accepted) and negative cases (data that must be rejected).
 
-## 🚨 URGENT TODO FOR NEXT SESSION 🚨
+## ✅ RECENTLY COMPLETED
 
-**YAML-Config Template Support Extension Required:**
+**YAML-Config Template Support Extension - COMPLETED:**
 
-**Current Issue**: YAML-config template support is artificially limited to only `{base}` variable, but user wants ALL non-pointer variables supported (`{file}`, `{ext}`, `{dir}`).
+**Status**: ✅ IMPLEMENTED - All template variables now supported in YAML configs
 
-**Current Implementation** (`generate.py:387`):
-```python
-target_name = source_config["target"].replace("{base}", source_file.stem)
-```
-
-**Required Change**:
+**Implementation**: Line 399 in `generate.py` correctly uses:
 ```python
 target_name = expand_target_template(source_config["target"], source_file_str, "")
 ```
 
-**Why this works**: Empty `pointer=""` makes pointer-related variables (`{pointer}`, `{pointer_raw}`, `{pointer_strict}`) become empty/ignored, but file-related variables (`{file}`, `{ext}`, `{dir}`, `{base}`) work perfectly.
+**Available Variables**: `{file}`, `{ext}`, `{dir}`, `{base}`, `{pointer}`, `{pointer_raw}`, `{pointer_strict}`
 
-**Implementation Steps**:
-1. Change line 387 in `generate.py` as shown above
-2. Add BDD tests for YAML-config templates: `{file}`, `{ext}`, `{dir}`
-3. Update tutorial documentation after implementation
-4. Verify all 242+ tests still pass
+**Test Coverage**: Unit test `test_yaml_config_with_template_variables_and_subdirectory` validates `{dir}` and `{base}` variables
 
-**User Expectation**: YAML configs should support templates like:
-```yaml
-schema.yaml:
-  paths: ["$.components.schemas.*"]
-  target: "{base}_{ext}_tests.yaml"  # Should become "schema_yaml_tests.yaml"
-```
-
-**REMINDER**: User specifically requested this be visible in next session!
+**Recent Template System Improvements** (completed via commits):
+- Comprehensive template system with RFC 6901 escaping (#79)
+- Template expansion cleanup and {index} variable removal (#93)
+- Template variable documentation clarification (#86)
 
 ## 🚨 CRITICAL: Coverage Must Be Maintained!
 
@@ -51,7 +38,8 @@ pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=term-miss
 2. ✅ Coverage ≥ 85% (maintain 94%+ if possible)
 3. ✅ Coverage report reviewed
 
-**Baseline Branch:** `working-baseline-94percent-coverage` (94.64% coverage, 59 tests)
+**Current Branch:** `master` (93.0% coverage, 152 tests)
+**Baseline Branch:** `working-baseline-94percent-coverage` (archived baseline)
 **The tests exist for a reason - USE THEM!**
 
 ## 🎯 CRITICAL: Always Use Tutorial as Reference
@@ -155,9 +143,10 @@ hatch build
 - **Templates**: Jinja2 templates for report generation (in `templates/` directory)
 
 ### Test Structure
-- `tests/unit/`: Fast unit tests for individual modules (target: 85%+ coverage, achieved: 94%+)
+- `tests/unit/`: Fast unit tests for individual modules (target: 85%+ coverage, achieved: 93.0%)
 - `tests/cli/`: End-to-end CLI integration tests (no coverage requirement - focus on workflow validation)
 - Unit tests provide comprehensive coverage; CLI tests validate end-to-end functionality
+- Current: 152 unit tests, significantly expanded from baseline
 
 ### Coverage Exclusion Strategy
 
@@ -316,13 +305,33 @@ pytest tests/unit/test_new_feature.py::test_my_feature -v  # Must pass
 ## Recent Development History
 
 **Major features completed:**
-1. ✅ Added comprehensive JSON Schema examples to spec_schema.yaml (following Draft 2020-12 standards)
-2. ✅ Fixed CLI generator bug: now produces relative paths instead of absolute paths for better portability
-3. ✅ Implemented comprehensive $defs test cases with proper separation of concerns
-4. ✅ Established Maven/Gradle-style development workflow with Makefile
-5. ✅ Maintained 94.6% test coverage throughout all changes
+1. ✅ Comprehensive template system with all variables (`{file}`, `{ext}`, `{dir}`, `{base}`, pointer variants)
+2. ✅ Commit message hook preventing Claude attribution noise (#94)
+3. ✅ Enhanced HTML report with left-side TOC and full schema depth navigation (#92)
+4. ✅ Template expansion cleanup removing obsolete {index} variable (#93)
+5. ✅ User warnings included in report message column across all templates (#91)
+6. ✅ Automatic tutorial.html generation workflow (#90)
+7. ✅ Test coverage maintained at 93.0% (152 passing tests)
 
-**Branch status:** Working on `working-baseline-94percent-coverage` with all recent improvements committed.
+**Branch status:** Working on `master` branch, diverged 3/3 commits from origin/master.
+
+## Current Project Status
+
+**Git Status:**
+- Branch: `master` (diverged 3/3 commits from origin)
+- Working tree: clean
+- Recent commits: commit-msg hook (#94), template refactoring (#93), HTML report features (#92)
+
+**Test Coverage:** ✅ 93.0% (exceeds ≥85% requirement)
+- 152 tests passing
+- All unit tests pass in 2.29s
+- Coverage maintained above baseline
+
+**Template System Status:** ✅ COMPLETE
+- All template variables implemented: `{file}`, `{ext}`, `{dir}`, `{base}`, pointer variants
+- YAML configs fully support template expansion
+- Unit tests validate functionality
+- Documentation updated
 
 ## Commit Standards
 
