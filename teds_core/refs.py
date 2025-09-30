@@ -127,6 +127,18 @@ def resolve_schema_node(
     file_part, _, frag = ref_expr.partition("#")
     schema_path = (base_dir / file_part).resolve()
 
+    # OPTIMIZATION: Try direct cache access for specific pointer first
+    if cache is not None and frag:
+        target_pointer = f"#{frag}" if not frag.startswith("/") else f"#{frag}"
+        try:
+            # Try to get the exact pointer from cache
+            node = cache.get_schema(schema_path, target_pointer)
+            fragment = frag.lstrip("/")
+            return node, fragment
+        except Exception:
+            # Fall back to root document loading if specific pointer not cached
+            pass
+
     # Use cache if provided, otherwise load directly
     if cache is not None:
         doc = cache.get_schema(schema_path, "#/")
@@ -147,6 +159,7 @@ def resolve_schema_node(
 def collect_examples(
     base_dir: Path, ref_expr: str, cache: TedsSchemaCache | None = None
 ) -> list[tuple[str, Any]]:
+    # OPTIMIZATION: Use optimized resolve_schema_node that tries direct cache access
     node, fragment = resolve_schema_node(base_dir, ref_expr, cache)
     if not isinstance(node, dict):
         return []
