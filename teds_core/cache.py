@@ -188,7 +188,7 @@ class TedsSchemaCache:
 
         try:
             content = file_path.read_bytes()
-            return hashlib.sha256(content).hexdigest()
+            return hashlib.sha1(content).hexdigest()
         except OSError as e:
             raise SchemaCacheError(f"Failed to read file {file_path}: {e}") from e
 
@@ -226,16 +226,13 @@ class TedsSchemaCache:
     def _load_and_cache_schema(
         self, file_path: Path, file_hash: str, json_pointer: str
     ) -> dict[str, Any]:
-        """Load schema from file and cache it."""
+        """Load schema from file and cache it with optimized multi-pointer extraction."""
         try:
             # Load the full schema document
             content = file_path.read_text(encoding="utf-8")
             full_schema = yaml_loader.load(content) or {}
 
-            # Extract the specific pointer
-            schema_fragment = self._extract_pointer(full_schema, json_pointer)
-
-            # Update cache entry
+            # Update cache entry metadata
             stat = file_path.stat()
             last_modified = datetime.fromtimestamp(stat.st_mtime).isoformat() + "Z"
             cached_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
@@ -249,14 +246,21 @@ class TedsSchemaCache:
                     "pointers": {},
                 }
 
-            # Find dependencies (simple $ref extraction)
-            dependencies = self._extract_dependencies(schema_fragment)
+            # Extract the requested pointer
+            schema_fragment = self._extract_pointer(full_schema, json_pointer)
 
-            entries[file_hash]["pointers"][json_pointer] = {
-                "schema": schema_fragment,
-                "cached_at": cached_at,
-                "dependencies": dependencies,
-            }
+            # OPTIMIZATION: Pre-cache common schema pointers from components/schemas
+            # This dramatically improves performance for subsequent schema accesses
+            self._preemptively_cache_common_pointers(
+                entries[file_hash], full_schema, cached_at
+            )
+
+            # Cache the specific requested pointer (might already be cached by preemptive caching)
+            if json_pointer not in entries[file_hash]["pointers"]:
+                entries[file_hash]["pointers"][json_pointer] = {
+                    "schema": schema_fragment,
+                    "cached_at": cached_at,
+                }
 
             self.dirty = True
             return schema_fragment
@@ -294,6 +298,56 @@ class TedsSchemaCache:
                 raise SchemaCacheError(f"JSON pointer not found: {json_pointer}")
 
         return current if isinstance(current, dict) else {}
+
+    def _preemptively_cache_common_pointers(
+        self, cache_entry: dict[str, Any], full_schema: dict[str, Any], cached_at: str
+    ) -> None:
+        """Pre-cache common schema pointers to improve subsequent access performance."""
+        # Cache common OpenAPI/AsyncAPI structure pointers
+        # Note: common_patterns could be used for future pattern-based caching
+
+        # Try to find and cache all schemas in components/schemas
+        try:
+            components = full_schema.get("components", {})
+            schemas = components.get("schemas", {})
+
+            if schemas:
+                # Cache the container
+                cache_entry["pointers"]["#/components/schemas"] = {
+                    "schema": schemas,
+                    "cached_at": cached_at,
+                }
+
+                # Cache individual schemas
+                for schema_name, schema_def in schemas.items():
+                    if isinstance(schema_def, dict):
+                        pointer = f"#/components/schemas/{schema_name}"
+                        cache_entry["pointers"][pointer] = {
+                            "schema": schema_def,
+                            "cached_at": cached_at,
+                        }
+        except Exception:
+            # Don't fail on preemptive caching errors
+            pass
+
+        # Try to find and cache definitions (JSON Schema draft-04/07 style)
+        try:
+            definitions = full_schema.get("definitions", {})
+            if definitions:
+                cache_entry["pointers"]["#/definitions"] = {
+                    "schema": definitions,
+                    "cached_at": cached_at,
+                }
+
+                for def_name, def_schema in definitions.items():
+                    if isinstance(def_schema, dict):
+                        pointer = f"#/definitions/{def_name}"
+                        cache_entry["pointers"][pointer] = {
+                            "schema": def_schema,
+                            "cached_at": cached_at,
+                        }
+        except Exception:
+            pass
 
     def _extract_dependencies(self, schema: dict[str, Any]) -> list[str]:
         """Extract $ref dependencies from schema (simple extraction)."""

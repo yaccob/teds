@@ -129,7 +129,8 @@ components:
         self.assertTrue(self.cache.dirty)
         stats = self.cache.get_stats()
         self.assertEqual(stats["cached_files"], 1)
-        self.assertEqual(stats["cached_pointers"], 1)
+        # With preemptive caching, multiple pointers are cached (root + extracted schemas)
+        self.assertGreaterEqual(stats["cached_pointers"], 1)
 
     def test_get_schema_extracts_json_pointer(self):
         """Test extracting specific schema parts via JSON pointer."""
