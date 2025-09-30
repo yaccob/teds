@@ -10,6 +10,7 @@ from pathlib import Path
 
 from ruamel.yaml import YAML
 
+from .cache import TedsSchemaCache
 from .errors import TedsError
 from .generate import generate_from_source_config, parse_generate_config
 from .validate import validate_file
@@ -20,27 +21,30 @@ def setup_logging():
     """Setup logging from YAML config with environment variable override."""
     # Find the logging config file
     config_path = Path(__file__).parent.parent / "logging.yaml"
-    
+
     if config_path.exists():
-        yaml = YAML(typ='safe', pure=True)
-        with open(config_path, 'r') as f:
+        yaml = YAML(typ="safe", pure=True)
+        with open(config_path) as f:
             config = yaml.load(f)
-        
+
         # Override log level from environment variable if set
-        env_level = os.getenv('LOGLEVEL', '').upper()
-        if env_level in ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']:
+        env_level = os.getenv("LOGLEVEL", "").upper()
+        if (
+            env_level in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+            and "loggers" in config
+            and "teds_core" in config["loggers"]
+        ):
             # Set the teds_core logger level from environment
-            if 'loggers' in config and 'teds_core' in config['loggers']:
-                config['loggers']['teds_core']['level'] = env_level
-        
+            config["loggers"]["teds_core"]["level"] = env_level
+
         logging.config.dictConfig(config)
     else:
         # Fallback to basic config
-        level = os.getenv('LOGLEVEL', 'INFO').upper()
+        level = os.getenv("LOGLEVEL", "INFO").upper()
         logging.basicConfig(
             level=getattr(logging, level, logging.INFO),
-            format='%(name)s:%(levelname)s: %(message)s',
-            stream=sys.stderr
+            format="%(name)s:%(levelname)s: %(message)s",
+            stream=sys.stderr,
         )
 
 
@@ -217,6 +221,91 @@ class GenerateCommand(Command):
             pass
 
 
+class CacheCommand(Command):
+    """Command for cache management operations."""
+
+    def execute(self, args: argparse.Namespace) -> int:
+        if args.cache_action == "status":
+            return self._handle_status()
+        elif args.cache_action == "clear":
+            return self._handle_clear()
+        elif args.cache_action == "stats":
+            return self._handle_stats()
+        else:
+            print(f"Unknown cache action: {args.cache_action}", file=sys.stderr)
+            return 1
+
+    def _handle_status(self) -> int:
+        """Show cache status."""
+        try:
+            with TedsSchemaCache() as cache:
+                stats = cache.get_stats()
+
+                if not Path(stats["cache_file"]).exists():
+                    print("Cache file does not exist")
+                    return 0
+
+                print("TeDS Schema Cache Status:")
+                print(
+                    f"- Cache file: {stats['cache_file']} ({stats['cache_size_bytes']} bytes)"
+                )
+                print(f"- Cached files: {stats['cached_files']}")
+                print(f"- Cached pointers: {stats['cached_pointers']}")
+                print(f"- Last updated: {stats.get('last_updated', 'Never')}")
+                print(f"- Created: {stats.get('created', 'Unknown')}")
+
+        except Exception as e:
+            print(f"Error reading cache: {e}", file=sys.stderr)
+            return 1
+
+        return 0
+
+    def _handle_clear(self) -> int:
+        """Clear cache."""
+        try:
+            with TedsSchemaCache() as cache:
+                cache.clear()
+                print("Cache cleared successfully")
+
+        except Exception as e:
+            print(f"Error clearing cache: {e}", file=sys.stderr)
+            return 1
+
+        return 0
+
+    def _handle_stats(self) -> int:
+        """Show detailed cache statistics."""
+        try:
+            with TedsSchemaCache() as cache:
+                stats = cache.get_stats()
+
+                print("TeDS Schema Cache Statistics:")
+                print(f"Cache Version: {cache.CACHE_VERSION}")
+                print(f"Cache File: {stats['cache_file']}")
+                print(f"File Size: {stats['cache_size_bytes']} bytes")
+                print(f"Cached Files: {stats['cached_files']}")
+                print(f"Cached Pointers: {stats['cached_pointers']}")
+                print(f"Created: {stats.get('created', 'Unknown')}")
+                print(f"Last Updated: {stats.get('last_updated', 'Never')}")
+
+                # Show cache entries if they exist
+                if stats["cached_files"] > 0:
+                    print("\nCached Schema Files:")
+                    entries = cache.cache_data.get("entries", {})
+                    for file_hash, entry in entries.items():
+                        file_path = entry.get("file_path", "Unknown")
+                        pointer_count = len(entry.get("pointers", {}))
+                        print(
+                            f"  {file_path} ({pointer_count} pointers, hash: {file_hash[:12]}...)"
+                        )
+
+        except Exception as e:
+            print(f"Error reading cache stats: {e}", file=sys.stderr)
+            return 1
+
+        return 0
+
+
 class CommandRegistry:
     """Registry for CLI commands."""
 
@@ -226,6 +315,7 @@ class CommandRegistry:
             "list-templates": ListTemplatesCommand(),
             "verify": VerifyCommand(),
             "generate": GenerateCommand(),
+            "cache": CacheCommand(),
         }
 
     def get_command(self, name: str) -> Command | None:
@@ -235,8 +325,6 @@ class CommandRegistry:
     def has_command(self, name: str) -> bool:
         """Check if command exists."""
         return name in self._commands
-
-
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -338,6 +426,24 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p_gen.add_argument("mapping", nargs="+", help="REF[=TARGET] mappings")
 
+    # Cache management subcommand
+    p_cache = sub.add_parser(
+        "cache",
+        help="Manage schema cache",
+        description="Manage the persistent schema cache used to speed up operations.",
+        formatter_class=argparse.RawTextHelpFormatter,
+    )
+    p_cache.add_argument(
+        "cache_action",
+        choices=["status", "clear", "stats"],
+        help=(
+            "Cache action to perform:\n"
+            "  status  show basic cache information\n"
+            "  clear   clear entire cache\n"
+            "  stats   show detailed cache statistics"
+        ),
+    )
+
     # No explicit report/templates subcommands; reporting is handled via verify --report and templates listing via top-level --list-templates.
 
     return ap
@@ -357,7 +463,7 @@ def main() -> None:
     # Parse arguments for regular commands
     ap = _build_parser()
 
-    if not argv or argv[0] not in {"verify", "generate"}:
+    if not argv or argv[0] not in {"verify", "generate", "cache"}:
         ap.print_help(sys.stderr)
         sys.exit(2)
 
