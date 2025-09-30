@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import os
 import logging
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -9,6 +9,7 @@ from typing import Any
 import jsonpath_ng
 from ruamel.yaml.comments import CommentedMap
 
+from .cache import TedsSchemaCache
 from .errors import TedsError
 from .refs import collect_examples, join_fragment, resolve_schema_node
 from .utils import expand_target_template, json_path_to_json_pointer
@@ -49,9 +50,16 @@ def _create_empty_test_file(testspec_path: Path) -> None:
     _write_yaml(testspec_path, doc)
 
 
-def generate_exact_node(node_ref: str, testspec_path: Path, schema_base_dir: Path = None) -> None:
+def generate_exact_node(
+    node_ref: str,
+    testspec_path: Path,
+    schema_base_dir: Path | None = None,
+    cache: TedsSchemaCache | None = None,
+) -> None:
     """Generate a test for the exact referenced node without expanding children."""
-    logger.debug(f"generate_exact_node: Starting with node_ref='{node_ref}', testspec_path={testspec_path}, schema_base_dir={schema_base_dir}")
+    logger.debug(
+        f"generate_exact_node: Starting with node_ref='{node_ref}', testspec_path={testspec_path}, schema_base_dir={schema_base_dir}"
+    )
     if testspec_path.exists():
         try:
             doc = yaml_loader.load(testspec_path.read_text(encoding="utf-8")) or {}
@@ -77,7 +85,9 @@ def generate_exact_node(node_ref: str, testspec_path: Path, schema_base_dir: Pat
         logger.debug(f"generate_exact_node: using provided schema_base_dir={base_dir}")
     else:
         base_dir = testspec_path.parent
-        logger.debug(f"generate_exact_node: using testspec parent as base_dir={base_dir}")
+        logger.debug(
+            f"generate_exact_node: using testspec parent as base_dir={base_dir}"
+        )
 
     # Create test only for the exact referenced node (no children expansion)
     group = _ensure_group(tests.get(node_ref))
@@ -85,7 +95,7 @@ def generate_exact_node(node_ref: str, testspec_path: Path, schema_base_dir: Pat
     logger.debug(f"generate_exact_node: Created test group for node_ref='{node_ref}'")
 
     # Add examples if available
-    ex_list = collect_examples(base_dir, node_ref)
+    ex_list = collect_examples(base_dir, node_ref, cache)
     if ex_list:
         vm = group.get("valid")
         if not isinstance(vm, dict):
@@ -103,7 +113,9 @@ def generate_exact_node(node_ref: str, testspec_path: Path, schema_base_dir: Pat
     _write_yaml(testspec_path, doc)
 
 
-def generate_from(parent_ref: str, testspec_path: Path) -> None:
+def generate_from(
+    parent_ref: str, testspec_path: Path, cache: TedsSchemaCache | None = None
+) -> None:
     if testspec_path.exists():
         try:
             doc = yaml_loader.load(testspec_path.read_text(encoding="utf-8")) or {}
@@ -126,9 +138,11 @@ def generate_from(parent_ref: str, testspec_path: Path) -> None:
     base_dir = Path.cwd()  # Schema files are always relative to working directory
 
     # Try to resolve the schema reference
-    logger.debug(f"generate_exact_node: base_dir={base_dir}, parent_ref={parent_ref}, testspec_path={testspec_path}")
+    logger.debug(
+        f"generate_exact_node: base_dir={base_dir}, parent_ref={parent_ref}, testspec_path={testspec_path}"
+    )
     try:
-        parent_node, parent_frag = resolve_schema_node(base_dir, parent_ref)
+        parent_node, parent_frag = resolve_schema_node(base_dir, parent_ref, cache)
     except Exception as first_error:
         # If the reference is relative and fails, try to find the schema file
         file_part = parent_ref.split("#")[0]
@@ -139,7 +153,9 @@ def generate_from(parent_ref: str, testspec_path: Path) -> None:
                 # Update base_dir to the schema's directory and try again
                 base_dir = schema_path.parent
                 try:
-                    parent_node, parent_frag = resolve_schema_node(base_dir, parent_ref)
+                    parent_node, parent_frag = resolve_schema_node(
+                        base_dir, parent_ref, cache
+                    )
                 except Exception as second_error:
                     raise TedsError(
                         f"Failed to resolve parent schema ref: {parent_ref}\n  base_dir: {base_dir}\n  error: {type(second_error).__name__}: {second_error}"
@@ -164,7 +180,7 @@ def generate_from(parent_ref: str, testspec_path: Path) -> None:
         group = _ensure_group(tests.get(child_ref))
         tests[child_ref] = group
 
-        ex_list = collect_examples(base_dir, child_ref)
+        ex_list = collect_examples(base_dir, child_ref, cache)
         if ex_list:
             vm = group.get("valid")
             if not isinstance(vm, dict):
@@ -196,7 +212,9 @@ def parse_generate_config(config_str: str) -> dict[str, dict[str, Any]] | str:
             raise TedsError(f"Configuration file not found: {config_file}")
         try:
             config_str = config_file.read_text(encoding="utf-8")
-            logger.debug(f"parse_generate_config: loaded config file content: {repr(config_str)}")
+            logger.debug(
+                f"parse_generate_config: loaded config file content: {config_str!r}"
+            )
         except Exception as e:
             raise TedsError(
                 f"Failed to read configuration file {config_file}: {e}"
@@ -244,7 +262,9 @@ def parse_generate_config(config_str: str) -> dict[str, dict[str, Any]] | str:
                         f"Source '{source_file}': path must be string, got {type(path).__name__}"
                     )
 
-        logger.debug(f"parse_generate_config: returning normalized_config={normalized_config}")
+        logger.debug(
+            f"parse_generate_config: returning normalized_config={normalized_config}"
+        )
         return normalized_config
     elif isinstance(parsed, str):
         # Check for REF[=TARGET] syntax first
@@ -319,7 +339,9 @@ def _find_schema_file(base_dir: Path, filename: str) -> Path | None:
     return None
 
 
-def expand_jsonpath_expressions(source_file: Path, expressions: list[str], reference_path: str = None) -> list[str]:
+def expand_jsonpath_expressions(
+    source_file: Path, expressions: list[str], reference_path: str | None = None
+) -> list[str]:
     """Expand JsonPath expressions to concrete JSON Pointer references.
 
     This function processes only JSON-Path expressions. JSON-Pointer conversion
@@ -385,26 +407,36 @@ def extract_base_name(sources: list[str]) -> str:
 
 
 def generate_from_source_config(
-    config: dict[str, dict[str, Any]], base_dir: Path
+    config: dict[str, dict[str, Any]],
+    base_dir: Path,
+    cache: TedsSchemaCache | None = None,
 ) -> None:
     """Generate test specifications from source-centric YAML configuration."""
     logger.debug(f"generate_from_source_config: base_dir={base_dir}, config={config}")
 
     for source_file_str, source_config in config.items():
-        logger.debug(f"Processing source: source_file_str='{source_file_str}', base_dir={base_dir}")
+        logger.debug(
+            f"Processing source: source_file_str='{source_file_str}', base_dir={base_dir}"
+        )
 
         # Determine target file (no schema path resolution yet)
         if source_config["target"]:
             # Explicit target: relative to cwd with template variable expansion
-            target_name = expand_target_template(source_config["target"], source_file_str, "")
+            target_name = expand_target_template(
+                source_config["target"], source_file_str, ""
+            )
             target_path = base_dir / target_name
-            logger.debug(f"Explicit target: target_name='{target_name}', target_path={target_path}")
+            logger.debug(
+                f"Explicit target: target_name='{target_name}', target_path={target_path}"
+            )
         else:
             # Default: {base}.tests.yaml next to schema file
             schema_file = base_dir / source_file_str
             target_name = f"{schema_file.stem}.tests.yaml"
-            target_path = schema_file.parent / target_name  
-            logger.debug(f"Default target: target_name='{target_name}', target_path={target_path}")
+            target_path = schema_file.parent / target_name
+            logger.debug(
+                f"Default target: target_name='{target_name}', target_path={target_path}"
+            )
 
         # Determine schema file path for JsonPath expansion
         if source_config["target"]:
@@ -413,17 +445,23 @@ def generate_from_source_config(
         else:
             # For default targets, schema paths are relative to working directory
             schema_file = base_dir / source_file_str
-        
+
         # Calculate correct reference path relative to test file directory
         try:
             reference_path = os.path.relpath(schema_file, target_path.parent)
         except ValueError:
             # Fallback if relative path calculation fails
             reference_path = source_file_str
-        
-        logger.debug(f"Before expand_jsonpath_expressions: schema_file={schema_file}, paths={source_config['paths']}, reference_path={reference_path}")
-        expanded_refs = expand_jsonpath_expressions(schema_file, source_config["paths"], reference_path)
-        logger.debug(f"After expand_jsonpath_expressions: expanded_refs={expanded_refs}")
+
+        logger.debug(
+            f"Before expand_jsonpath_expressions: schema_file={schema_file}, paths={source_config['paths']}, reference_path={reference_path}"
+        )
+        expanded_refs = expand_jsonpath_expressions(
+            schema_file, source_config["paths"], reference_path
+        )
+        logger.debug(
+            f"After expand_jsonpath_expressions: expanded_refs={expanded_refs}"
+        )
 
         # Detect and warn about conflicts within this source
         conflicts = detect_conflicts(expanded_refs)
@@ -457,12 +495,18 @@ def generate_from_source_config(
                     # For schema resolution in generate_exact_node, always use test file directory
                     # because references are now calculated relative to test file
                     schema_base_dir = target_path.parent
-                    
-                    logger.debug(f"Calling generate_exact_node with ref='{ref}', target_path={target_path}, schema_base_dir={schema_base_dir}")
-                    generate_exact_node(ref, target_path, schema_base_dir=schema_base_dir)
+
+                    logger.debug(
+                        f"Calling generate_exact_node with ref='{ref}', target_path={target_path}, schema_base_dir={schema_base_dir}"
+                    )
+                    generate_exact_node(
+                        ref, target_path, schema_base_dir=schema_base_dir, cache=cache
+                    )
                     logger.debug(f"Successfully generated from ref='{ref}'")
                 except Exception as e:
-                    logger.debug(f"Exception in generate_exact_node: {type(e).__name__}: {e}")
+                    logger.debug(
+                        f"Exception in generate_exact_node: {type(e).__name__}: {e}"
+                    )
                     print(
                         f"Warning: Failed to generate from '{ref}': {e}",
                         file=sys.stderr,

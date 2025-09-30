@@ -9,6 +9,7 @@ from typing import Any
 from jsonschema import Draft202012Validator
 from jsonschema import ValidationError as JsonSchemaValidationError
 
+from .cache import TedsSchemaCache
 from .refs import build_validator_for_ref, collect_examples
 from .version import (
     RECOMMENDED_TESTSPEC_VERSION,
@@ -399,11 +400,12 @@ def _process_schema_ref(
     testspec_dir: Path,
     output_level: str,
     in_place: bool,
+    cache: TedsSchemaCache | None = None,
 ) -> tuple[dict[str, Any], int]:
     """Process a single schema reference and its test cases."""
     try:
         validator_strict, validator_base = build_validator_for_ref(
-            testspec_dir, schema_ref
+            testspec_dir, schema_ref, cache
         )
     except Exception as e:
         print(
@@ -413,7 +415,7 @@ def _process_schema_ref(
         return {}, 2
 
     try:
-        examples = collect_examples(testspec_dir, schema_ref)
+        examples = collect_examples(testspec_dir, schema_ref, cache)
     except Exception as e:
         print(
             f"Failed to collect examples for ref: {schema_ref}\n  in: {testspec_dir}\n  error: {type(e).__name__}: {e}",
@@ -445,7 +447,11 @@ def _process_schema_ref(
 
 
 def validate_doc(
-    doc: dict[str, Any], testspec_dir: Path, output_level: str, in_place: bool = False
+    doc: dict[str, Any],
+    testspec_dir: Path,
+    output_level: str,
+    in_place: bool = False,
+    cache: TedsSchemaCache | None = None,
 ) -> tuple[dict[str, Any], int]:
     """Validate a testspec document against schemas."""
     tests = doc.get("tests") or {}
@@ -454,7 +460,7 @@ def validate_doc(
 
     for schema_ref, value in tests.items():
         out_group, ref_rc = _process_schema_ref(
-            schema_ref, value, testspec_dir, output_level, in_place
+            schema_ref, value, testspec_dir, output_level, in_place, cache
         )
         rc = max(rc, ref_rc)
 
@@ -464,7 +470,12 @@ def validate_doc(
     return out_tests, rc
 
 
-def validate_file(testspec_path: Path, output_level: str, in_place: bool) -> int:
+def validate_file(
+    testspec_path: Path,
+    output_level: str,
+    in_place: bool,
+    cache: TedsSchemaCache | None = None,
+) -> int:
     try:
         doc = yaml_loader.load(testspec_path.read_text(encoding="utf-8")) or {}
     except Exception as e:  # pragma: no cover start
@@ -523,6 +534,7 @@ def validate_file(testspec_path: Path, output_level: str, in_place: bool) -> int
         testspec_path.parent,
         output_level=output_level,
         in_place=in_place,
+        cache=cache,
     )
 
     result_doc = {"version": RECOMMENDED_TESTSPEC_VERSION, "tests": out_tests}
