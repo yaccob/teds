@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -74,7 +74,9 @@ class TedsSchemaCache:
     def save(self) -> None:
         """Save cache to disk if dirty."""
         if self.dirty:
-            self.cache_data["last_updated"] = datetime.utcnow().isoformat() + "Z"
+            self.cache_data["last_updated"] = (
+                datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+            )
             try:
                 # Atomic write using temporary file
                 temp_file = self.cache_file.with_suffix(".tmp")
@@ -163,7 +165,7 @@ class TedsSchemaCache:
 
     def _init_empty_cache(self) -> None:
         """Initialize empty cache structure."""
-        now = datetime.utcnow().isoformat() + "Z"
+        now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
         self.cache_data = {
             "cache_version": self.CACHE_VERSION,
             "created": now,
@@ -236,7 +238,7 @@ class TedsSchemaCache:
             # Update cache entry
             stat = file_path.stat()
             last_modified = datetime.fromtimestamp(stat.st_mtime).isoformat() + "Z"
-            cached_at = datetime.utcnow().isoformat() + "Z"
+            cached_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
             entries = self.cache_data.setdefault("entries", {})
             if file_hash not in entries:
