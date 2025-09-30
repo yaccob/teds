@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from .cache import TedsSchemaCache
 from .resources import read_text_resource
 from .validate import _validate_testspec_against_schema, validate_doc
 from .version import (
@@ -130,7 +131,10 @@ def build_context(inputs: Iterable[ReportInput]) -> dict[str, Any]:
 
 
 def run_report_per_spec(
-    spec_paths: list[Path], template_id: str, output_level: str
+    spec_paths: list[Path],
+    template_id: str,
+    output_level: str,
+    cache: TedsSchemaCache | None = None,
 ) -> tuple[list[tuple[Path, str]], int]:
     """Render a report per spec file using the given template id.
 
@@ -170,7 +174,7 @@ def run_report_per_spec(
             continue
         # Evaluate cases with filtering
         out_tests, rc = validate_doc(
-            raw, sp.parent, output_level=output_level, in_place=False
+            raw, sp.parent, output_level=output_level, in_place=False, cache=cache
         )
         doc = {"version": RECOMMENDED_TESTSPEC_VERSION, "tests": out_tests}
         counts = _compute_counts(doc)

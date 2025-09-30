@@ -127,9 +127,10 @@ class VerifyCommand(Command):
             return 2
 
         try:
-            pairs, rc = run_report_per_spec(
-                [Path(s) for s in args.spec], tpl_id, args.output_level
-            )
+            with TedsSchemaCache() as cache:
+                pairs, rc = run_report_per_spec(
+                    [Path(s) for s in args.spec], tpl_id, args.output_level, cache
+                )
             multi = len(pairs) > 1
 
             for sp, content in pairs:
@@ -167,15 +168,17 @@ class VerifyCommand(Command):
     def _handle_verify_mode(self, args: argparse.Namespace) -> int:
         """Handle standard verification mode."""
         rc_all = 0
-        for spec in args.spec:
-            spec_path = Path(spec)
-            if args.in_place:
-                print(f"Updating {spec_path}", file=sys.stderr)
-            else:
-                print(f"Verifying {spec_path}", file=sys.stderr)
-            rc_all = max(
-                rc_all, validate_file(spec_path, args.output_level, args.in_place)
-            )
+        with TedsSchemaCache() as cache:
+            for spec in args.spec:
+                spec_path = Path(spec)
+                if args.in_place:
+                    print(f"Updating {spec_path}", file=sys.stderr)
+                else:
+                    print(f"Verifying {spec_path}", file=sys.stderr)
+                rc_all = max(
+                    rc_all,
+                    validate_file(spec_path, args.output_level, args.in_place, cache),
+                )
         return rc_all
 
 
@@ -186,18 +189,21 @@ class GenerateCommand(Command):
         self._configure_network(args)
 
         try:
-            # Process each mapping argument
-            for mapping_str in args.mapping:
-                config = parse_generate_config(mapping_str)
+            with TedsSchemaCache() as cache:
+                # Process each mapping argument
+                for mapping_str in args.mapping:
+                    config = parse_generate_config(mapping_str)
 
-                # All inputs are now normalized to dict format by parse_generate_config
-                if not isinstance(config, dict):
-                    raise TedsError(f"Unexpected configuration format: {type(config)}")
+                    # All inputs are now normalized to dict format by parse_generate_config
+                    if not isinstance(config, dict):
+                        raise TedsError(
+                            f"Unexpected configuration format: {type(config)}"
+                        )
 
-                # Use unified processing pipeline
-                base_dir = Path.cwd()
-                # Status messages will be handled inside generate_from_source_config
-                generate_from_source_config(config, base_dir)
+                    # Use unified processing pipeline
+                    base_dir = Path.cwd()
+                    # Status messages will be handled inside generate_from_source_config
+                    generate_from_source_config(config, base_dir, cache)
         except TedsError as e:
             print(str(e), file=sys.stderr)
             return 2
