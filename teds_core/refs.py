@@ -12,6 +12,7 @@ from jsonschema import Draft202012Validator, FormatChecker
 from referencing import Registry, Resource
 from referencing.jsonschema import DRAFT202012
 
+from .cache import TedsSchemaCache
 from .errors import NetworkError
 from .yamlio import yaml_loader
 
@@ -22,7 +23,7 @@ SCHEMA_CACHE_SIZE = 128  # LRU cache size for schema resolution
 
 
 def build_validator_for_ref(
-    base_dir: Path, ref_expr: str
+    base_dir: Path, ref_expr: str, cache: TedsSchemaCache | None = None
 ) -> tuple[Draft202012Validator, Draft202012Validator]:
     """Build validators for a schema reference."""
     file_part, _, frag = ref_expr.partition("#")
@@ -30,7 +31,11 @@ def build_validator_for_ref(
     base_uri = schema_path.as_uri()
     target_ref = base_uri if not frag else f"{base_uri}#/{frag.lstrip('/')}"
 
-    root_doc = yaml_loader.load(schema_path.read_text(encoding="utf-8")) or {}
+    # Use cache if provided, otherwise load directly
+    if cache is not None:
+        root_doc = cache.get_schema(schema_path, "#/")
+    else:
+        root_doc = yaml_loader.load(schema_path.read_text(encoding="utf-8")) or {}
 
     registry = Registry(retrieve=_retrieve).with_resource(
         base_uri,
@@ -46,7 +51,10 @@ def build_validator_for_ref(
 
 
 def build_validator_for_ref_with_config(
-    base_dir: Path, ref_expr: str, network_config: NetworkConfiguration
+    base_dir: Path,
+    ref_expr: str,
+    network_config: NetworkConfiguration,
+    cache: TedsSchemaCache | None = None,
 ) -> tuple[Draft202012Validator, Draft202012Validator]:
     """Build validators with specific network configuration."""
     file_part, _, frag = ref_expr.partition("#")
@@ -54,7 +62,11 @@ def build_validator_for_ref_with_config(
     base_uri = schema_path.as_uri()
     target_ref = base_uri if not frag else f"{base_uri}#/{frag.lstrip('/')}"
 
-    root_doc = yaml_loader.load(schema_path.read_text(encoding="utf-8")) or {}
+    # Use cache if provided, otherwise load directly
+    if cache is not None:
+        root_doc = cache.get_schema(schema_path, "#/")
+    else:
+        root_doc = yaml_loader.load(schema_path.read_text(encoding="utf-8")) or {}
 
     # Use specific retrieve function with config
     def retrieve_func(uri: str) -> Resource:
@@ -109,10 +121,18 @@ def jq_examples_prefix(fragment: str) -> str:
     return "".join(jq_segment(s) for s in segs)
 
 
-def resolve_schema_node(base_dir: Path, ref_expr: str) -> tuple[Any, str]:
+def resolve_schema_node(
+    base_dir: Path, ref_expr: str, cache: TedsSchemaCache | None = None
+) -> tuple[Any, str]:
     file_part, _, frag = ref_expr.partition("#")
     schema_path = (base_dir / file_part).resolve()
-    doc = yaml_loader.load(schema_path.read_text(encoding="utf-8")) or {}
+
+    # Use cache if provided, otherwise load directly
+    if cache is not None:
+        doc = cache.get_schema(schema_path, "#/")
+    else:
+        doc = yaml_loader.load(schema_path.read_text(encoding="utf-8")) or {}
+
     node: Any = doc
     fragment = frag.lstrip("/")
     for k in split_json_pointer(frag):
@@ -124,8 +144,10 @@ def resolve_schema_node(base_dir: Path, ref_expr: str) -> tuple[Any, str]:
     return node, fragment
 
 
-def collect_examples(base_dir: Path, ref_expr: str) -> list[tuple[str, Any]]:
-    node, fragment = resolve_schema_node(base_dir, ref_expr)
+def collect_examples(
+    base_dir: Path, ref_expr: str, cache: TedsSchemaCache | None = None
+) -> list[tuple[str, Any]]:
+    node, fragment = resolve_schema_node(base_dir, ref_expr, cache)
     if not isinstance(node, dict):
         return []
     ex = node.get("examples")
