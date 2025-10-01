@@ -1,0 +1,174 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Ride Sharing Platform Schema"
+type: object
+properties:
+  riders:
+    type: array
+    items:
+      $ref: "#/$defs/Rider"
+  drivers:
+    type: array
+    items:
+      $ref: "#/$defs/Driver"
+  rides:
+    type: array
+    items:
+      $ref: "#/$defs/Ride"
+  vehicles:
+    type: array
+    items:
+      $ref: "../fleet_management/fleet_management.yaml#/$defs/Vehicle"
+$defs:
+  Rider:
+    type: object
+    properties:
+      rider_id:
+        type: string
+        format: uuid
+      name:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/PersonName"
+      email:
+        type: string
+        format: email
+      phone:
+        type: string
+        pattern: "^\\+?[1-9]\\d{1,14}$"
+      rating:
+        type: number
+        minimum: 1
+        maximum: 5
+      total_rides:
+        type: integer
+        minimum: 0
+      payment_methods:
+        type: array
+        items:
+          $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Payment"
+      preferences:
+        $ref: "#/$defs/RiderPreferences"
+    required: ["rider_id", "name", "email", "phone"]
+  RiderPreferences:
+    type: object
+    properties:
+      preferred_car_type:
+        type: string
+        enum: ["economy", "comfort", "premium", "suv", "any"]
+      music_preference:
+        type: string
+        enum: ["no_music", "driver_choice", "my_playlist"]
+      temperature_preference:
+        type: string
+        enum: ["warm", "cool", "driver_choice"]
+      conversation_preference:
+        type: string
+        enum: ["chatty", "quiet", "no_preference"]
+  Driver:
+    type: object
+    properties:
+      driver_id:
+        type: string
+        format: uuid
+      name:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/PersonName"
+      email:
+        type: string
+        format: email
+      phone:
+        type: string
+        pattern: "^\\+?[1-9]\\d{1,14}$"
+      license:
+        $ref: "../fleet_management/fleet_management.yaml#/$defs/DriversLicense"
+      rating:
+        type: number
+        minimum: 1
+        maximum: 5
+      total_rides:
+        type: integer
+        minimum: 0
+      status:
+        type: string
+        enum: ["online", "offline", "busy", "inactive"]
+      vehicle_id:
+        type: string
+        format: uuid
+      current_location:
+        $ref: "../logistics_shipping/logistics.yaml#/$defs/Location"
+      earnings:
+        $ref: "#/$defs/DriverEarnings"
+    required: ["driver_id", "name", "email", "phone", "license", "status"]
+  DriverEarnings:
+    type: object
+    properties:
+      total_earnings:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      weekly_earnings:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      monthly_earnings:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      last_payout:
+        type: string
+        format: date
+  Ride:
+    type: object
+    properties:
+      ride_id:
+        type: string
+        format: uuid
+      rider_id:
+        type: string
+        format: uuid
+      driver_id:
+        type: string
+        format: uuid
+      pickup_location:
+        $ref: "../logistics_shipping/logistics.yaml#/$defs/Location"
+      dropoff_location:
+        $ref: "../logistics_shipping/logistics.yaml#/$defs/Location"
+      requested_time:
+        type: string
+        format: date-time
+      pickup_time:
+        type: string
+        format: date-time
+      dropoff_time:
+        type: string
+        format: date-time
+      status:
+        type: string
+        enum: ["requested", "accepted", "driver_arriving", "in_progress", "completed", "cancelled"]
+      ride_type:
+        type: string
+        enum: ["economy", "comfort", "premium", "suv", "shared"]
+      estimated_duration:
+        type: integer
+        minimum: 1
+      actual_duration:
+        type: integer
+        minimum: 1
+      estimated_distance:
+        type: number
+        minimum: 0.1
+      actual_distance:
+        type: number
+        minimum: 0.1
+      base_fare:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      surge_multiplier:
+        type: number
+        minimum: 1
+        maximum: 5
+      total_fare:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      tip:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      payment:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Payment"
+      rider_rating:
+        type: integer
+        minimum: 1
+        maximum: 5
+      driver_rating:
+        type: integer
+        minimum: 1
+        maximum: 5
+    required: ["ride_id", "rider_id", "pickup_location", "dropoff_location", "requested_time", "status", "ride_type"]

@@ -1,0 +1,253 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Insurance Claims Management Schema"
+type: object
+properties:
+  policies:
+    type: array
+    items:
+      $ref: "#/$defs/Policy"
+  claims:
+    type: array
+    items:
+      $ref: "#/$defs/Claim"
+  policyholders:
+    type: array
+    items:
+      $ref: "#/$defs/Policyholder"
+  adjusters:
+    type: array
+    items:
+      $ref: "#/$defs/Adjuster"
+$defs:
+  Policyholder:
+    type: object
+    properties:
+      policyholder_id:
+        type: string
+        format: uuid
+      name:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/PersonName"
+      email:
+        type: string
+        format: email
+      phone:
+        type: string
+        pattern: "^\\+?[1-9]\\d{1,14}$"
+      address:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Address"
+      date_of_birth:
+        type: string
+        format: date
+      ssn:
+        type: string
+        pattern: "^[0-9]{3}-[0-9]{2}-[0-9]{4}$"
+      driver_license:
+        type: string
+      credit_score:
+        type: integer
+        minimum: 300
+        maximum: 850
+    required: ["policyholder_id", "name", "email", "phone", "address", "date_of_birth"]
+  Policy:
+    type: object
+    properties:
+      policy_id:
+        type: string
+        format: uuid
+      policy_number:
+        type: string
+        pattern: "^POL-[0-9]{8}$"
+      policyholder_id:
+        type: string
+        format: uuid
+      policy_type:
+        type: string
+        enum: ["auto", "home", "life", "health", "business", "travel"]
+      coverage_type:
+        type: string
+        enum: ["basic", "standard", "premium", "comprehensive"]
+      premium:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      deductible:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      coverage_limit:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      effective_date:
+        type: string
+        format: date
+      expiration_date:
+        type: string
+        format: date
+      status:
+        type: string
+        enum: ["active", "suspended", "cancelled", "expired"]
+      covered_items:
+        type: array
+        items:
+          $ref: "#/$defs/CoveredItem"
+    required: ["policy_id", "policy_number", "policyholder_id", "policy_type", "coverage_type", "premium", "deductible", "effective_date", "expiration_date", "status"]
+  CoveredItem:
+    type: object
+    properties:
+      item_id:
+        type: string
+        format: uuid
+      item_type:
+        type: string
+        enum: ["vehicle", "property", "person", "business_equipment"]
+      description:
+        type: string
+        maxLength: 200
+      value:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      details:
+        oneOf:
+          - $ref: "#/$defs/VehicleDetails"
+          - $ref: "#/$defs/PropertyDetails"
+    required: ["item_id", "item_type", "description", "value"]
+  VehicleDetails:
+    type: object
+    properties:
+      make:
+        type: string
+      model:
+        type: string
+      year:
+        type: integer
+        minimum: 1900
+      vin:
+        type: string
+        pattern: "^[A-HJ-NPR-Z0-9]{17}$"
+      license_plate:
+        type: string
+    required: ["make", "model", "year", "vin"]
+  PropertyDetails:
+    type: object
+    properties:
+      property_type:
+        type: string
+        enum: ["single_family", "condo", "apartment", "commercial"]
+      address:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Address"
+      square_feet:
+        type: integer
+        minimum: 100
+      year_built:
+        type: integer
+        minimum: 1800
+    required: ["property_type", "address", "square_feet", "year_built"]
+  Claim:
+    type: object
+    properties:
+      claim_id:
+        type: string
+        format: uuid
+      claim_number:
+        type: string
+        pattern: "^CLM-[0-9]{8}$"
+      policy_id:
+        type: string
+        format: uuid
+      incident_date:
+        type: string
+        format: date
+      reported_date:
+        type: string
+        format: date
+      claim_type:
+        type: string
+        enum: ["accident", "theft", "fire", "flood", "vandalism", "medical", "liability", "other"]
+      description:
+        type: string
+        maxLength: 2000
+      location:
+        $ref: "../logistics_shipping/logistics.yaml#/$defs/Location"
+      estimated_loss:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      claimed_amount:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      approved_amount:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      status:
+        type: string
+        enum: ["submitted", "under_review", "investigating", "approved", "denied", "closed", "pending_payment"]
+      adjuster_id:
+        type: string
+        format: uuid
+      documents:
+        type: array
+        items:
+          $ref: "#/$defs/ClaimDocument"
+      timeline:
+        type: array
+        items:
+          $ref: "#/$defs/ClaimEvent"
+    required: ["claim_id", "claim_number", "policy_id", "incident_date", "reported_date", "claim_type", "description", "estimated_loss", "status"]
+  ClaimDocument:
+    type: object
+    properties:
+      document_id:
+        type: string
+        format: uuid
+      document_type:
+        type: string
+        enum: ["police_report", "medical_record", "receipt", "photo", "estimate", "statement", "other"]
+      file_name:
+        type: string
+      file_url:
+        type: string
+        format: uri
+      uploaded_date:
+        type: string
+        format: date-time
+      uploaded_by:
+        type: string
+    required: ["document_id", "document_type", "file_name", "file_url", "uploaded_date", "uploaded_by"]
+  ClaimEvent:
+    type: object
+    properties:
+      event_id:
+        type: string
+        format: uuid
+      event_type:
+        type: string
+        enum: ["submitted", "assigned", "reviewed", "approved", "denied", "payment_issued", "closed"]
+      date:
+        type: string
+        format: date-time
+      user:
+        type: string
+      notes:
+        type: string
+        maxLength: 500
+    required: ["event_id", "event_type", "date", "user"]
+  Adjuster:
+    type: object
+    properties:
+      adjuster_id:
+        type: string
+        format: uuid
+      name:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/PersonName"
+      email:
+        type: string
+        format: email
+      phone:
+        type: string
+        pattern: "^\\+?[1-9]\\d{1,14}$"
+      license_number:
+        type: string
+      specialties:
+        type: array
+        items:
+          type: string
+          enum: ["auto", "property", "medical", "commercial", "fraud"]
+      hire_date:
+        type: string
+        format: date
+      active_caseload:
+        type: integer
+        minimum: 0
+      max_authority:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+    required: ["adjuster_id", "name", "email", "phone", "license_number", "hire_date"]

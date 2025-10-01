@@ -1,0 +1,360 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Music Streaming Platform Schema"
+type: object
+properties:
+  users:
+    type: array
+    items:
+      $ref: "#/$defs/User"
+  artists:
+    type: array
+    items:
+      $ref: "#/$defs/Artist"
+  albums:
+    type: array
+    items:
+      $ref: "#/$defs/Album"
+  tracks:
+    type: array
+    items:
+      $ref: "#/$defs/Track"
+  playlists:
+    type: array
+    items:
+      $ref: "#/$defs/Playlist"
+$defs:
+  User:
+    type: object
+    properties:
+      user_id:
+        type: string
+        format: uuid
+      username:
+        type: string
+        pattern: "^[a-zA-Z0-9_]{3,20}$"
+      email:
+        type: string
+        format: email
+      name:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/PersonName"
+      date_of_birth:
+        type: string
+        format: date
+      country:
+        type: string
+        pattern: "^[A-Z]{2}$"
+      subscription_type:
+        type: string
+        enum: ["free", "premium", "family", "student"]
+      subscription_start:
+        type: string
+        format: date
+      subscription_end:
+        type: string
+        format: date
+      listening_preferences:
+        $ref: "#/$defs/ListeningPreferences"
+      followers_count:
+        type: integer
+        minimum: 0
+      following_count:
+        type: integer
+        minimum: 0
+    required: ["user_id", "username", "email", "name", "subscription_type"]
+  ListeningPreferences:
+    type: object
+    properties:
+      preferred_genres:
+        type: array
+        items:
+          type: string
+          enum: ["rock", "pop", "hip_hop", "electronic", "classical", "jazz", "country", "r_and_b", "indie", "metal", "folk", "reggae", "blues", "punk"]
+        maxItems: 5
+      audio_quality:
+        type: string
+        enum: ["low", "normal", "high", "lossless"]
+        default: "normal"
+      explicit_content:
+        type: boolean
+        default: true
+      crossfade_duration:
+        type: integer
+        minimum: 0
+        maximum: 12
+      volume_normalization:
+        type: boolean
+        default: true
+  Artist:
+    type: object
+    properties:
+      artist_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 100
+      biography:
+        type: string
+        maxLength: 2000
+      genres:
+        type: array
+        items:
+          type: string
+        uniqueItems: true
+      country:
+        type: string
+        pattern: "^[A-Z]{2}$"
+      formation_date:
+        type: string
+        format: date
+      band_members:
+        type: array
+        items:
+          $ref: "#/$defs/BandMember"
+      social_media:
+        type: object
+        properties:
+          spotify_url:
+            type: string
+            format: uri
+          youtube_url:
+            type: string
+            format: uri
+          instagram:
+            type: string
+          twitter:
+            type: string
+      verified:
+        type: boolean
+        default: false
+      monthly_listeners:
+        type: integer
+        minimum: 0
+      total_plays:
+        type: integer
+        minimum: 0
+    required: ["artist_id", "name", "genres"]
+  BandMember:
+    type: object
+    properties:
+      member_id:
+        type: string
+        format: uuid
+      name:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/PersonName"
+      role:
+        type: string
+        enum: ["vocals", "guitar", "bass", "drums", "keyboard", "producer", "songwriter"]
+      join_date:
+        type: string
+        format: date
+      leave_date:
+        type: string
+        format: date
+    required: ["member_id", "name", "role", "join_date"]
+  Album:
+    type: object
+    properties:
+      album_id:
+        type: string
+        format: uuid
+      title:
+        type: string
+        maxLength: 100
+      artist_id:
+        type: string
+        format: uuid
+      release_date:
+        type: string
+        format: date
+      album_type:
+        type: string
+        enum: ["studio", "live", "compilation", "ep", "single"]
+      genre:
+        type: string
+      total_tracks:
+        type: integer
+        minimum: 1
+      duration_seconds:
+        type: integer
+        minimum: 1
+      cover_art_url:
+        type: string
+        format: uri
+      record_label:
+        type: string
+        maxLength: 100
+      producer:
+        type: string
+        maxLength: 100
+      copyright:
+        type: string
+        maxLength: 200
+      explicit:
+        type: boolean
+        default: false
+      total_plays:
+        type: integer
+        minimum: 0
+    required: ["album_id", "title", "artist_id", "release_date", "album_type", "total_tracks", "duration_seconds"]
+  Track:
+    type: object
+    properties:
+      track_id:
+        type: string
+        format: uuid
+      title:
+        type: string
+        maxLength: 100
+      artist_id:
+        type: string
+        format: uuid
+      album_id:
+        type: string
+        format: uuid
+      track_number:
+        type: integer
+        minimum: 1
+      duration_seconds:
+        type: integer
+        minimum: 1
+      file_url:
+        type: string
+        format: uri
+      preview_url:
+        type: string
+        format: uri
+      lyrics:
+        type: string
+        maxLength: 10000
+      explicit:
+        type: boolean
+        default: false
+      isrc:
+        type: string
+        pattern: "^[A-Z]{2}[A-Z0-9]{3}[0-9]{7}$"
+      composers:
+        type: array
+        items:
+          type: string
+      featured_artists:
+        type: array
+        items:
+          type: string
+          format: uuid
+      audio_features:
+        $ref: "#/$defs/AudioFeatures"
+      play_count:
+        type: integer
+        minimum: 0
+      skip_count:
+        type: integer
+        minimum: 0
+    required: ["track_id", "title", "artist_id", "album_id", "track_number", "duration_seconds", "file_url"]
+  AudioFeatures:
+    type: object
+    properties:
+      tempo:
+        type: number
+        minimum: 50
+        maximum: 200
+      key:
+        type: integer
+        minimum: 0
+        maximum: 11
+      mode:
+        type: integer
+        enum: [0, 1]
+      time_signature:
+        type: integer
+        minimum: 3
+        maximum: 7
+      energy:
+        type: number
+        minimum: 0
+        maximum: 1
+      danceability:
+        type: number
+        minimum: 0
+        maximum: 1
+      valence:
+        type: number
+        minimum: 0
+        maximum: 1
+      acousticness:
+        type: number
+        minimum: 0
+        maximum: 1
+      instrumentalness:
+        type: number
+        minimum: 0
+        maximum: 1
+      liveness:
+        type: number
+        minimum: 0
+        maximum: 1
+      speechiness:
+        type: number
+        minimum: 0
+        maximum: 1
+      loudness:
+        type: number
+        minimum: -60
+        maximum: 0
+  Playlist:
+    type: object
+    properties:
+      playlist_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 100
+      description:
+        type: string
+        maxLength: 300
+      owner_id:
+        type: string
+        format: uuid
+      public:
+        type: boolean
+        default: true
+      collaborative:
+        type: boolean
+        default: false
+      created_date:
+        type: string
+        format: date-time
+      updated_date:
+        type: string
+        format: date-time
+      cover_image_url:
+        type: string
+        format: uri
+      tracks:
+        type: array
+        items:
+          $ref: "#/$defs/PlaylistTrack"
+      followers_count:
+        type: integer
+        minimum: 0
+      total_duration_seconds:
+        type: integer
+        minimum: 0
+    required: ["playlist_id", "name", "owner_id", "public", "created_date", "tracks"]
+  PlaylistTrack:
+    type: object
+    properties:
+      track_id:
+        type: string
+        format: uuid
+      added_date:
+        type: string
+        format: date-time
+      added_by:
+        type: string
+        format: uuid
+      position:
+        type: integer
+        minimum: 0
+    required: ["track_id", "added_date", "added_by", "position"]

@@ -1,0 +1,214 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Library Management System Schema"
+type: object
+properties:
+  books:
+    type: array
+    items:
+      $ref: "#/$defs/Book"
+  members:
+    type: array
+    items:
+      $ref: "#/$defs/Member"
+  loans:
+    type: array
+    items:
+      $ref: "#/$defs/Loan"
+  reservations:
+    type: array
+    items:
+      $ref: "#/$defs/Reservation"
+$defs:
+  Book:
+    type: object
+    properties:
+      book_id:
+        type: string
+        format: uuid
+      isbn:
+        type: string
+        pattern: "^(?:ISBN(?:-1[03])?:? )?(?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]$"
+      title:
+        type: string
+        maxLength: 200
+      subtitle:
+        type: string
+        maxLength: 200
+      authors:
+        type: array
+        items:
+          $ref: "#/$defs/Author"
+        minItems: 1
+      publisher:
+        type: string
+        maxLength: 100
+      publication_date:
+        type: string
+        format: date
+      edition:
+        type: string
+      language:
+        type: string
+        enum: ["en", "es", "fr", "de", "it", "pt", "ja", "zh", "ko", "ru", "ar"]
+      pages:
+        type: integer
+        minimum: 1
+      genre:
+        type: string
+        enum: ["fiction", "non_fiction", "biography", "history", "science", "technology", "art", "philosophy", "religion", "children", "young_adult"]
+      dewey_decimal:
+        type: string
+        pattern: "^[0-9]{3}\\.[0-9]{2,3}$"
+      location:
+        $ref: "#/$defs/ShelfLocation"
+      condition:
+        type: string
+        enum: ["excellent", "good", "fair", "poor", "damaged"]
+      status:
+        type: string
+        enum: ["available", "checked_out", "reserved", "processing", "missing", "damaged"]
+      copies_total:
+        type: integer
+        minimum: 1
+      copies_available:
+        type: integer
+        minimum: 0
+    required: ["book_id", "isbn", "title", "authors", "publisher", "publication_date", "genre", "location", "status", "copies_total", "copies_available"]
+  Author:
+    type: object
+    properties:
+      author_id:
+        type: string
+        format: uuid
+      name:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/PersonName"
+      birth_date:
+        type: string
+        format: date
+      death_date:
+        type: string
+        format: date
+      nationality:
+        type: string
+        pattern: "^[A-Z]{2}$"
+      biography:
+        type: string
+        maxLength: 2000
+    required: ["author_id", "name"]
+  ShelfLocation:
+    type: object
+    properties:
+      floor:
+        type: integer
+        minimum: 1
+      section:
+        type: string
+        maxLength: 10
+      aisle:
+        type: string
+        maxLength: 5
+      shelf:
+        type: string
+        maxLength: 5
+    required: ["floor", "section", "aisle", "shelf"]
+  Member:
+    type: object
+    properties:
+      member_id:
+        type: string
+        format: uuid
+      card_number:
+        type: string
+        pattern: "^[0-9]{10}$"
+      name:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/PersonName"
+      email:
+        type: string
+        format: email
+      phone:
+        type: string
+        pattern: "^\\+?[1-9]\\d{1,14}$"
+      address:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Address"
+      date_of_birth:
+        type: string
+        format: date
+      membership_type:
+        type: string
+        enum: ["adult", "child", "student", "senior", "faculty", "staff"]
+      registration_date:
+        type: string
+        format: date
+      expiration_date:
+        type: string
+        format: date
+      status:
+        type: string
+        enum: ["active", "expired", "suspended", "cancelled"]
+      fines_owed:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      emergency_contact:
+        $ref: "../healthcare_records/healthcare_records.yaml#/$defs/EmergencyContact"
+    required: ["member_id", "card_number", "name", "email", "membership_type", "registration_date", "expiration_date", "status"]
+  Loan:
+    type: object
+    properties:
+      loan_id:
+        type: string
+        format: uuid
+      book_id:
+        type: string
+        format: uuid
+      member_id:
+        type: string
+        format: uuid
+      checkout_date:
+        type: string
+        format: date
+      due_date:
+        type: string
+        format: date
+      return_date:
+        type: string
+        format: date
+      renewal_count:
+        type: integer
+        minimum: 0
+        maximum: 3
+      status:
+        type: string
+        enum: ["active", "returned", "overdue", "lost", "damaged"]
+      fine_amount:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      librarian_id:
+        type: string
+        format: uuid
+    required: ["loan_id", "book_id", "member_id", "checkout_date", "due_date", "status"]
+  Reservation:
+    type: object
+    properties:
+      reservation_id:
+        type: string
+        format: uuid
+      book_id:
+        type: string
+        format: uuid
+      member_id:
+        type: string
+        format: uuid
+      reservation_date:
+        type: string
+        format: date
+      expiration_date:
+        type: string
+        format: date
+      position_in_queue:
+        type: integer
+        minimum: 1
+      status:
+        type: string
+        enum: ["active", "ready", "fulfilled", "expired", "cancelled"]
+      notification_sent:
+        type: boolean
+        default: false
+    required: ["reservation_id", "book_id", "member_id", "reservation_date", "expiration_date", "position_in_queue", "status"]

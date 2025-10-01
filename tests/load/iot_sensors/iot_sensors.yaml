@@ -1,0 +1,48 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "IoT Sensor Data Schema"
+type: object
+properties:
+  devices:
+    type: array
+    items:
+      $ref: "#/$defs/Device"
+  readings:
+    type: array
+    items:
+      $ref: "#/$defs/SensorReading"
+$defs:
+  Device:
+    type: object
+    properties:
+      device_id:
+        type: string
+        format: uuid
+      device_type:
+        type: string
+        enum: ["temperature", "humidity", "pressure", "motion"]
+      location:
+        type: object
+        properties:
+          latitude:
+            type: number
+          longitude:
+            type: number
+        required: ["latitude", "longitude"]
+    required: ["device_id", "device_type"]
+  SensorReading:
+    type: object
+    properties:
+      reading_id:
+        type: string
+        format: uuid
+      device_id:
+        type: string
+        format: uuid
+      timestamp:
+        type: string
+        format: date-time
+      value:
+        type: number
+      unit:
+        type: string
+    required: ["reading_id", "device_id", "timestamp", "value"]

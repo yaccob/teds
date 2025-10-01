@@ -1,0 +1,117 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Supply Chain Management Schema"
+type: object
+properties:
+  suppliers:
+    type: array
+    items:
+      $ref: "#/$defs/Supplier"
+  purchase_orders:
+    type: array
+    items:
+      $ref: "#/$defs/PurchaseOrder"
+  inventory:
+    type: array
+    items:
+      $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/InventoryItem"
+  shipments:
+    type: array
+    items:
+      $ref: "../logistics_shipping/logistics.yaml#/$defs/Shipment"
+$defs:
+  Supplier:
+    type: object
+    properties:
+      supplier_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 100
+      contact_person:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/PersonName"
+      email:
+        type: string
+        format: email
+      phone:
+        type: string
+        pattern: "^\\+?[1-9]\\d{1,14}$"
+      address:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Address"
+      tax_id:
+        type: string
+      payment_terms:
+        type: string
+        enum: ["net_15", "net_30", "net_45", "net_60", "cod", "prepaid"]
+      credit_limit:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      rating:
+        type: integer
+        minimum: 1
+        maximum: 5
+      products_supplied:
+        type: array
+        items:
+          type: string
+          format: uuid
+    required: ["supplier_id", "name", "contact_person", "email", "phone", "address", "payment_terms"]
+  PurchaseOrder:
+    type: object
+    properties:
+      po_id:
+        type: string
+        format: uuid
+      po_number:
+        type: string
+        pattern: "^PO-[0-9]{8}$"
+      supplier_id:
+        type: string
+        format: uuid
+      order_date:
+        type: string
+        format: date
+      expected_delivery:
+        type: string
+        format: date
+      status:
+        type: string
+        enum: ["draft", "sent", "acknowledged", "shipped", "received", "cancelled"]
+      items:
+        type: array
+        items:
+          $ref: "#/$defs/POItem"
+        minItems: 1
+      subtotal:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      tax_amount:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      shipping_cost:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      total_amount:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      payment_terms:
+        type: string
+        enum: ["net_15", "net_30", "net_45", "net_60", "cod", "prepaid"]
+    required: ["po_id", "po_number", "supplier_id", "order_date", "status", "items", "total_amount"]
+  POItem:
+    type: object
+    properties:
+      product_id:
+        type: string
+        format: uuid
+      sku:
+        type: string
+      description:
+        type: string
+        maxLength: 200
+      quantity:
+        type: integer
+        minimum: 1
+      unit_price:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      total_price:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      expected_delivery:
+        type: string
+        format: date
+    required: ["product_id", "sku", "description", "quantity", "unit_price", "total_price"]

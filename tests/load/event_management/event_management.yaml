@@ -1,0 +1,289 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Event Management System Schema"
+type: object
+properties:
+  events:
+    type: array
+    items:
+      $ref: "#/$defs/Event"
+  venues:
+    type: array
+    items:
+      $ref: "#/$defs/Venue"
+  attendees:
+    type: array
+    items:
+      $ref: "#/$defs/Attendee"
+  tickets:
+    type: array
+    items:
+      $ref: "#/$defs/Ticket"
+$defs:
+  Event:
+    type: object
+    properties:
+      event_id:
+        type: string
+        format: uuid
+      title:
+        type: string
+        maxLength: 200
+      description:
+        type: string
+        maxLength: 2000
+      category:
+        type: string
+        enum: ["conference", "workshop", "concert", "sports", "exhibition", "networking", "charity", "festival"]
+      venue_id:
+        type: string
+        format: uuid
+      organizer:
+        $ref: "#/$defs/Organizer"
+      start_datetime:
+        type: string
+        format: date-time
+      end_datetime:
+        type: string
+        format: date-time
+      timezone:
+        type: string
+      capacity:
+        type: integer
+        minimum: 1
+      registration_start:
+        type: string
+        format: date-time
+      registration_end:
+        type: string
+        format: date-time
+      status:
+        type: string
+        enum: ["draft", "published", "cancelled", "completed"]
+      pricing:
+        type: array
+        items:
+          $ref: "#/$defs/TicketType"
+      speakers:
+        type: array
+        items:
+          $ref: "#/$defs/Speaker"
+      agenda:
+        type: array
+        items:
+          $ref: "#/$defs/AgendaItem"
+    required: ["event_id", "title", "category", "venue_id", "organizer", "start_datetime", "end_datetime", "capacity", "status"]
+  Venue:
+    type: object
+    properties:
+      venue_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 100
+      address:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Address"
+      capacity:
+        type: integer
+        minimum: 1
+      venue_type:
+        type: string
+        enum: ["conference_center", "hotel", "auditorium", "outdoor", "stadium", "theater", "exhibition_hall"]
+      amenities:
+        type: array
+        items:
+          type: string
+          enum: ["wifi", "parking", "catering", "av_equipment", "accessibility", "air_conditioning", "security"]
+      contact:
+        $ref: "../healthcare_records/healthcare_records.yaml#/$defs/EmergencyContact"
+      hourly_rate:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+    required: ["venue_id", "name", "address", "capacity", "venue_type"]
+  Organizer:
+    type: object
+    properties:
+      organizer_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 100
+      email:
+        type: string
+        format: email
+      phone:
+        type: string
+        pattern: "^\\+?[1-9]\\d{1,14}$"
+      organization:
+        type: string
+        maxLength: 100
+      website:
+        type: string
+        format: uri
+    required: ["organizer_id", "name", "email", "phone"]
+  TicketType:
+    type: object
+    properties:
+      ticket_type_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 50
+      description:
+        type: string
+        maxLength: 200
+      price:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      quantity_available:
+        type: integer
+        minimum: 0
+      quantity_sold:
+        type: integer
+        minimum: 0
+      sale_start:
+        type: string
+        format: date-time
+      sale_end:
+        type: string
+        format: date-time
+      transfer_allowed:
+        type: boolean
+        default: true
+      refund_allowed:
+        type: boolean
+        default: false
+    required: ["ticket_type_id", "name", "price", "quantity_available", "sale_start", "sale_end"]
+  Speaker:
+    type: object
+    properties:
+      speaker_id:
+        type: string
+        format: uuid
+      name:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/PersonName"
+      email:
+        type: string
+        format: email
+      bio:
+        type: string
+        maxLength: 1000
+      company:
+        type: string
+        maxLength: 100
+      title:
+        type: string
+        maxLength: 100
+      photo_url:
+        type: string
+        format: uri
+      social_media:
+        type: object
+        properties:
+          twitter:
+            type: string
+          linkedin:
+            type: string
+          website:
+            type: string
+            format: uri
+    required: ["speaker_id", "name", "email", "bio"]
+  AgendaItem:
+    type: object
+    properties:
+      item_id:
+        type: string
+        format: uuid
+      title:
+        type: string
+        maxLength: 100
+      description:
+        type: string
+        maxLength: 500
+      start_time:
+        type: string
+        format: date-time
+      end_time:
+        type: string
+        format: date-time
+      speaker_ids:
+        type: array
+        items:
+          type: string
+          format: uuid
+      location:
+        type: string
+        maxLength: 50
+      session_type:
+        type: string
+        enum: ["keynote", "presentation", "workshop", "panel", "break", "networking", "lunch"]
+    required: ["item_id", "title", "start_time", "end_time", "session_type"]
+  Attendee:
+    type: object
+    properties:
+      attendee_id:
+        type: string
+        format: uuid
+      name:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/PersonName"
+      email:
+        type: string
+        format: email
+      phone:
+        type: string
+        pattern: "^\\+?[1-9]\\d{1,14}$"
+      company:
+        type: string
+        maxLength: 100
+      job_title:
+        type: string
+        maxLength: 100
+      dietary_restrictions:
+        type: array
+        items:
+          type: string
+      accessibility_needs:
+        type: array
+        items:
+          type: string
+      registration_date:
+        type: string
+        format: date-time
+      check_in_time:
+        type: string
+        format: date-time
+    required: ["attendee_id", "name", "email", "registration_date"]
+  Ticket:
+    type: object
+    properties:
+      ticket_id:
+        type: string
+        format: uuid
+      ticket_number:
+        type: string
+        pattern: "^[A-Z0-9]{8}$"
+      event_id:
+        type: string
+        format: uuid
+      ticket_type_id:
+        type: string
+        format: uuid
+      attendee_id:
+        type: string
+        format: uuid
+      purchase_date:
+        type: string
+        format: date-time
+      price_paid:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      payment:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Payment"
+      status:
+        type: string
+        enum: ["valid", "used", "cancelled", "refunded", "transferred"]
+      qr_code:
+        type: string
+      used_date:
+        type: string
+        format: date-time
+    required: ["ticket_id", "ticket_number", "event_id", "ticket_type_id", "attendee_id", "purchase_date", "price_paid", "status"]

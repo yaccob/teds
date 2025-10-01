@@ -1,0 +1,69 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Financial Transactions Schema"
+type: object
+properties:
+  transactions:
+    type: array
+    items:
+      $ref: "#/$defs/Transaction"
+  accounts:
+    type: array
+    items:
+      $ref: "#/$defs/Account"
+$defs:
+  Transaction:
+    type: object
+    properties:
+      transaction_id:
+        type: string
+        format: uuid
+      account_id:
+        type: string
+        format: uuid
+      amount:
+        $ref: "#/$defs/Money"
+      type:
+        type: string
+        enum: ["debit", "credit", "transfer"]
+      timestamp:
+        type: string
+        format: date-time
+      merchant:
+        $ref: "#/$defs/Merchant"
+    required: ["transaction_id", "account_id", "amount", "type"]
+  Account:
+    type: object
+    properties:
+      account_id:
+        type: string
+        format: uuid
+      account_number:
+        type: string
+        pattern: "^[0-9]{10,12}$"
+      balance:
+        $ref: "#/$defs/Money"
+      account_type:
+        type: string
+        enum: ["checking", "savings", "credit", "investment"]
+    required: ["account_id", "account_number", "balance"]
+  Money:
+    type: object
+    properties:
+      amount:
+        type: number
+        minimum: 0
+      currency:
+        type: string
+        pattern: "^[A-Z]{3}$"
+    required: ["amount", "currency"]
+  Merchant:
+    type: object
+    properties:
+      merchant_id:
+        type: string
+      name:
+        type: string
+      category:
+        type: string
+        enum: ["retail", "restaurant", "gas", "grocery", "online"]
+    required: ["merchant_id", "name"]

@@ -1,0 +1,241 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Manufacturing Operations Schema"
+type: object
+properties:
+  products:
+    type: array
+    items:
+      $ref: "#/$defs/Product"
+  production_orders:
+    type: array
+    items:
+      $ref: "#/$defs/ProductionOrder"
+  machines:
+    type: array
+    items:
+      $ref: "#/$defs/Machine"
+  quality_checks:
+    type: array
+    items:
+      $ref: "#/$defs/QualityCheck"
+$defs:
+  Product:
+    type: object
+    properties:
+      product_id:
+        type: string
+        format: uuid
+      part_number:
+        type: string
+        pattern: "^[A-Z0-9-]{8,15}$"
+      name:
+        type: string
+        maxLength: 100
+      description:
+        type: string
+        maxLength: 500
+      category:
+        type: string
+        enum: ["raw_material", "component", "sub_assembly", "finished_good"]
+      specifications:
+        $ref: "#/$defs/ProductSpecifications"
+      bill_of_materials:
+        type: array
+        items:
+          $ref: "#/$defs/BOMItem"
+      cost:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      weight:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Weight"
+      dimensions:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Dimensions"
+    required: ["product_id", "part_number", "name", "category", "specifications"]
+  ProductSpecifications:
+    type: object
+    properties:
+      material:
+        type: string
+      color:
+        type: string
+      finish:
+        type: string
+        enum: ["raw", "painted", "anodized", "plated", "powder_coated"]
+      tolerance:
+        type: string
+      hardness:
+        type: string
+      temperature_range:
+        $ref: "#/$defs/TemperatureRange"
+    required: ["material"]
+  TemperatureRange:
+    type: object
+    properties:
+      min_celsius:
+        type: number
+      max_celsius:
+        type: number
+    required: ["min_celsius", "max_celsius"]
+  BOMItem:
+    type: object
+    properties:
+      component_id:
+        type: string
+        format: uuid
+      quantity:
+        type: number
+        minimum: 0
+      unit:
+        type: string
+        enum: ["each", "kg", "g", "m", "cm", "mm", "l", "ml"]
+      cost_per_unit:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+    required: ["component_id", "quantity", "unit"]
+  ProductionOrder:
+    type: object
+    properties:
+      order_id:
+        type: string
+        format: uuid
+      order_number:
+        type: string
+        pattern: "^PO-[0-9]{6}$"
+      product_id:
+        type: string
+        format: uuid
+      quantity_ordered:
+        type: integer
+        minimum: 1
+      quantity_produced:
+        type: integer
+        minimum: 0
+      priority:
+        type: string
+        enum: ["low", "normal", "high", "urgent"]
+      start_date:
+        type: string
+        format: date
+      due_date:
+        type: string
+        format: date
+      completion_date:
+        type: string
+        format: date
+      status:
+        type: string
+        enum: ["planned", "in_progress", "completed", "cancelled", "on_hold"]
+      assigned_machines:
+        type: array
+        items:
+          type: string
+          format: uuid
+      operator_id:
+        type: string
+        format: uuid
+    required: ["order_id", "order_number", "product_id", "quantity_ordered", "priority", "start_date", "due_date", "status"]
+  Machine:
+    type: object
+    properties:
+      machine_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 100
+      model:
+        type: string
+      manufacturer:
+        type: string
+      serial_number:
+        type: string
+      machine_type:
+        type: string
+        enum: ["cnc_mill", "cnc_lathe", "press", "welder", "grinder", "drill", "saw", "3d_printer"]
+      location:
+        $ref: "#/$defs/MachineLocation"
+      capacity:
+        $ref: "#/$defs/MachineCapacity"
+      status:
+        type: string
+        enum: ["operational", "maintenance", "down", "setup"]
+      last_maintenance:
+        type: string
+        format: date
+      next_maintenance:
+        type: string
+        format: date
+      operating_hours:
+        type: number
+        minimum: 0
+    required: ["machine_id", "name", "model", "manufacturer", "machine_type", "location", "status"]
+  MachineLocation:
+    type: object
+    properties:
+      building:
+        type: string
+      floor:
+        type: integer
+        minimum: 1
+      area:
+        type: string
+      workstation:
+        type: string
+    required: ["building", "floor", "area"]
+  MachineCapacity:
+    type: object
+    properties:
+      max_weight:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Weight"
+      max_dimensions:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Dimensions"
+      power_consumption_kw:
+        type: number
+        minimum: 0
+      units_per_hour:
+        type: integer
+        minimum: 1
+  QualityCheck:
+    type: object
+    properties:
+      check_id:
+        type: string
+        format: uuid
+      production_order_id:
+        type: string
+        format: uuid
+      inspector_id:
+        type: string
+        format: uuid
+      check_type:
+        type: string
+        enum: ["incoming", "in_process", "final", "random"]
+      check_date:
+        type: string
+        format: date-time
+      measurements:
+        type: array
+        items:
+          $ref: "#/$defs/Measurement"
+      overall_result:
+        type: string
+        enum: ["pass", "fail", "conditional"]
+      notes:
+        type: string
+        maxLength: 1000
+    required: ["check_id", "production_order_id", "inspector_id", "check_type", "check_date", "overall_result"]
+  Measurement:
+    type: object
+    properties:
+      parameter:
+        type: string
+      measured_value:
+        type: number
+      target_value:
+        type: number
+      tolerance:
+        type: number
+      unit:
+        type: string
+      result:
+        type: string
+        enum: ["pass", "fail"]
+    required: ["parameter", "measured_value", "target_value", "tolerance", "unit", "result"]

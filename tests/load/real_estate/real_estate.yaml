@@ -1,0 +1,263 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Real Estate Management Schema"
+type: object
+properties:
+  properties:
+    type: array
+    items:
+      $ref: "#/$defs/Property"
+  agents:
+    type: array
+    items:
+      $ref: "#/$defs/Agent"
+  listings:
+    type: array
+    items:
+      $ref: "#/$defs/Listing"
+  transactions:
+    type: array
+    items:
+      $ref: "#/$defs/Transaction"
+$defs:
+  Property:
+    type: object
+    properties:
+      property_id:
+        type: string
+        format: uuid
+      address:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Address"
+      property_type:
+        type: string
+        enum: ["house", "apartment", "condo", "townhouse", "commercial", "land", "multi_family"]
+      bedrooms:
+        type: integer
+        minimum: 0
+        maximum: 20
+      bathrooms:
+        type: number
+        minimum: 0
+        maximum: 20
+        multipleOf: 0.5
+      square_feet:
+        type: integer
+        minimum: 100
+      lot_size_sqft:
+        type: integer
+        minimum: 0
+      year_built:
+        type: integer
+        minimum: 1800
+        maximum: 2030
+      features:
+        type: array
+        items:
+          type: string
+        uniqueItems: true
+      hoa_fee:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      property_taxes:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      zoning:
+        type: string
+        enum: ["residential", "commercial", "industrial", "mixed_use", "agricultural"]
+      condition:
+        type: string
+        enum: ["excellent", "good", "fair", "poor", "needs_repair"]
+      photos:
+        type: array
+        items:
+          type: string
+          format: uri
+        maxItems: 50
+    required: ["property_id", "address", "property_type", "square_feet"]
+  Agent:
+    type: object
+    properties:
+      agent_id:
+        type: string
+        format: uuid
+      name:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/PersonName"
+      email:
+        type: string
+        format: email
+      phone:
+        type: string
+        pattern: "^\\+?[1-9]\\d{1,14}$"
+      license_number:
+        type: string
+      brokerage:
+        type: string
+        maxLength: 100
+      specialties:
+        type: array
+        items:
+          type: string
+          enum: ["residential", "commercial", "luxury", "first_time_buyers", "investment", "relocation"]
+      years_experience:
+        type: integer
+        minimum: 0
+      commission_rate:
+        type: number
+        minimum: 0
+        maximum: 0.1
+      rating:
+        type: number
+        minimum: 0
+        maximum: 5
+      total_sales:
+        type: integer
+        minimum: 0
+    required: ["agent_id", "name", "email", "phone", "license_number", "brokerage"]
+  Listing:
+    type: object
+    properties:
+      listing_id:
+        type: string
+        format: uuid
+      property_id:
+        type: string
+        format: uuid
+      agent_id:
+        type: string
+        format: uuid
+      listing_type:
+        type: string
+        enum: ["sale", "rent", "lease"]
+      price:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      price_per_sqft:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      status:
+        type: string
+        enum: ["active", "pending", "sold", "expired", "withdrawn", "contingent"]
+      list_date:
+        type: string
+        format: date
+      days_on_market:
+        type: integer
+        minimum: 0
+      description:
+        type: string
+        maxLength: 2000
+      virtual_tour_url:
+        type: string
+        format: uri
+      showing_instructions:
+        type: string
+        maxLength: 500
+      open_houses:
+        type: array
+        items:
+          $ref: "#/$defs/OpenHouse"
+    required: ["listing_id", "property_id", "agent_id", "listing_type", "price", "status", "list_date"]
+  OpenHouse:
+    type: object
+    properties:
+      open_house_id:
+        type: string
+        format: uuid
+      date:
+        type: string
+        format: date
+      start_time:
+        type: string
+        pattern: "^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
+      end_time:
+        type: string
+        pattern: "^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
+      notes:
+        type: string
+        maxLength: 200
+    required: ["open_house_id", "date", "start_time", "end_time"]
+  Transaction:
+    type: object
+    properties:
+      transaction_id:
+        type: string
+        format: uuid
+      listing_id:
+        type: string
+        format: uuid
+      buyer_agent_id:
+        type: string
+        format: uuid
+      seller_agent_id:
+        type: string
+        format: uuid
+      buyer_info:
+        $ref: "#/$defs/PartyInfo"
+      seller_info:
+        $ref: "#/$defs/PartyInfo"
+      offer_price:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      final_price:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      financing:
+        $ref: "#/$defs/Financing"
+      contingencies:
+        type: array
+        items:
+          type: string
+          enum: ["inspection", "appraisal", "financing", "sale_of_home"]
+      closing_date:
+        type: string
+        format: date
+      status:
+        type: string
+        enum: ["offer_made", "under_contract", "contingent", "pending", "closed", "cancelled"]
+      commission:
+        $ref: "#/$defs/Commission"
+    required: ["transaction_id", "listing_id", "buyer_agent_id", "seller_agent_id", "offer_price", "status"]
+  PartyInfo:
+    type: object
+    properties:
+      name:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/PersonName"
+      email:
+        type: string
+        format: email
+      phone:
+        type: string
+        pattern: "^\\+?[1-9]\\d{1,14}$"
+      address:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Address"
+    required: ["name", "email", "phone"]
+  Financing:
+    type: object
+    properties:
+      financing_type:
+        type: string
+        enum: ["cash", "conventional", "fha", "va", "usda", "other"]
+      loan_amount:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      down_payment:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      interest_rate:
+        type: number
+        minimum: 0
+        maximum: 0.3
+      loan_term_years:
+        type: integer
+        enum: [15, 20, 25, 30]
+      lender:
+        type: string
+        maxLength: 100
+      pre_approved:
+        type: boolean
+    required: ["financing_type"]
+  Commission:
+    type: object
+    properties:
+      total_commission:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      buyer_agent_commission:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      seller_agent_commission:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      brokerage_split:
+        type: number
+        minimum: 0
+        maximum: 1
+    required: ["total_commission", "buyer_agent_commission", "seller_agent_commission"]

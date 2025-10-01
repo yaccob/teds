@@ -1,0 +1,252 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Fitness Tracking Application Schema"
+type: object
+properties:
+  users:
+    type: array
+    items:
+      $ref: "#/$defs/User"
+  workouts:
+    type: array
+    items:
+      $ref: "#/$defs/Workout"
+  exercises:
+    type: array
+    items:
+      $ref: "#/$defs/Exercise"
+  nutrition:
+    type: array
+    items:
+      $ref: "#/$defs/NutritionEntry"
+$defs:
+  User:
+    type: object
+    properties:
+      user_id:
+        type: string
+        format: uuid
+      name:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/PersonName"
+      email:
+        type: string
+        format: email
+      date_of_birth:
+        type: string
+        format: date
+      gender:
+        type: string
+        enum: ["male", "female", "other", "prefer_not_to_say"]
+      height_cm:
+        type: number
+        minimum: 100
+        maximum: 250
+      weight_kg:
+        type: number
+        minimum: 20
+        maximum: 300
+      activity_level:
+        type: string
+        enum: ["sedentary", "lightly_active", "moderately_active", "very_active", "extremely_active"]
+      goals:
+        type: array
+        items:
+          type: string
+          enum: ["weight_loss", "weight_gain", "muscle_gain", "endurance", "strength", "general_fitness"]
+      target_weight_kg:
+        type: number
+        minimum: 20
+        maximum: 300
+      created_at:
+        type: string
+        format: date-time
+    required: ["user_id", "name", "email", "date_of_birth", "height_cm", "weight_kg", "activity_level", "created_at"]
+  Workout:
+    type: object
+    properties:
+      workout_id:
+        type: string
+        format: uuid
+      user_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 100
+      date:
+        type: string
+        format: date
+      start_time:
+        type: string
+        format: date-time
+      end_time:
+        type: string
+        format: date-time
+      workout_type:
+        type: string
+        enum: ["strength", "cardio", "flexibility", "sports", "mixed"]
+      exercises:
+        type: array
+        items:
+          $ref: "#/$defs/WorkoutExercise"
+        minItems: 1
+      total_calories_burned:
+        type: integer
+        minimum: 0
+      notes:
+        type: string
+        maxLength: 500
+      rating:
+        type: integer
+        minimum: 1
+        maximum: 5
+    required: ["workout_id", "user_id", "name", "date", "start_time", "workout_type", "exercises"]
+  Exercise:
+    type: object
+    properties:
+      exercise_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 100
+      category:
+        type: string
+        enum: ["chest", "back", "shoulders", "arms", "legs", "core", "cardio", "full_body"]
+      muscle_groups:
+        type: array
+        items:
+          type: string
+          enum: ["chest", "back", "shoulders", "biceps", "triceps", "forearms", "quads", "hamstrings", "glutes", "calves", "abs", "obliques"]
+      equipment:
+        type: array
+        items:
+          type: string
+          enum: ["barbell", "dumbbell", "kettlebell", "machine", "cable", "bodyweight", "resistance_band", "medicine_ball"]
+      difficulty:
+        type: string
+        enum: ["beginner", "intermediate", "advanced"]
+      instructions:
+        type: string
+        maxLength: 1000
+      tips:
+        type: string
+        maxLength: 500
+    required: ["exercise_id", "name", "category", "muscle_groups", "difficulty"]
+  WorkoutExercise:
+    type: object
+    properties:
+      exercise_id:
+        type: string
+        format: uuid
+      sets:
+        type: array
+        items:
+          $ref: "#/$defs/ExerciseSet"
+        minItems: 1
+      rest_time_seconds:
+        type: integer
+        minimum: 0
+      notes:
+        type: string
+        maxLength: 200
+    required: ["exercise_id", "sets"]
+  ExerciseSet:
+    type: object
+    properties:
+      set_number:
+        type: integer
+        minimum: 1
+      reps:
+        type: integer
+        minimum: 0
+      weight_kg:
+        type: number
+        minimum: 0
+      duration_seconds:
+        type: integer
+        minimum: 0
+      distance_meters:
+        type: number
+        minimum: 0
+      calories_burned:
+        type: integer
+        minimum: 0
+      completed:
+        type: boolean
+        default: true
+    required: ["set_number"]
+  NutritionEntry:
+    type: object
+    properties:
+      entry_id:
+        type: string
+        format: uuid
+      user_id:
+        type: string
+        format: uuid
+      date:
+        type: string
+        format: date
+      meal_type:
+        type: string
+        enum: ["breakfast", "lunch", "dinner", "snack"]
+      foods:
+        type: array
+        items:
+          $ref: "#/$defs/FoodItem"
+        minItems: 1
+      total_calories:
+        type: integer
+        minimum: 0
+      total_protein_g:
+        type: number
+        minimum: 0
+      total_carbs_g:
+        type: number
+        minimum: 0
+      total_fat_g:
+        type: number
+        minimum: 0
+      total_fiber_g:
+        type: number
+        minimum: 0
+      total_sugar_g:
+        type: number
+        minimum: 0
+    required: ["entry_id", "user_id", "date", "meal_type", "foods", "total_calories"]
+  FoodItem:
+    type: object
+    properties:
+      food_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 100
+      brand:
+        type: string
+        maxLength: 50
+      serving_size:
+        type: string
+      quantity:
+        type: number
+        minimum: 0
+      calories_per_serving:
+        type: integer
+        minimum: 0
+      protein_g:
+        type: number
+        minimum: 0
+      carbs_g:
+        type: number
+        minimum: 0
+      fat_g:
+        type: number
+        minimum: 0
+      fiber_g:
+        type: number
+        minimum: 0
+      sugar_g:
+        type: number
+        minimum: 0
+    required: ["food_id", "name", "serving_size", "quantity", "calories_per_serving"]

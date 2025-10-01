@@ -1,0 +1,356 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Agricultural Management System Schema"
+type: object
+properties:
+  farms:
+    type: array
+    items:
+      $ref: "#/$defs/Farm"
+  crops:
+    type: array
+    items:
+      $ref: "#/$defs/Crop"
+  livestock:
+    type: array
+    items:
+      $ref: "#/$defs/Livestock"
+  field_operations:
+    type: array
+    items:
+      $ref: "#/$defs/FieldOperation"
+  weather_data:
+    type: array
+    items:
+      $ref: "../weather_data/weather_data.yaml#/$defs/WeatherObservation"
+$defs:
+  Farm:
+    type: object
+    properties:
+      farm_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 100
+      owner:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/PersonName"
+      address:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Address"
+      total_area_hectares:
+        type: number
+        minimum: 0.1
+      farm_type:
+        type: string
+        enum: ["crop", "livestock", "mixed", "organic", "dairy", "poultry"]
+      established_date:
+        type: string
+        format: date
+      certifications:
+        type: array
+        items:
+          type: string
+          enum: ["organic", "fair_trade", "rainforest_alliance", "gmo_free", "sustainable"]
+      fields:
+        type: array
+        items:
+          $ref: "#/$defs/Field"
+      irrigation_systems:
+        type: array
+        items:
+          $ref: "#/$defs/IrrigationSystem"
+      equipment:
+        type: array
+        items:
+          $ref: "#/$defs/Equipment"
+    required: ["farm_id", "name", "owner", "address", "total_area_hectares", "farm_type", "established_date"]
+  Field:
+    type: object
+    properties:
+      field_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 50
+      area_hectares:
+        type: number
+        minimum: 0.01
+      soil_type:
+        type: string
+        enum: ["clay", "sand", "silt", "loam", "peat", "chalk"]
+      soil_ph:
+        type: number
+        minimum: 0
+        maximum: 14
+      coordinates:
+        type: array
+        items:
+          type: object
+          properties:
+            latitude:
+              type: number
+              minimum: -90
+              maximum: 90
+            longitude:
+              type: number
+              minimum: -180
+              maximum: 180
+          required: ["latitude", "longitude"]
+        minItems: 3
+      slope_percentage:
+        type: number
+        minimum: 0
+        maximum: 100
+      drainage:
+        type: string
+        enum: ["poor", "moderate", "good", "excellent"]
+      current_crop_id:
+        type: string
+        format: uuid
+    required: ["field_id", "name", "area_hectares", "soil_type", "coordinates"]
+  Crop:
+    type: object
+    properties:
+      crop_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 50
+      variety:
+        type: string
+        maxLength: 50
+      category:
+        type: string
+        enum: ["cereal", "vegetable", "fruit", "legume", "oilseed", "fiber", "forage"]
+      planting_season:
+        type: string
+        enum: ["spring", "summer", "fall", "winter"]
+      growing_days:
+        type: integer
+        minimum: 1
+        maximum: 365
+      water_requirements:
+        type: string
+        enum: ["low", "moderate", "high"]
+      soil_requirements:
+        type: array
+        items:
+          type: string
+          enum: ["clay", "sand", "silt", "loam", "peat", "chalk"]
+      optimal_temperature_c:
+        $ref: "../manufacturing/manufacturing.yaml#/$defs/TemperatureRange"
+      yield_per_hectare_kg:
+        type: number
+        minimum: 0
+      market_price_per_kg:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+    required: ["crop_id", "name", "category", "planting_season", "growing_days", "water_requirements"]
+  Livestock:
+    type: object
+    properties:
+      animal_id:
+        type: string
+        format: uuid
+      ear_tag:
+        type: string
+      species:
+        type: string
+        enum: ["cattle", "sheep", "goat", "pig", "chicken", "turkey", "horse"]
+      breed:
+        type: string
+      date_of_birth:
+        type: string
+        format: date
+      gender:
+        type: string
+        enum: ["male", "female"]
+      weight_kg:
+        type: number
+        minimum: 0.1
+      health_status:
+        type: string
+        enum: ["healthy", "sick", "quarantine", "deceased"]
+      vaccinations:
+        type: array
+        items:
+          $ref: "#/$defs/Vaccination"
+      breeding_history:
+        type: array
+        items:
+          $ref: "#/$defs/BreedingRecord"
+      feed_consumption_kg_per_day:
+        type: number
+        minimum: 0
+      milk_production_liters_per_day:
+        type: number
+        minimum: 0
+      location:
+        type: string
+        maxLength: 50
+    required: ["animal_id", "ear_tag", "species", "breed", "date_of_birth", "gender", "health_status"]
+  Vaccination:
+    type: object
+    properties:
+      vaccine_name:
+        type: string
+      vaccination_date:
+        type: string
+        format: date
+      next_due_date:
+        type: string
+        format: date
+      veterinarian:
+        type: string
+      batch_number:
+        type: string
+    required: ["vaccine_name", "vaccination_date", "next_due_date"]
+  BreedingRecord:
+    type: object
+    properties:
+      breeding_date:
+        type: string
+        format: date
+      mate_id:
+        type: string
+        format: uuid
+      pregnancy_confirmed:
+        type: boolean
+      due_date:
+        type: string
+        format: date
+      birth_date:
+        type: string
+        format: date
+      offspring_count:
+        type: integer
+        minimum: 0
+      offspring_ids:
+        type: array
+        items:
+          type: string
+          format: uuid
+    required: ["breeding_date", "mate_id"]
+  IrrigationSystem:
+    type: object
+    properties:
+      system_id:
+        type: string
+        format: uuid
+      type:
+        type: string
+        enum: ["drip", "sprinkler", "flood", "furrow", "center_pivot"]
+      field_ids:
+        type: array
+        items:
+          type: string
+          format: uuid
+      water_source:
+        type: string
+        enum: ["well", "river", "lake", "municipal", "rainwater"]
+      flow_rate_liters_per_minute:
+        type: number
+        minimum: 1
+      installation_date:
+        type: string
+        format: date
+      maintenance_schedule:
+        type: string
+        enum: ["weekly", "monthly", "quarterly", "yearly"]
+      automated:
+        type: boolean
+        default: false
+    required: ["system_id", "type", "field_ids", "water_source", "flow_rate_liters_per_minute"]
+  Equipment:
+    type: object
+    properties:
+      equipment_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 100
+      type:
+        type: string
+        enum: ["tractor", "harvester", "planter", "cultivator", "sprayer", "mower", "trailer"]
+      manufacturer:
+        type: string
+      model:
+        type: string
+      year:
+        type: integer
+        minimum: 1900
+        maximum: 2030
+      purchase_date:
+        type: string
+        format: date
+      purchase_price:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      operating_hours:
+        type: number
+        minimum: 0
+      fuel_consumption_per_hour:
+        type: number
+        minimum: 0
+      maintenance_records:
+        type: array
+        items:
+          $ref: "../fleet_management/fleet_management.yaml#/$defs/MaintenanceRecord"
+      status:
+        type: string
+        enum: ["operational", "maintenance", "repair", "retired"]
+    required: ["equipment_id", "name", "type", "manufacturer", "model", "year", "purchase_date", "status"]
+  FieldOperation:
+    type: object
+    properties:
+      operation_id:
+        type: string
+        format: uuid
+      field_id:
+        type: string
+        format: uuid
+      operation_type:
+        type: string
+        enum: ["planting", "harvesting", "fertilizing", "spraying", "irrigation", "cultivation", "weeding"]
+      crop_id:
+        type: string
+        format: uuid
+      operation_date:
+        type: string
+        format: date
+      equipment_used:
+        type: array
+        items:
+          type: string
+          format: uuid
+      operator:
+        type: string
+      materials_used:
+        type: array
+        items:
+          $ref: "#/$defs/Material"
+      weather_conditions:
+        $ref: "../weather_data/weather_data.yaml#/$defs/WeatherObservation"
+      cost:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      notes:
+        type: string
+        maxLength: 500
+    required: ["operation_id", "field_id", "operation_type", "operation_date", "operator"]
+  Material:
+    type: object
+    properties:
+      material_type:
+        type: string
+        enum: ["seed", "fertilizer", "pesticide", "herbicide", "fuel"]
+      name:
+        type: string
+      quantity:
+        type: number
+        minimum: 0
+      unit:
+        type: string
+        enum: ["kg", "l", "g", "ml", "tons", "bags"]
+      cost_per_unit:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+    required: ["material_type", "name", "quantity", "unit", "cost_per_unit"]

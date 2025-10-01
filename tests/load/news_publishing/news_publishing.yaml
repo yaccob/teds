@@ -1,0 +1,158 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "News Publishing Platform Schema"
+type: object
+properties:
+  articles:
+    type: array
+    items:
+      $ref: "#/$defs/Article"
+  authors:
+    type: array
+    items:
+      $ref: "#/$defs/Author"
+  categories:
+    type: array
+    items:
+      $ref: "#/$defs/Category"
+  comments:
+    type: array
+    items:
+      $ref: "../social_media/social_media.yaml#/$defs/Comment"
+$defs:
+  Article:
+    type: object
+    properties:
+      article_id:
+        type: string
+        format: uuid
+      title:
+        type: string
+        maxLength: 200
+      subtitle:
+        type: string
+        maxLength: 300
+      slug:
+        type: string
+        pattern: "^[a-z0-9-]+$"
+      content:
+        type: string
+        maxLength: 50000
+      excerpt:
+        type: string
+        maxLength: 500
+      author_id:
+        type: string
+        format: uuid
+      category_id:
+        type: string
+        format: uuid
+      tags:
+        type: array
+        items:
+          type: string
+          maxLength: 30
+        uniqueItems: true
+      featured_image:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/ProductImage"
+      status:
+        type: string
+        enum: ["draft", "review", "published", "archived"]
+      published_date:
+        type: string
+        format: date-time
+      updated_date:
+        type: string
+        format: date-time
+      view_count:
+        type: integer
+        minimum: 0
+      share_count:
+        type: integer
+        minimum: 0
+      reading_time_minutes:
+        type: integer
+        minimum: 1
+      seo:
+        $ref: "#/$defs/SEO"
+    required: ["article_id", "title", "content", "author_id", "category_id", "status"]
+  Author:
+    type: object
+    properties:
+      author_id:
+        type: string
+        format: uuid
+      name:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/PersonName"
+      email:
+        type: string
+        format: email
+      bio:
+        type: string
+        maxLength: 1000
+      avatar_url:
+        type: string
+        format: uri
+      social_media:
+        type: object
+        properties:
+          twitter:
+            type: string
+          linkedin:
+            type: string
+          website:
+            type: string
+            format: uri
+      specialties:
+        type: array
+        items:
+          type: string
+      join_date:
+        type: string
+        format: date
+      article_count:
+        type: integer
+        minimum: 0
+    required: ["author_id", "name", "email", "bio", "join_date"]
+  Category:
+    type: object
+    properties:
+      category_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 50
+      description:
+        type: string
+        maxLength: 200
+      parent_category_id:
+        type: string
+        format: uuid
+      color:
+        type: string
+        pattern: "^#[0-9A-Fa-f]{6}$"
+      article_count:
+        type: integer
+        minimum: 0
+    required: ["category_id", "name", "description"]
+  SEO:
+    type: object
+    properties:
+      meta_title:
+        type: string
+        maxLength: 60
+      meta_description:
+        type: string
+        maxLength: 160
+      canonical_url:
+        type: string
+        format: uri
+      keywords:
+        type: array
+        items:
+          type: string
+        maxItems: 10
+      og_image:
+        type: string
+        format: uri
+    required: ["meta_title", "meta_description"]

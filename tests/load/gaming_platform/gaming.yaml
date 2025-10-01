@@ -1,0 +1,339 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Gaming Platform Schema"
+type: object
+properties:
+  players:
+    type: array
+    items:
+      $ref: "#/$defs/Player"
+  games:
+    type: array
+    items:
+      $ref: "#/$defs/Game"
+  matches:
+    type: array
+    items:
+      $ref: "#/$defs/Match"
+  tournaments:
+    type: array
+    items:
+      $ref: "#/$defs/Tournament"
+$defs:
+  Player:
+    type: object
+    properties:
+      player_id:
+        type: string
+        format: uuid
+      username:
+        type: string
+        pattern: "^[a-zA-Z0-9_]{3,20}$"
+      email:
+        type: string
+        format: email
+      profile:
+        $ref: "#/$defs/PlayerProfile"
+      stats:
+        $ref: "#/$defs/PlayerStats"
+      achievements:
+        type: array
+        items:
+          $ref: "#/$defs/Achievement"
+      created_at:
+        type: string
+        format: date-time
+      last_active:
+        type: string
+        format: date-time
+    required: ["player_id", "username", "email", "created_at"]
+  PlayerProfile:
+    type: object
+    properties:
+      display_name:
+        type: string
+        maxLength: 30
+      avatar_url:
+        type: string
+        format: uri
+      country:
+        type: string
+        pattern: "^[A-Z]{2}$"
+      preferred_language:
+        type: string
+        enum: ["en", "es", "fr", "de", "it", "pt", "ja", "zh", "ko", "ru"]
+      bio:
+        type: string
+        maxLength: 200
+      privacy_settings:
+        $ref: "#/$defs/PrivacySettings"
+  PrivacySettings:
+    type: object
+    properties:
+      profile_visible:
+        type: boolean
+        default: true
+      stats_visible:
+        type: boolean
+        default: true
+      online_status_visible:
+        type: boolean
+        default: true
+      allow_friend_requests:
+        type: boolean
+        default: true
+  PlayerStats:
+    type: object
+    properties:
+      total_games_played:
+        type: integer
+        minimum: 0
+      total_wins:
+        type: integer
+        minimum: 0
+      total_losses:
+        type: integer
+        minimum: 0
+      win_rate:
+        type: number
+        minimum: 0
+        maximum: 1
+      ranking:
+        type: integer
+        minimum: 1
+      skill_level:
+        type: string
+        enum: ["bronze", "silver", "gold", "platinum", "diamond", "master", "grandmaster"]
+      total_playtime_hours:
+        type: number
+        minimum: 0
+  Game:
+    type: object
+    properties:
+      game_id:
+        type: string
+        format: uuid
+      title:
+        type: string
+        maxLength: 100
+      genre:
+        type: string
+        enum: ["fps", "moba", "strategy", "rpg", "racing", "sports", "puzzle", "fighting"]
+      max_players:
+        type: integer
+        minimum: 1
+        maximum: 100
+      min_players:
+        type: integer
+        minimum: 1
+      game_modes:
+        type: array
+        items:
+          type: string
+        uniqueItems: true
+      maps:
+        type: array
+        items:
+          $ref: "#/$defs/Map"
+      version:
+        type: string
+        pattern: "^\\d+\\.\\d+\\.\\d+$"
+      release_date:
+        type: string
+        format: date
+    required: ["game_id", "title", "genre", "max_players", "min_players", "version"]
+  Map:
+    type: object
+    properties:
+      map_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 50
+      description:
+        type: string
+        maxLength: 200
+      game_modes:
+        type: array
+        items:
+          type: string
+      size:
+        type: string
+        enum: ["small", "medium", "large", "extra_large"]
+      environment:
+        type: string
+        enum: ["urban", "desert", "forest", "arctic", "space", "fantasy"]
+    required: ["map_id", "name", "game_modes"]
+  Match:
+    type: object
+    properties:
+      match_id:
+        type: string
+        format: uuid
+      game_id:
+        type: string
+        format: uuid
+      game_mode:
+        type: string
+      map_id:
+        type: string
+        format: uuid
+      players:
+        type: array
+        items:
+          $ref: "#/$defs/MatchPlayer"
+        minItems: 1
+      teams:
+        type: array
+        items:
+          $ref: "#/$defs/Team"
+      start_time:
+        type: string
+        format: date-time
+      end_time:
+        type: string
+        format: date-time
+      duration_seconds:
+        type: integer
+        minimum: 0
+      status:
+        type: string
+        enum: ["scheduled", "in_progress", "completed", "cancelled", "abandoned"]
+      winner:
+        oneOf:
+          - type: string
+            format: uuid
+          - type: "null"
+    required: ["match_id", "game_id", "game_mode", "players", "start_time", "status"]
+  MatchPlayer:
+    type: object
+    properties:
+      player_id:
+        type: string
+        format: uuid
+      team_id:
+        type: string
+        format: uuid
+      character:
+        type: string
+      score:
+        type: integer
+        minimum: 0
+      kills:
+        type: integer
+        minimum: 0
+      deaths:
+        type: integer
+        minimum: 0
+      assists:
+        type: integer
+        minimum: 0
+      joined_at:
+        type: string
+        format: date-time
+      left_at:
+        type: string
+        format: date-time
+    required: ["player_id", "joined_at"]
+  Team:
+    type: object
+    properties:
+      team_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 30
+      color:
+        type: string
+        enum: ["red", "blue", "green", "yellow", "purple", "orange"]
+      score:
+        type: integer
+        minimum: 0
+      player_ids:
+        type: array
+        items:
+          type: string
+          format: uuid
+    required: ["team_id", "name", "player_ids"]
+  Tournament:
+    type: object
+    properties:
+      tournament_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 100
+      game_id:
+        type: string
+        format: uuid
+      format:
+        type: string
+        enum: ["single_elimination", "double_elimination", "round_robin", "swiss"]
+      max_participants:
+        type: integer
+        minimum: 2
+      prize_pool:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      registration_start:
+        type: string
+        format: date-time
+      registration_end:
+        type: string
+        format: date-time
+      start_date:
+        type: string
+        format: date-time
+      end_date:
+        type: string
+        format: date-time
+      status:
+        type: string
+        enum: ["upcoming", "registration_open", "registration_closed", "in_progress", "completed", "cancelled"]
+      participants:
+        type: array
+        items:
+          type: string
+          format: uuid
+      matches:
+        type: array
+        items:
+          type: string
+          format: uuid
+    required: ["tournament_id", "name", "game_id", "format", "max_participants", "start_date", "status"]
+  Achievement:
+    type: object
+    properties:
+      achievement_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 50
+      description:
+        type: string
+        maxLength: 200
+      category:
+        type: string
+        enum: ["skill", "milestone", "special", "seasonal"]
+      rarity:
+        type: string
+        enum: ["common", "uncommon", "rare", "epic", "legendary"]
+      icon_url:
+        type: string
+        format: uri
+      unlocked_at:
+        type: string
+        format: date-time
+      progress:
+        type: object
+        properties:
+          current:
+            type: integer
+            minimum: 0
+          required:
+            type: integer
+            minimum: 1
+        required: ["current", "required"]
+    required: ["achievement_id", "name", "description", "category", "rarity"]
