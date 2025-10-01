@@ -1,6 +1,127 @@
 $schema: "https://json-schema.org/draft/2020-12/schema"
 title: "Fleet Management System Schema"
 type: object
+examples:
+  - vehicles:
+      - vehicle_id: "550e8400-e29b-41d4-a716-446655440001"
+        license_plate: "ABC-1234"
+        vin: "1HGBH41JXMN109186"
+        make: "Ford"
+        model: "Transit"
+        year: 2023
+        vehicle_type: "van"
+        fuel_type: "gasoline"
+        mileage: 45820
+        location:
+          address: "123 Fleet Street"
+          city: "San Francisco"
+          state: "CA"
+          postal_code: "94105"
+          country: "United States"
+          latitude: 37.7749
+          longitude: -122.4194
+        status: "available"
+        assigned_driver_id: "550e8400-e29b-41d4-a716-446655440010"
+        insurance:
+          policy_number: "POL-FL-2024-001"
+          provider: "Fleet Insurance Corp"
+          coverage_type: "comprehensive"
+          premium:
+            amount: 1200.00
+            currency: "USD"
+          deductible:
+            amount: 500.00
+            currency: "USD"
+          effective_date: "2024-01-01"
+          expiration_date: "2024-12-31"
+    drivers:
+      - driver_id: "550e8400-e29b-41d4-a716-446655440010"
+        employee_id: "EMP-2024-001"
+        name:
+          first_name: "Maria"
+          last_name: "Rodriguez"
+        email: "maria.rodriguez@fleetco.com"
+        phone: "+15551234567"
+        address:
+          street: "456 Driver Lane"
+          city: "Oakland"
+          state: "California"
+          postal_code: "94607"
+          country: "United States"
+        license:
+          license_number: "D1234567"
+          license_class: "B"
+          issue_date: "2020-03-15"
+          expiration_date: "2028-03-15"
+          issuing_state: "CA"
+          restrictions: []
+        hire_date: "2022-06-01"
+        status: "active"
+        certifications: ["Defensive Driving", "Commercial Vehicle Safety"]
+    routes:
+      - route_id: "550e8400-e29b-41d4-a716-446655440020"
+        name: "Downtown Delivery Route"
+        vehicle_id: "550e8400-e29b-41d4-a716-446655440001"
+        driver_id: "550e8400-e29b-41d4-a716-446655440010"
+        start_location:
+          address: "123 Fleet Street"
+          city: "San Francisco"
+          state: "CA"
+          postal_code: "94105"
+          country: "United States"
+          latitude: 37.7749
+          longitude: -122.4194
+        end_location:
+          address: "789 Customer Ave"
+          city: "San Francisco"
+          state: "CA"
+          postal_code: "94102"
+          country: "United States"
+          latitude: 37.7849
+          longitude: -122.4094
+        waypoints:
+          - address: "456 Waypoint St"
+            city: "San Francisco"
+            state: "CA"
+            postal_code: "94103"
+            country: "United States"
+            latitude: 37.7799
+            longitude: -122.4144
+        estimated_duration_minutes: 45
+        estimated_distance_miles: 12.5
+        scheduled_start: "2024-10-01T09:00:00Z"
+        actual_start: "2024-10-01T09:05:00Z"
+        actual_end: "2024-10-01T09:52:00Z"
+        status: "completed"
+    maintenance:
+      - maintenance_id: "550e8400-e29b-41d4-a716-446655440030"
+        vehicle_id: "550e8400-e29b-41d4-a716-446655440001"
+        maintenance_type: "routine"
+        description: "Regular oil change and 20-point inspection"
+        scheduled_date: "2024-09-15"
+        completed_date: "2024-09-15"
+        cost:
+          amount: 89.95
+          currency: "USD"
+        service_provider: "Quick Lube Express"
+        mileage_at_service: 45000
+        next_service_due: "2024-12-15"
+        status: "completed"
+        parts_replaced:
+          - part_number: "OF-5W30-5QT"
+            description: "5W-30 Motor Oil, 5 Quarts"
+            quantity: 1
+            cost_per_unit:
+              amount: 24.99
+              currency: "USD"
+            supplier: "AutoParts Plus"
+          - part_number: "OF-FILTER-A123"
+            description: "Oil Filter"
+            quantity: 1
+            cost_per_unit:
+              amount: 12.99
+              currency: "USD"
+            supplier: "AutoParts Plus"
 properties:
   vehicles:
     type: array

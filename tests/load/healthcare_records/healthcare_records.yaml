@@ -1,6 +1,52 @@
 $schema: "https://json-schema.org/draft/2020-12/schema"
 title: "Healthcare Records Schema"
 type: object
+examples:
+  - patients:
+      - patient_id: "550e8400-e29b-41d4-a716-446655440001"
+        name:
+          first_name: "Sarah"
+          middle_name: "Elizabeth"
+          last_name: "Miller"
+        date_of_birth: "1985-07-20"
+        gender: "female"
+        blood_type: "A+"
+        allergies: ["Penicillin", "Shellfish", "Latex"]
+        emergency_contact:
+          name:
+            first_name: "Michael"
+            last_name: "Miller"
+          relationship: "Spouse"
+          phone: "+15551234567"
+          email: "michael.miller@email.com"
+    medical_records:
+      - record_id: "550e8400-e29b-41d4-a716-446655440010"
+        patient_id: "550e8400-e29b-41d4-a716-446655440001"
+        visit_date: "2024-09-15"
+        diagnosis:
+          - code: "Z00.0"
+            description: "Encounter for general adult medical examination without abnormal findings"
+            severity: "mild"
+          - code: "E11.9"
+            description: "Type 2 diabetes mellitus without complications"
+            severity: "moderate"
+        medications:
+          - name: "Metformin"
+            dosage: "500mg"
+            frequency: "Twice daily with meals"
+            start_date: "2024-09-15"
+            end_date: "2025-09-15"
+          - name: "Lisinopril"
+            dosage: "10mg"
+            frequency: "Once daily"
+            start_date: "2024-09-15"
+        vitals:
+          temperature: 36.8
+          blood_pressure:
+            systolic: 128
+            diastolic: 82
+          heart_rate: 72
+          weight: 68.5
 properties:
   patients:
     type: array

@@ -14,6 +14,22 @@ properties:
     type: array
     items:
       $ref: "#/$defs/Comment"
+examples:
+  - users:
+      - user_id: "550e8400-e29b-41d4-a716-446655440000"
+        username: "john_doe"
+        email: "john@example.com"
+    posts:
+      - post_id: "123e4567-e89b-12d3-a456-426614174000"
+        user_id: "550e8400-e29b-41d4-a716-446655440000"
+        content: "Hello world!"
+        created_at: "2024-01-15T10:30:00Z"
+    comments:
+      - comment_id: "987fcdeb-51a2-43d8-b123-456789abcdef"
+        post_id: "123e4567-e89b-12d3-a456-426614174000"
+        user_id: "550e8400-e29b-41d4-a716-446655440000"
+        content: "Great post!"
+        created_at: "2024-01-15T10:45:00Z"
 $defs:
   User:
     type: object
@@ -39,6 +55,19 @@ $defs:
         type: boolean
         default: false
     required: ["user_id", "username", "email"]
+    examples:
+      - user_id: "550e8400-e29b-41d4-a716-446655440000"
+        username: "john_doe"
+        email: "john@example.com"
+        profile:
+          display_name: "John Doe"
+          bio: "Tech enthusiast and coffee lover"
+          avatar_url: "https://example.com/avatar.jpg"
+          location: "San Francisco"
+          birth_date: "1990-05-15"
+        followers_count: 1250
+        following_count: 320
+        verified: false
   UserProfile:
     type: object
     properties:
@@ -60,6 +89,13 @@ $defs:
       birth_date:
         type: string
         format: date
+    examples:
+      - display_name: "John Doe"
+        bio: "Tech enthusiast and coffee lover ☕"
+        avatar_url: "https://example.com/avatar.jpg"
+        location: "San Francisco, CA"
+        website: "https://johndoe.dev"
+        birth_date: "1990-05-15"
   Post:
     type: object
     properties:
@@ -98,6 +134,16 @@ $defs:
         type: string
         format: date-time
     required: ["post_id", "user_id", "content", "created_at"]
+    examples:
+      - post_id: "123e4567-e89b-12d3-a456-426614174000"
+        user_id: "550e8400-e29b-41d4-a716-446655440000"
+        content: "Just discovered an amazing new coffee shop! ☕ #coffee #discovery"
+        media_urls: ["https://example.com/coffee-shop.jpg"]
+        hashtags: ["#coffee", "#discovery"]
+        mentions: ["@coffeelover"]
+        likes_count: 42
+        shares_count: 8
+        created_at: "2024-01-15T10:30:00Z"
   Comment:
     type: object
     properties:
@@ -123,3 +169,10 @@ $defs:
         type: string
         format: date-time
     required: ["comment_id", "post_id", "user_id", "content", "created_at"]
+    examples:
+      - comment_id: "987fcdeb-51a2-43d8-b123-456789abcdef"
+        post_id: "123e4567-e89b-12d3-a456-426614174000"
+        user_id: "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+        content: "Which coffee shop? I'm always looking for new places!"
+        likes_count: 3
+        created_at: "2024-01-15T10:45:00Z"

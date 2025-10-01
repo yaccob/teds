@@ -21,6 +21,22 @@ properties:
 $defs:
   MenuItem:
     type: object
+    examples:
+      - item_id: "550e8400-e29b-41d4-a716-446655440001"
+        name: "Grilled Salmon"
+        description: "Fresh Atlantic salmon grilled to perfection, served with seasonal vegetables and rice pilaf"
+        category: "entree"
+        price:
+          amount: 28.95
+          currency: "USD"
+        cost:
+          amount: 12.50
+          currency: "USD"
+        ingredients: ["salmon", "rice", "broccoli", "carrots", "olive oil", "lemon"]
+        allergens: ["fish"]
+        available: true
+        preparation_time: 18
+        calories: 450
     properties:
       item_id:
         type: string
@@ -59,6 +75,38 @@ $defs:
     required: ["item_id", "name", "category", "price", "available"]
   Order:
     type: object
+    examples:
+      - order_id: "550e8400-e29b-41d4-a716-446655440010"
+        order_number: 142
+        table_id: "550e8400-e29b-41d4-a716-446655440020"
+        server_id: "550e8400-e29b-41d4-a716-446655440030"
+        items:
+          - item_id: "550e8400-e29b-41d4-a716-446655440001"
+            quantity: 2
+            unit_price:
+              amount: 28.95
+              currency: "USD"
+            total_price:
+              amount: 57.90
+              currency: "USD"
+            modifications: ["no vegetables", "extra lemon"]
+            status: "preparing"
+        subtotal:
+          amount: 57.90
+          currency: "USD"
+        tax_amount:
+          amount: 5.21
+          currency: "USD"
+        tip_amount:
+          amount: 12.00
+          currency: "USD"
+        total_amount:
+          amount: 75.11
+          currency: "USD"
+        payment_method: "credit_card"
+        status: "preparing"
+        order_time: "2024-03-15T18:30:00Z"
+        special_instructions: "Table celebrating anniversary"
     properties:
       order_id:
         type: string
@@ -147,6 +195,22 @@ $defs:
     required: ["table_id", "table_number", "capacity", "location", "status"]
   Staff:
     type: object
+    examples:
+      - staff_id: "550e8400-e29b-41d4-a716-446655440030"
+        employee_id: "EMP-2024-001"
+        name:
+          first_name: "Emily"
+          last_name: "Johnson"
+        role: "server"
+        hourly_rate:
+          amount: 15.50
+          currency: "USD"
+        hire_date: "2024-01-15"
+        status: "active"
+        shift:
+          start_time: "17:00"
+          end_time: "23:00"
+          days: ["friday", "saturday", "sunday"]
     properties:
       staff_id:
         type: string

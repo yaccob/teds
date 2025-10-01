@@ -349,3 +349,13 @@ pytest tests/unit/test_new_feature.py::test_my_feature -v  # Must pass
 - ✅ Always run coverage verification before committing
 
 **This is a permanent, non-negotiable requirement that must ALWAYS be followed.**
+
+## Pull Request Guidelines
+
+**Test Coverage in PR Descriptions:**
+- ❌ **NEVER include test coverage details** in PR descriptions unless coverage is the main topic of the PR
+- ❌ Avoid mentioning "X tests pass", "Y% coverage", test counts, etc.
+- ✅ Focus on **business value**, **problem solved**, and **technical changes**
+- ✅ Only mention testing when it's directly relevant to the change (e.g., "Add tests for new feature")
+
+**Rationale:** Test coverage is an implementation detail, not user value. PRs should focus on what problem is solved and how.

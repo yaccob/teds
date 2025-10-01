@@ -1,0 +1,48 @@
+version: 1.0.0
+tests:
+  financial_transactions.yaml#/$defs/Transaction:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  financial_transactions.yaml#/$defs/Account:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  financial_transactions.yaml#/$defs/Money:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  financial_transactions.yaml#/$defs/Merchant:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  financial_transactions.yaml#/$schema:
+    valid:
+    invalid:
+  financial_transactions.yaml#/title:
+    valid:
+    invalid:
+  financial_transactions.yaml#/type:
+    valid:
+    invalid:
+  financial_transactions.yaml#/properties:
+    valid:
+    invalid:
+  financial_transactions.yaml#/examples:
+    valid:
+    invalid:
+  financial_transactions.yaml#/$defs:
+    valid:
+    invalid:

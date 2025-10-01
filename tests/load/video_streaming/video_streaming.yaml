@@ -18,6 +18,36 @@ properties:
     type: array
     items:
       $ref: "#/$defs/Playlist"
+examples:
+  - videos:
+      - video_id: "550e8400-e29b-41d4-a716-446655440000"
+        title: "My First Video"
+        channel_id: "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+        duration_seconds: 300
+        file_url: "https://example.com/video.mp4"
+        upload_date: "2024-01-15T10:00:00Z"
+        visibility: "public"
+        category: "entertainment"
+    users:
+      - user_id: "123e4567-e89b-12d3-a456-426614174000"
+        username: "creator1"
+        email: "creator@example.com"
+    channels:
+      - channel_id: "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+        name: "My Channel"
+        owner_id: "123e4567-e89b-12d3-a456-426614174000"
+        creation_date: "2024-01-01T00:00:00Z"
+        category: "entertainment"
+    playlists:
+      - playlist_id: "987fcdeb-51a2-43d8-b123-456789abcdef"
+        title: "My Playlist"
+        channel_id: "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+        visibility: "public"
+        creation_date: "2024-01-10T00:00:00Z"
+        videos:
+          - video_id: "550e8400-e29b-41d4-a716-446655440000"
+            position: 1
+            added_date: "2024-01-10T00:00:00Z"
 $defs:
   Video:
     type: object

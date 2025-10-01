@@ -21,6 +21,30 @@ properties:
 $defs:
   Property:
     type: object
+    examples:
+      - property_id: "550e8400-e29b-41d4-a716-446655440001"
+        address:
+          street: "1234 Oak Street"
+          city: "Beverly Hills"
+          state: "California"
+          postal_code: "90210"
+          country: "United States"
+        property_type: "house"
+        bedrooms: 4
+        bathrooms: 3.5
+        square_feet: 2850
+        lot_size_sqft: 8000
+        year_built: 2018
+        features: ["pool", "garage", "fireplace", "hardwood_floors", "granite_countertops"]
+        hoa_fee:
+          amount: 250.00
+          currency: "USD"
+        property_taxes:
+          amount: 12500.00
+          currency: "USD"
+        zoning: "residential"
+        condition: "excellent"
+        photos: ["https://example.com/photos/001.jpg", "https://example.com/photos/002.jpg"]
     properties:
       property_id:
         type: string
@@ -73,6 +97,20 @@ $defs:
     required: ["property_id", "address", "property_type", "square_feet"]
   Agent:
     type: object
+    examples:
+      - agent_id: "550e8400-e29b-41d4-a716-446655440010"
+        name:
+          first_name: "Sarah"
+          last_name: "Williams"
+        email: "sarah.williams@premierrealty.com"
+        phone: "+15551234567"
+        license_number: "RE#01234567"
+        brokerage: "Premier Realty Group"
+        specialties: ["luxury", "residential"]
+        years_experience: 8
+        commission_rate: 0.03
+        rating: 4.8
+        total_sales: 127
     properties:
       agent_id:
         type: string
@@ -112,6 +150,29 @@ $defs:
     required: ["agent_id", "name", "email", "phone", "license_number", "brokerage"]
   Listing:
     type: object
+    examples:
+      - listing_id: "550e8400-e29b-41d4-a716-446655440020"
+        property_id: "550e8400-e29b-41d4-a716-446655440001"
+        agent_id: "550e8400-e29b-41d4-a716-446655440010"
+        listing_type: "sale"
+        price:
+          amount: 1250000.00
+          currency: "USD"
+        price_per_sqft:
+          amount: 438.60
+          currency: "USD"
+        status: "active"
+        list_date: "2024-03-15"
+        days_on_market: 45
+        description: "Stunning 4-bedroom luxury home in prestigious Beverly Hills neighborhood. Features include gourmet kitchen, pool, and beautiful landscaping."
+        virtual_tour_url: "https://example.com/virtual-tour/001"
+        showing_instructions: "Please call listing agent 24 hours in advance"
+        open_houses:
+          - open_house_id: "550e8400-e29b-41d4-a716-446655440030"
+            date: "2024-04-20"
+            start_time: "14:00"
+            end_time: "16:00"
+            notes: "Refreshments will be provided"
     properties:
       listing_id:
         type: string

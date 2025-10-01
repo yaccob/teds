@@ -1,0 +1,58 @@
+version: 1.0.0
+tests:
+  event_management.yaml#/$defs/Event:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  event_management.yaml#/$defs/Venue:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  event_management.yaml#/$defs/Organizer:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  event_management.yaml#/$defs/TicketType:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  event_management.yaml#/$defs/Speaker:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  event_management.yaml#/$defs/AgendaItem:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  event_management.yaml#/$defs/Attendee:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  event_management.yaml#/$defs/Ticket:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases

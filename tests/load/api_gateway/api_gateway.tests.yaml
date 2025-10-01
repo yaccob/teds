@@ -1,0 +1,254 @@
+version: 1.0.0
+tests:
+  api_gateway.yaml#/$defs/GatewayConfig:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/TLSConfig:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/CORSConfig:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/TimeoutConfig:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/SecurityConfig:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/Route:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/RouteBackend:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/RetryPolicy:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/LoadBalancing:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/CircuitBreaker:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/RouteAuthentication:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/JWTConfig:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/APIKeyConfig:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/OAuth2Config:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/RouteRateLimit:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/CacheConfig:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/RequestTransformation:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/ResponseTransformation:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/HealthCheck:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/Middleware:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/Authentication:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/SessionConfig:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/RateLimiting:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/RateLimitRule:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/RateLimitStorage:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/RedisConfig:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/Monitoring:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/MetricsConfig:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/LoggingConfig:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/TracingConfig:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/JaegerConfig:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/ZipkinConfig:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/MonitoringHealthChecks:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/HealthCheckDefinition:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/Backend:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  api_gateway.yaml#/$defs/BackendServer:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases

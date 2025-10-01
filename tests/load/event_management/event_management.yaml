@@ -1,6 +1,133 @@
 $schema: "https://json-schema.org/draft/2020-12/schema"
 title: "Event Management System Schema"
 type: object
+examples:
+  - events:
+      - event_id: "550e8400-e29b-41d4-a716-446655440001"
+        title: "TechConf 2024: The Future of AI"
+        description: "Join us for the premier technology conference featuring the latest innovations in artificial intelligence, machine learning, and emerging technologies. Network with industry leaders and explore cutting-edge solutions."
+        category: "conference"
+        venue_id: "550e8400-e29b-41d4-a716-446655440010"
+        organizer:
+          organizer_id: "550e8400-e29b-41d4-a716-446655440020"
+          name: "TechEvents Corp"
+          email: "events@techevents.com"
+          phone: "+15551234567"
+          organization: "TechEvents Corporation"
+          website: "https://www.techevents.com"
+        start_datetime: "2024-11-15T09:00:00Z"
+        end_datetime: "2024-11-16T18:00:00Z"
+        timezone: "America/New_York"
+        capacity: 500
+        registration_start: "2024-09-01T00:00:00Z"
+        registration_end: "2024-11-10T23:59:59Z"
+        status: "published"
+        pricing:
+          - ticket_type_id: "550e8400-e29b-41d4-a716-446655440030"
+            name: "Early Bird"
+            description: "Discounted rate for early registrations"
+            price:
+              amount: 299.00
+              currency: "USD"
+            quantity_available: 100
+            quantity_sold: 87
+            sale_start: "2024-09-01T00:00:00Z"
+            sale_end: "2024-10-15T23:59:59Z"
+            transfer_allowed: true
+            refund_allowed: true
+          - ticket_type_id: "550e8400-e29b-41d4-a716-446655440031"
+            name: "Standard"
+            description: "Regular conference pass"
+            price:
+              amount: 399.00
+              currency: "USD"
+            quantity_available: 350
+            quantity_sold: 142
+            sale_start: "2024-10-16T00:00:00Z"
+            sale_end: "2024-11-10T23:59:59Z"
+            transfer_allowed: true
+            refund_allowed: false
+        speakers:
+          - speaker_id: "550e8400-e29b-41d4-a716-446655440040"
+            name:
+              first_name: "Dr. Sarah"
+              last_name: "Chen"
+            email: "sarah.chen@airesearch.com"
+            bio: "Dr. Sarah Chen is a leading researcher in artificial intelligence with over 15 years of experience in machine learning and neural networks. She has published over 100 papers and holds 20 patents in AI technologies."
+            company: "AI Research Institute"
+            title: "Chief AI Scientist"
+            photo_url: "https://example.com/speakers/sarah-chen.jpg"
+            social_media:
+              twitter: "@sarahchen_ai"
+              linkedin: "sarahchen-ai"
+              website: "https://sarahchen.ai"
+        agenda:
+          - item_id: "550e8400-e29b-41d4-a716-446655440050"
+            title: "Opening Keynote: The Future of AI"
+            description: "An inspiring overview of where artificial intelligence is headed in the next decade"
+            start_time: "2024-11-15T09:30:00Z"
+            end_time: "2024-11-15T10:30:00Z"
+            speaker_ids: ["550e8400-e29b-41d4-a716-446655440040"]
+            location: "Main Auditorium"
+            session_type: "keynote"
+    venues:
+      - venue_id: "550e8400-e29b-41d4-a716-446655440010"
+        name: "Metropolitan Convention Center"
+        address:
+          street: "1001 Convention Plaza"
+          city: "New York"
+          state: "New York"
+          postal_code: "10001"
+          country: "United States"
+        capacity: 1000
+        venue_type: "conference_center"
+        amenities: ["wifi", "parking", "catering", "av_equipment", "accessibility", "air_conditioning", "security"]
+        contact:
+          name:
+            first_name: "Michael"
+            last_name: "Roberts"
+          phone: "+15559876543"
+          relationship: "Venue Manager"
+          email: "michael.roberts@metroconvention.com"
+        hourly_rate:
+          amount: 500.00
+          currency: "USD"
+    attendees:
+      - attendee_id: "550e8400-e29b-41d4-a716-446655440060"
+        name:
+          first_name: "John"
+          last_name: "Doe"
+        email: "john.doe@techcorp.com"
+        phone: "+15551234568"
+        company: "TechCorp Inc."
+        job_title: "Senior Software Engineer"
+        dietary_restrictions: ["vegetarian"]
+        accessibility_needs: []
+        registration_date: "2024-09-15T14:30:00Z"
+        check_in_time: "2024-11-15T08:45:00Z"
+    tickets:
+      - ticket_id: "550e8400-e29b-41d4-a716-446655440070"
+        ticket_number: "TC240001"
+        event_id: "550e8400-e29b-41d4-a716-446655440001"
+        ticket_type_id: "550e8400-e29b-41d4-a716-446655440030"
+        attendee_id: "550e8400-e29b-41d4-a716-446655440060"
+        purchase_date: "2024-09-15T14:35:00Z"
+        price_paid:
+          amount: 299.00
+          currency: "USD"
+        payment:
+          payment_id: "pay_tc240001"
+          method: "credit_card"
+          amount:
+            amount: 299.00
+            currency: "USD"
+          status: "completed"
+          transaction_date: "2024-09-15T14:35:00Z"
+          payment_provider: "stripe"
+          reference_number: "ch_3NZ8pI2eZvKYlo2C0123456789"
+        status: "used"
+        qr_code: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
+        used_date: "2024-11-15T08:45:00Z"
 properties:
   events:
     type: array

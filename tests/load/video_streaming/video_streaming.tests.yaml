@@ -1,0 +1,44 @@
+version: 1.0.0
+tests:
+  video_streaming.yaml#/$defs/Video:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  video_streaming.yaml#/$defs/Channel:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  video_streaming.yaml#/$defs/Playlist:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  video_streaming.yaml#/$defs/PlaylistVideo:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  video_streaming.yaml#/$defs/Subtitle:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  video_streaming.yaml#/$defs/Monetization:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases

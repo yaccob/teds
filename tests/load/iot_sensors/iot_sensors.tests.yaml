@@ -1,0 +1,16 @@
+version: 1.0.0
+tests:
+  iot_sensors.yaml#/$defs/Device:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  iot_sensors.yaml#/$defs/SensorReading:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases

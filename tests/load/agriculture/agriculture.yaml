@@ -1,6 +1,150 @@
 $schema: "https://json-schema.org/draft/2020-12/schema"
 title: "Agricultural Management System Schema"
 type: object
+examples:
+  - farms:
+      - farm_id: "550e8400-e29b-41d4-a716-446655440001"
+        name: "Green Valley Farm"
+        owner:
+          first_name: "John"
+          middle_name: "Robert"
+          last_name: "Smith"
+        address:
+          street: "1234 Farm Road"
+          city: "Greenfield"
+          state: "Iowa"
+          postal_code: "50849"
+          country: "United States"
+        total_area_hectares: 240.5
+        farm_type: "mixed"
+        established_date: "2010-03-15"
+        certifications: ["organic", "sustainable"]
+        fields:
+          - field_id: "550e8400-e29b-41d4-a716-446655440010"
+            name: "North Field"
+            area_hectares: 25.5
+            soil_type: "loam"
+            soil_ph: 6.8
+            coordinates:
+              - latitude: 42.1234
+                longitude: -93.5678
+              - latitude: 42.1244
+                longitude: -93.5678
+              - latitude: 42.1244
+                longitude: -93.5688
+              - latitude: 42.1234
+                longitude: -93.5688
+            slope_percentage: 2.5
+            drainage: "good"
+            current_crop_id: "550e8400-e29b-41d4-a716-446655440020"
+        irrigation_systems:
+          - system_id: "550e8400-e29b-41d4-a716-446655440030"
+            type: "drip"
+            field_ids: ["550e8400-e29b-41d4-a716-446655440010"]
+            water_source: "well"
+            flow_rate_liters_per_minute: 150.0
+            installation_date: "2015-05-10"
+            maintenance_schedule: "monthly"
+            automated: true
+        equipment:
+          - equipment_id: "550e8400-e29b-41d4-a716-446655440040"
+            name: "John Deere 7820"
+            type: "tractor"
+            manufacturer: "John Deere"
+            model: "7820"
+            year: 2018
+            purchase_date: "2018-04-15"
+            purchase_price:
+              amount: 125000.00
+              currency: "USD"
+            operating_hours: 1245.5
+            fuel_consumption_per_hour: 12.5
+            maintenance_records: []
+            status: "operational"
+    crops:
+      - crop_id: "550e8400-e29b-41d4-a716-446655440020"
+        name: "Corn"
+        variety: "Pioneer P1870"
+        category: "cereal"
+        planting_season: "spring"
+        growing_days: 110
+        water_requirements: "moderate"
+        soil_requirements: ["loam", "silt"]
+        optimal_temperature_c:
+          minimum: 18.0
+          maximum: 32.0
+        yield_per_hectare_kg: 8500.0
+        market_price_per_kg:
+          amount: 0.25
+          currency: "USD"
+    livestock:
+      - animal_id: "550e8400-e29b-41d4-a716-446655440050"
+        ear_tag: "001A"
+        species: "cattle"
+        breed: "Holstein"
+        date_of_birth: "2020-03-15"
+        gender: "female"
+        weight_kg: 550.0
+        health_status: "healthy"
+        vaccinations:
+          - vaccine_name: "IBR/BVD"
+            vaccination_date: "2024-01-15"
+            next_due_date: "2025-01-15"
+            veterinarian: "Dr. Sarah Johnson"
+            batch_number: "VB2024-001"
+        breeding_history:
+          - breeding_date: "2023-05-10"
+            mate_id: "550e8400-e29b-41d4-a716-446655440051"
+            pregnancy_confirmed: true
+            due_date: "2024-02-15"
+            birth_date: "2024-02-18"
+            offspring_count: 1
+            offspring_ids: ["550e8400-e29b-41d4-a716-446655440052"]
+        feed_consumption_kg_per_day: 25.0
+        milk_production_liters_per_day: 28.5
+        location: "Barn A"
+    field_operations:
+      - operation_id: "550e8400-e29b-41d4-a716-446655440060"
+        field_id: "550e8400-e29b-41d4-a716-446655440010"
+        operation_type: "planting"
+        crop_id: "550e8400-e29b-41d4-a716-446655440020"
+        operation_date: "2024-04-15"
+        equipment_used: ["550e8400-e29b-41d4-a716-446655440040"]
+        operator: "Mike Johnson"
+        materials_used:
+          - material_type: "seed"
+            name: "Pioneer P1870 Corn Seed"
+            quantity: 25.0
+            unit: "kg"
+            cost_per_unit:
+              amount: 8.50
+              currency: "USD"
+        weather_conditions:
+          timestamp: "2024-04-15T10:00:00Z"
+          temperature_c: 22.0
+          humidity_percent: 65.0
+          pressure_hpa: 1013.25
+          wind_speed_kmh: 8.5
+          wind_direction_degrees: 225
+          precipitation_mm: 0.0
+          visibility_km: 10.0
+          uv_index: 5
+          weather_condition: "partly_cloudy"
+        cost:
+          amount: 450.00
+          currency: "USD"
+        notes: "Good planting conditions, soil temperature optimal"
+    weather_data:
+      - timestamp: "2024-04-15T10:00:00Z"
+        temperature_c: 22.0
+        humidity_percent: 65.0
+        pressure_hpa: 1013.25
+        wind_speed_kmh: 8.5
+        wind_direction_degrees: 225
+        precipitation_mm: 0.0
+        visibility_km: 10.0
+        uv_index: 5
+        weather_condition: "partly_cloudy"
 properties:
   farms:
     type: array

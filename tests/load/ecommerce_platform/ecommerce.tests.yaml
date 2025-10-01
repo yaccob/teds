@@ -1,0 +1,135 @@
+version: 1.0.0
+tests:
+  ecommerce.yaml#/$defs/Metadata:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  ecommerce.yaml#/$defs/Customer:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  ecommerce.yaml#/$defs/PersonName:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  ecommerce.yaml#/$defs/Address:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  ecommerce.yaml#/$defs/CustomerPreferences:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  ecommerce.yaml#/$defs/Product:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  ecommerce.yaml#/$defs/ProductCategory:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  ecommerce.yaml#/$defs/Money:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  ecommerce.yaml#/$defs/Weight:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  ecommerce.yaml#/$defs/Dimensions:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  ecommerce.yaml#/$defs/ProductImage:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  ecommerce.yaml#/$defs/ProductVariant:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  ecommerce.yaml#/$defs/Order:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  ecommerce.yaml#/$defs/OrderItem:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  ecommerce.yaml#/$defs/Payment:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  ecommerce.yaml#/$defs/Shipping:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  ecommerce.yaml#/$defs/OrderTotals:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  ecommerce.yaml#/$defs/InventoryItem:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  ecommerce.yaml#/$defs/WarehouseLocation:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases

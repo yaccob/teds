@@ -439,12 +439,9 @@ def generate_from_source_config(
             )
 
         # Determine schema file path for JsonPath expansion
-        if source_config["target"]:
-            # For explicit targets, schema paths are relative to target directory
-            schema_file = target_path.parent / source_file_str
-        else:
-            # For default targets, schema paths are relative to working directory
-            schema_file = base_dir / source_file_str
+        # Schema paths are always relative to working directory (base_dir)
+        # This ensures consistent behavior regardless of target specification
+        schema_file = base_dir / source_file_str
 
         # Calculate correct reference path relative to test file directory
         try:

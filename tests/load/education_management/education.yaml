@@ -1,6 +1,116 @@
 $schema: "https://json-schema.org/draft/2020-12/schema"
 title: "Education Management System Schema"
 type: object
+examples:
+  - students:
+      - student_id: "550e8400-e29b-41d4-a716-446655440001"
+        student_number: "20240001"
+        name:
+          first_name: "Emily"
+          middle_name: "Jane"
+          last_name: "Johnson"
+        email: "emily.johnson@university.edu"
+        date_of_birth: "2005-03-15"
+        address:
+          street: "123 Student Lane"
+          city: "University City"
+          state: "California"
+          postal_code: "90210"
+          country: "United States"
+        emergency_contact:
+          name:
+            first_name: "Robert"
+            last_name: "Johnson"
+          phone: "+15551234567"
+          relationship: "Father"
+          email: "robert.johnson@email.com"
+        enrollment_date: "2023-08-15"
+        status: "active"
+        gpa: 3.75
+    courses:
+      - course_id: "550e8400-e29b-41d4-a716-446655440010"
+        course_code: "CSC101"
+        title: "Introduction to Computer Science"
+        description: "An introductory course covering fundamental concepts of computer science including programming basics, algorithms, and data structures."
+        credits: 3
+        department: "Computer Science"
+        prerequisites: []
+        instructor:
+          instructor_id: "550e8400-e29b-41d4-a716-446655440020"
+          name:
+            first_name: "Dr. Sarah"
+            last_name: "Thompson"
+          email: "sarah.thompson@university.edu"
+          department: "Computer Science"
+          office_location: "CS Building, Room 301"
+          phone: "+15559876543"
+        schedule:
+          days: ["monday", "wednesday", "friday"]
+          start_time: "10:00"
+          end_time: "11:00"
+          room: "CS-101"
+          building: "Computer Science Building"
+        max_enrollment: 30
+        semester: "fall"
+        year: 2024
+      - course_id: "550e8400-e29b-41d4-a716-446655440011"
+        course_code: "MAT201"
+        title: "Calculus II"
+        description: "Continuation of Calculus I covering integration techniques, infinite series, and applications."
+        credits: 4
+        department: "Mathematics"
+        prerequisites: ["550e8400-e29b-41d4-a716-446655440030"]
+        instructor:
+          instructor_id: "550e8400-e29b-41d4-a716-446655440021"
+          name:
+            first_name: "Dr. Michael"
+            last_name: "Davis"
+          email: "michael.davis@university.edu"
+          department: "Mathematics"
+          office_location: "Math Building, Room 205"
+          phone: "+15559876544"
+        schedule:
+          days: ["tuesday", "thursday"]
+          start_time: "14:00"
+          end_time: "15:30"
+          room: "MATH-205"
+          building: "Mathematics Building"
+        max_enrollment: 25
+        semester: "fall"
+        year: 2024
+    enrollments:
+      - enrollment_id: "550e8400-e29b-41d4-a716-446655440040"
+        student_id: "550e8400-e29b-41d4-a716-446655440001"
+        course_id: "550e8400-e29b-41d4-a716-446655440010"
+        enrollment_date: "2024-08-20"
+        status: "enrolled"
+        final_grade: "B+"
+      - enrollment_id: "550e8400-e29b-41d4-a716-446655440041"
+        student_id: "550e8400-e29b-41d4-a716-446655440001"
+        course_id: "550e8400-e29b-41d4-a716-446655440011"
+        enrollment_date: "2024-08-20"
+        status: "enrolled"
+    grades:
+      - grade_id: "550e8400-e29b-41d4-a716-446655440050"
+        enrollment_id: "550e8400-e29b-41d4-a716-446655440040"
+        assignment_name: "Midterm Exam"
+        assignment_type: "exam"
+        points_earned: 87.5
+        points_possible: 100.0
+        percentage: 87.5
+        letter_grade: "B+"
+        graded_date: "2024-09-20"
+        comments: "Good understanding of core concepts, minor errors in algorithm implementation."
+      - grade_id: "550e8400-e29b-41d4-a716-446655440051"
+        enrollment_id: "550e8400-e29b-41d4-a716-446655440040"
+        assignment_name: "Programming Project 1"
+        assignment_type: "project"
+        points_earned: 92.0
+        points_possible: 100.0
+        percentage: 92.0
+        letter_grade: "A-"
+        graded_date: "2024-09-15"
+        comments: "Excellent code structure and documentation. Well-implemented solution."
 properties:
   students:
     type: array

@@ -1,0 +1,65 @@
+version: 1.0.0
+tests:
+  music_streaming.yaml#/$defs/User:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  music_streaming.yaml#/$defs/ListeningPreferences:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  music_streaming.yaml#/$defs/Artist:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  music_streaming.yaml#/$defs/BandMember:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  music_streaming.yaml#/$defs/Album:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  music_streaming.yaml#/$defs/Track:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  music_streaming.yaml#/$defs/AudioFeatures:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  music_streaming.yaml#/$defs/Playlist:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  music_streaming.yaml#/$defs/PlaylistTrack:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases

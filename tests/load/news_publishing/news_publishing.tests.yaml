@@ -1,0 +1,30 @@
+version: 1.0.0
+tests:
+  news_publishing.yaml#/$defs/Article:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  news_publishing.yaml#/$defs/Author:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  news_publishing.yaml#/$defs/Category:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  news_publishing.yaml#/$defs/SEO:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases

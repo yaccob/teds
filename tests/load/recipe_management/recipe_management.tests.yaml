@@ -1,0 +1,65 @@
+version: 1.0.0
+tests:
+  recipe_management.yaml#/$defs/Recipe:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  recipe_management.yaml#/$defs/Ingredient:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  recipe_management.yaml#/$defs/RecipeIngredient:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  recipe_management.yaml#/$defs/Instruction:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  recipe_management.yaml#/$defs/NutritionInfo:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  recipe_management.yaml#/$defs/User:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  recipe_management.yaml#/$defs/MealPlan:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  recipe_management.yaml#/$defs/PlannedMeal:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  recipe_management.yaml#/$defs/ShoppingItem:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases

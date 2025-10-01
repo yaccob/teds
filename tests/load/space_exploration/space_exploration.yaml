@@ -25,6 +25,23 @@ properties:
 $defs:
   Mission:
     type: object
+    examples:
+      - mission_id: "550e8400-e29b-41d4-a716-446655440001"
+        name: "Artemis III"
+        mission_type: "exploration"
+        agency: "NASA"
+        launch_date: "2025-09-15T10:30:00Z"
+        planned_duration_days: 45
+        status: "planned"
+        destination: "550e8400-e29b-41d4-a716-446655440020"
+        objectives: ["Land on lunar south pole", "Establish lunar base camp", "Conduct geological surveys"]
+        budget:
+          amount: 4200000000.00
+          currency: "USD"
+        crew: ["550e8400-e29b-41d4-a716-446655440010", "550e8400-e29b-41d4-a716-446655440011"]
+        spacecraft_id: "550e8400-e29b-41d4-a716-446655440030"
+        launch_site: "Kennedy Space Center LC-39A"
+        mission_control: "Johnson Space Center"
     properties:
       mission_id:
         type: string
@@ -75,6 +92,28 @@ $defs:
     required: ["mission_id", "name", "mission_type", "agency", "launch_date", "status", "objectives", "spacecraft_id"]
   Spacecraft:
     type: object
+    examples:
+      - spacecraft_id: "550e8400-e29b-41d4-a716-446655440030"
+        name: "Orion Artemis III"
+        spacecraft_type: "capsule"
+        manufacturer: "Lockheed Martin"
+        launch_mass_kg: 25400.0
+        dimensions:
+          length_cm: 500.0
+          width_cm: 500.0
+          height_cm: 340.0
+          weight_kg: 25400.0
+        power_source: "solar"
+        power_output_watts: 11200.0
+        propulsion_system:
+          type: "chemical"
+          fuel_type: "MMH/NTO"
+          thrust_newtons: 33400.0
+          specific_impulse_seconds: 316.0
+          fuel_capacity_kg: 8800.0
+        crew_capacity: 4
+        operational_status: "active"
+        launch_date: "2025-09-15T10:30:00Z"
     properties:
       spacecraft_id:
         type: string
@@ -211,6 +250,26 @@ $defs:
     required: ["instrument_id", "name", "type", "purpose", "mass_kg", "power_consumption_watts"]
   Astronaut:
     type: object
+    examples:
+      - astronaut_id: "550e8400-e29b-41d4-a716-446655440010"
+        name:
+          first_name: "Christina"
+          middle_name: "Hammock"
+          last_name: "Koch"
+        call_sign: "Station"
+        nationality: "US"
+        date_of_birth: "1979-02-29"
+        agency: "NASA"
+        astronaut_class: "Group 21"
+        selection_date: "2013-06-17"
+        total_space_time_hours: 5248.5
+        total_eva_time_hours: 42.5
+        missions_flown: ["550e8400-e29b-41d4-a716-446655440040"]
+        specializations: ["mission_specialist", "flight_engineer"]
+        medical_clearance:
+          status: "active"
+          last_exam_date: "2024-12-15"
+          next_exam_date: "2025-06-15"
     properties:
       astronaut_id:
         type: string

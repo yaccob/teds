@@ -1,0 +1,44 @@
+version: 1.0.0
+tests:
+  healthcare_records.yaml#/$defs/Patient:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  healthcare_records.yaml#/$defs/MedicalRecord:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  healthcare_records.yaml#/$defs/EmergencyContact:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  healthcare_records.yaml#/$defs/Diagnosis:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  healthcare_records.yaml#/$defs/Medication:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  healthcare_records.yaml#/$defs/VitalSigns:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases

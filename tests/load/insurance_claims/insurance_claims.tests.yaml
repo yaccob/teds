@@ -1,0 +1,65 @@
+version: 1.0.0
+tests:
+  insurance_claims.yaml#/$defs/Policyholder:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  insurance_claims.yaml#/$defs/Policy:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  insurance_claims.yaml#/$defs/CoveredItem:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  insurance_claims.yaml#/$defs/VehicleDetails:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  insurance_claims.yaml#/$defs/PropertyDetails:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  insurance_claims.yaml#/$defs/Claim:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  insurance_claims.yaml#/$defs/ClaimDocument:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  insurance_claims.yaml#/$defs/ClaimEvent:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  insurance_claims.yaml#/$defs/Adjuster:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases

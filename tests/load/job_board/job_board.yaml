@@ -1,6 +1,111 @@
 $schema: "https://json-schema.org/draft/2020-12/schema"
 title: "Job Board Platform Schema"
 type: object
+examples:
+  - jobs:
+      - job_id: "550e8400-e29b-41d4-a716-446655440001"
+        title: "Senior Full Stack Developer"
+        description: "We are seeking an experienced Full Stack Developer to join our growing engineering team. You will work on cutting-edge web applications using modern technologies including React, Node.js, and cloud infrastructure. This role offers the opportunity to work on challenging projects that impact millions of users worldwide."
+        company_id: "550e8400-e29b-41d4-a716-446655440010"
+        department: "Engineering"
+        location:
+          street: "1 Hacker Way"
+          city: "Menlo Park"
+          state: "California"
+          postal_code: "94025"
+          country: "United States"
+        remote_work: "hybrid"
+        employment_type: "full_time"
+        experience_level: "senior"
+        salary_range:
+          min_salary:
+            amount: 120000.00
+            currency: "USD"
+          max_salary:
+            amount: 180000.00
+            currency: "USD"
+          salary_type: "annual"
+        required_skills: ["JavaScript", "React", "Node.js", "PostgreSQL", "AWS"]
+        preferred_skills: ["TypeScript", "Docker", "Kubernetes", "GraphQL", "CI/CD"]
+        education_requirements: "bachelors"
+        benefits: ["health_insurance", "dental", "vision", "401k", "pto", "flexible_hours", "remote_work"]
+        posted_date: "2024-09-15T10:00:00Z"
+        application_deadline: "2024-11-15"
+        status: "open"
+        application_count: 47
+    companies:
+      - company_id: "550e8400-e29b-41d4-a716-446655440010"
+        name: "TechVision Inc."
+        description: "A leading technology company focused on building innovative web and mobile applications that transform how people interact with technology."
+        industry: "Technology"
+        size: "201-500"
+        founded_year: 2015
+        website: "https://techvision.com"
+        headquarters:
+          street: "1 Hacker Way"
+          city: "Menlo Park"
+          state: "California"
+          postal_code: "94025"
+          country: "United States"
+        logo_url: "https://techvision.com/logo.png"
+        culture: ["Innovation", "Work-life balance", "Remote-friendly", "Continuous learning"]
+        benefits: ["health_insurance", "dental", "vision", "401k", "pto", "flexible_hours", "remote_work", "gym_membership"]
+    candidates:
+      - candidate_id: "550e8400-e29b-41d4-a716-446655440020"
+        name:
+          first_name: "Sarah"
+          last_name: "Chen"
+        email: "sarah.chen@email.com"
+        phone: "+14155559876"
+        address:
+          street: "456 Developer Street"
+          city: "San Francisco"
+          state: "California"
+          postal_code: "94102"
+          country: "United States"
+        profile:
+          headline: "Senior Full Stack Developer with 8+ years experience"
+          summary: "Passionate full stack developer with expertise in modern web technologies. Experienced in building scalable applications from conception to deployment."
+          skills: ["JavaScript", "React", "Node.js", "Python", "PostgreSQL", "AWS", "Docker"]
+          experience_years: 8
+          desired_salary:
+            amount: 150000.00
+            currency: "USD"
+          willing_to_relocate: false
+          remote_work_preference: "hybrid"
+        work_experience:
+          - company: "Previous Tech Co"
+            title: "Full Stack Developer"
+            start_date: "2020-01-15"
+            end_date: "2024-08-30"
+            description: "Led development of customer-facing web applications serving 100K+ users"
+        education:
+          - institution: "University of California, Berkeley"
+            degree: "Bachelor of Science in Computer Science"
+            graduation_date: "2016-05-15"
+            gpa: 3.7
+        resume_url: "https://candidates.jobboard.com/resumes/sarah_chen_resume.pdf"
+        created_at: "2024-09-10T14:30:00Z"
+        last_active: "2024-10-01T09:15:00Z"
+    applications:
+      - application_id: "550e8400-e29b-41d4-a716-446655440030"
+        job_id: "550e8400-e29b-41d4-a716-446655440001"
+        candidate_id: "550e8400-e29b-41d4-a716-446655440020"
+        applied_date: "2024-09-20T11:45:00Z"
+        status: "under_review"
+        cover_letter: "I am excited to apply for the Senior Full Stack Developer position at TechVision Inc. With my 8 years of experience building scalable web applications and my expertise in the required technologies, I believe I would be a great addition to your engineering team."
+        custom_responses:
+          - question: "What interests you most about this role?"
+            answer: "The opportunity to work on challenging projects that impact millions of users and to contribute to innovative solutions in a fast-paced environment."
+        interview_rounds:
+          - round_id: "550e8400-e29b-41d4-a716-446655440040"
+            round_type: "phone_screen"
+            scheduled_date: "2024-10-05T14:00:00Z"
+            duration_minutes: 30
+            interviewer: "John Smith"
+            status: "scheduled"
+            notes: "Initial phone screening to discuss background and basic technical concepts"
+        notes: "Strong technical background, good communication skills, available to start within 2 weeks"
 properties:
   jobs:
     type: array

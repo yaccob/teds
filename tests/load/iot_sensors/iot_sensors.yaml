@@ -10,6 +10,15 @@ properties:
     type: array
     items:
       $ref: "#/$defs/SensorReading"
+examples:
+  - devices:
+      - device_id: "550e8400-e29b-41d4-a716-446655440000"
+        device_type: "temperature"
+    readings:
+      - reading_id: "123e4567-e89b-12d3-a456-426614174000"
+        device_id: "550e8400-e29b-41d4-a716-446655440000"
+        timestamp: "2024-01-15T10:30:00Z"
+        value: 23.5
 $defs:
   Device:
     type: object
@@ -29,6 +38,14 @@ $defs:
             type: number
         required: ["latitude", "longitude"]
     required: ["device_id", "device_type"]
+    examples:
+      - device_id: "550e8400-e29b-41d4-a716-446655440000"
+        device_type: "temperature"
+        location:
+          latitude: 37.7749
+          longitude: -122.4194
+      - device_id: "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+        device_type: "motion"
   SensorReading:
     type: object
     properties:
@@ -46,3 +63,14 @@ $defs:
       unit:
         type: string
     required: ["reading_id", "device_id", "timestamp", "value"]
+    examples:
+      - reading_id: "123e4567-e89b-12d3-a456-426614174000"
+        device_id: "550e8400-e29b-41d4-a716-446655440000"
+        timestamp: "2024-01-15T10:30:00Z"
+        value: 23.5
+        unit: "°C"
+      - reading_id: "987fcdeb-51a2-43d8-b123-456789abcdef"
+        device_id: "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+        timestamp: "2024-01-15T10:31:00Z"
+        value: 1013.25
+        unit: "hPa"

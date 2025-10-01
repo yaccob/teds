@@ -1,6 +1,88 @@
 $schema: "https://json-schema.org/draft/2020-12/schema"
 title: "Hotel Booking Management Schema"
 type: object
+examples:
+  - hotels:
+      - hotel_id: "550e8400-e29b-41d4-a716-446655440001"
+        name: "Grand Pacific Resort"
+        address:
+          street: "1500 Ocean Boulevard"
+          city: "Miami Beach"
+          state: "Florida"
+          postal_code: "33139"
+          country: "United States"
+        star_rating: 5
+        amenities: ["wifi", "pool", "gym", "spa", "restaurant", "bar", "parking", "concierge"]
+        rooms:
+          - room_id: "550e8400-e29b-41d4-a716-446655440010"
+            room_number: "1205"
+            room_type: "deluxe"
+            capacity: 2
+            price_per_night:
+              amount: 450.00
+              currency: "USD"
+            amenities: ["Ocean view", "King bed", "Balcony", "Mini bar", "Coffee machine"]
+            available: true
+          - room_id: "550e8400-e29b-41d4-a716-446655440011"
+            room_number: "2010"
+            room_type: "suite"
+            capacity: 4
+            price_per_night:
+              amount: 850.00
+              currency: "USD"
+            amenities: ["Ocean view", "Separate living room", "Kitchen", "Jacuzzi", "Butler service"]
+            available: true
+        contact:
+          name:
+            first_name: "Isabella"
+            last_name: "Rodriguez"
+          relationship: "Hotel Manager"
+          phone: "+13055551234"
+          email: "manager@grandpacific.com"
+    bookings:
+      - booking_id: "550e8400-e29b-41d4-a716-446655440020"
+        confirmation_number: "GPR001"
+        hotel_id: "550e8400-e29b-41d4-a716-446655440001"
+        room_id: "550e8400-e29b-41d4-a716-446655440010"
+        guest_id: "550e8400-e29b-41d4-a716-446655440030"
+        check_in_date: "2024-12-20"
+        check_out_date: "2024-12-23"
+        nights: 3
+        total_amount:
+          amount: 1350.00
+          currency: "USD"
+        payment:
+          payment_id: "pay_gpr001"
+          method: "credit_card"
+          amount:
+            amount: 1350.00
+            currency: "USD"
+          status: "completed"
+          transaction_date: "2024-10-01T15:30:00Z"
+          payment_provider: "stripe"
+          reference_number: "ch_3NZ8pI2eZvKYlo2C0987654321"
+        status: "confirmed"
+        special_requests: "Late check-in requested, ocean view preferred, anniversary celebration - please prepare room with flowers and champagne"
+    guests:
+      - guest_id: "550e8400-e29b-41d4-a716-446655440030"
+        name:
+          first_name: "David"
+          last_name: "Anderson"
+        email: "david.anderson@email.com"
+        phone: "+12125559876"
+        address:
+          street: "789 Manhattan Avenue"
+          city: "New York"
+          state: "New York"
+          postal_code: "10025"
+          country: "United States"
+        loyalty_number: "GPR-GOLD-123456"
+        preferences:
+          room_type: "deluxe"
+          floor_preference: "high"
+          bed_type: "king"
+          smoking: false
+          dietary_restrictions: ["Vegetarian", "Gluten-free"]
 properties:
   hotels:
     type: array

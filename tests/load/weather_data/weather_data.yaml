@@ -17,6 +17,17 @@ properties:
 $defs:
   WeatherStation:
     type: object
+    examples:
+      - station_id: "550e8400-e29b-41d4-a716-446655440001"
+        name: "San Francisco International Airport"
+        location:
+          latitude: 37.6213
+          longitude: -122.3790
+        elevation_meters: 3.7
+        station_type: "automatic"
+        operator: "National Weather Service"
+        installation_date: "2010-05-15"
+        sensors: []
     properties:
       station_id:
         type: string
@@ -43,6 +54,19 @@ $defs:
     required: ["station_id", "name", "location", "elevation_meters", "station_type"]
   WeatherObservation:
     type: object
+    examples:
+      - observation_id: "550e8400-e29b-41d4-a716-446655440010"
+        station_id: "550e8400-e29b-41d4-a716-446655440001"
+        timestamp: "2024-03-15T14:30:00Z"
+        temperature_celsius: 18.5
+        humidity_percent: 72.0
+        pressure_hpa: 1013.25
+        wind_speed_kmh: 12.8
+        wind_direction_degrees: 225
+        precipitation_mm: 0.0
+        visibility_km: 16.0
+        cloud_cover_percent: 25.0
+        weather_conditions: ["partly_cloudy"]
     properties:
       observation_id:
         type: string
@@ -92,6 +116,22 @@ $defs:
     required: ["observation_id", "station_id", "timestamp", "temperature_celsius", "humidity_percent", "pressure_hpa"]
   WeatherForecast:
     type: object
+    examples:
+      - forecast_id: "550e8400-e29b-41d4-a716-446655440020"
+        location:
+          latitude: 37.6213
+          longitude: -122.3790
+        forecast_date: "2024-03-16"
+        issued_time: "2024-03-15T18:00:00Z"
+        forecast_periods:
+          - period_start: "2024-03-16T06:00:00Z"
+            period_end: "2024-03-16T18:00:00Z"
+            temperature_high_celsius: 22.0
+            temperature_low_celsius: 15.0
+            precipitation_probability: 20.0
+            precipitation_amount_mm: 0.5
+            wind_speed_kmh: 15.0
+            conditions: "partly_cloudy"
     properties:
       forecast_id:
         type: string

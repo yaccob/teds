@@ -1,6 +1,69 @@
 $schema: "https://json-schema.org/draft/2020-12/schema"
 title: "News Publishing Platform Schema"
 type: object
+examples:
+  - articles:
+      - article_id: "550e8400-e29b-41d4-a716-446655440001"
+        title: "Breaking: Major Breakthrough in Renewable Energy Technology"
+        subtitle: "New solar panel design achieves record 47% efficiency in laboratory tests"
+        slug: "renewable-energy-breakthrough-solar-panel-efficiency"
+        content: "Scientists at the Massachusetts Institute of Technology have achieved a groundbreaking milestone in renewable energy technology with the development of a new solar panel design that reaches 47% efficiency in converting sunlight to electricity. This represents a significant improvement over current commercial solar panels, which typically achieve 20-22% efficiency. The breakthrough could revolutionize the solar energy industry and accelerate the global transition to clean energy."
+        excerpt: "MIT scientists develop solar panel technology with record-breaking 47% efficiency, potentially revolutionizing renewable energy industry."
+        author_id: "550e8400-e29b-41d4-a716-446655440010"
+        category_id: "550e8400-e29b-41d4-a716-446655440020"
+        tags: ["renewable energy", "solar power", "technology", "climate change", "MIT"]
+        status: "published"
+        featured_image:
+          url: "https://news.example.com/images/solar-panels-breakthrough.jpg"
+          alt: "Advanced solar panels in laboratory setting"
+          caption: "MIT researchers testing the new high-efficiency solar panel design"
+        publication_date: "2024-10-01T09:00:00Z"
+        last_modified: "2024-10-01T09:15:00Z"
+        view_count: 125000
+        share_count: 2500
+        reading_time_minutes: 4
+        language: "en"
+        priority: "high"
+        seo:
+          meta_description: "MIT scientists achieve record 47% efficiency in new solar panel design, marking major breakthrough in renewable energy technology."
+          keywords: ["solar energy", "renewable technology", "MIT research", "energy efficiency"]
+    authors:
+      - author_id: "550e8400-e29b-41d4-a716-446655440010"
+        name:
+          first_name: "Jessica"
+          last_name: "Chen"
+        email: "jessica.chen@newsorg.com"
+        bio: "Science and technology reporter with 8 years of experience covering breakthrough research and innovation. Specialized in renewable energy and climate technology."
+        profile_image: "https://news.example.com/authors/jessica-chen.jpg"
+        specialties: ["science", "technology", "renewable energy", "climate"]
+        social_media:
+          twitter: "@jessicachen_sci"
+          linkedin: "jessica-chen-science"
+        hire_date: "2018-03-15"
+        articles_published: 347
+        average_views_per_article: 15000
+    categories:
+      - category_id: "550e8400-e29b-41d4-a716-446655440020"
+        name: "Science & Technology"
+        description: "Latest developments in scientific research, technological innovations, and their impact on society"
+        slug: "science-technology"
+        parent_category_id: null
+        color: "#2E86C1"
+        icon: "microscope"
+        display_order: 3
+        article_count: 1247
+        active: true
+    comments:
+      - comment_id: "550e8400-e29b-41d4-a716-446655440030"
+        content: "This is incredible news! Can't wait to see this technology make it to market. Great job MIT!"
+        author_id: "550e8400-e29b-41d4-a716-446655440040"
+        post_id: "550e8400-e29b-41d4-a716-446655440001"
+        parent_comment_id: null
+        created_at: "2024-10-01T10:30:00Z"
+        likes: 45
+        replies: 3
+        status: "approved"
+        reported: false
 properties:
   articles:
     type: array
