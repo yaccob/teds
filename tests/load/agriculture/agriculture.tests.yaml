@@ -1,0 +1,72 @@
+version: 1.0.0
+tests:
+  agriculture.yaml#/$defs/Farm:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  agriculture.yaml#/$defs/Field:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  agriculture.yaml#/$defs/Crop:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  agriculture.yaml#/$defs/Livestock:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  agriculture.yaml#/$defs/Vaccination:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  agriculture.yaml#/$defs/BreedingRecord:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  agriculture.yaml#/$defs/IrrigationSystem:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  agriculture.yaml#/$defs/Equipment:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  agriculture.yaml#/$defs/FieldOperation:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  agriculture.yaml#/$defs/Material:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases

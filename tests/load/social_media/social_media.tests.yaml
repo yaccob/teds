@@ -1,0 +1,48 @@
+version: 1.0.0
+tests:
+  social_media.yaml#/$defs/User:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  social_media.yaml#/$defs/UserProfile:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  social_media.yaml#/$defs/Post:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  social_media.yaml#/$defs/Comment:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  social_media.yaml#/$schema:
+    valid:
+    invalid:
+  social_media.yaml#/title:
+    valid:
+    invalid:
+  social_media.yaml#/type:
+    valid:
+    invalid:
+  social_media.yaml#/properties:
+    valid:
+    invalid:
+  social_media.yaml#/examples:
+    valid:
+    invalid:
+  social_media.yaml#/$defs:
+    valid:
+    invalid:

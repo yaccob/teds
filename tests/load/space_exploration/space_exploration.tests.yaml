@@ -1,0 +1,65 @@
+version: 1.0.0
+tests:
+  space_exploration.yaml#/$defs/Mission:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  space_exploration.yaml#/$defs/Spacecraft:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  space_exploration.yaml#/$defs/PropulsionSystem:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  space_exploration.yaml#/$defs/LifeSupport:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  space_exploration.yaml#/$defs/CommunicationSystem:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  space_exploration.yaml#/$defs/ScientificInstrument:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  space_exploration.yaml#/$defs/Astronaut:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  space_exploration.yaml#/$defs/CelestialBody:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  space_exploration.yaml#/$defs/TelemetryData:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases

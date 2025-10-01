@@ -1,0 +1,51 @@
+version: 1.0.0
+tests:
+  fitness_tracking.yaml#/$defs/User:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  fitness_tracking.yaml#/$defs/Workout:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  fitness_tracking.yaml#/$defs/Exercise:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  fitness_tracking.yaml#/$defs/WorkoutExercise:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  fitness_tracking.yaml#/$defs/ExerciseSet:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  fitness_tracking.yaml#/$defs/NutritionEntry:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  fitness_tracking.yaml#/$defs/FoodItem:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases

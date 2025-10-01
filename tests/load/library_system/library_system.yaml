@@ -1,6 +1,85 @@
 $schema: "https://json-schema.org/draft/2020-12/schema"
 title: "Library Management System Schema"
 type: object
+examples:
+  - books:
+      - book_id: "550e8400-e29b-41d4-a716-446655440001"
+        isbn: "978-0-7475-3269-9"
+        title: "Harry Potter and the Philosopher's Stone"
+        subtitle: "The Boy Who Lived"
+        authors:
+          - author_id: "550e8400-e29b-41d4-a716-446655440010"
+            name:
+              first_name: "J.K."
+              last_name: "Rowling"
+            birth_date: "1965-07-31"
+            nationality: "GB"
+            biography: "British author and philanthropist best known for writing the Harry Potter fantasy series."
+        publisher: "Bloomsbury Publishing"
+        publication_date: "1997-06-26"
+        edition: "First Edition"
+        language: "en"
+        pages: 223
+        genre: "children"
+        dewey_decimal: "823.914"
+        location:
+          floor: 2
+          section: "CF"
+          aisle: "A3"
+          shelf: "H15"
+        condition: "good"
+        status: "available"
+        copies_total: 5
+        copies_available: 3
+    members:
+      - member_id: "550e8400-e29b-41d4-a716-446655440020"
+        card_number: "1234567890"
+        name:
+          first_name: "Emma"
+          last_name: "Watson"
+        email: "emma.watson@email.com"
+        phone: "+15551234567"
+        address:
+          street: "123 Library Lane"
+          city: "Boston"
+          state: "Massachusetts"
+          postal_code: "02101"
+          country: "United States"
+        date_of_birth: "1995-04-15"
+        membership_type: "adult"
+        registration_date: "2020-01-15"
+        expiration_date: "2025-01-15"
+        status: "active"
+        fines_owed:
+          amount: 0.00
+          currency: "USD"
+        borrowing_limit: 10
+        preferences:
+          preferred_genres: ["fiction", "young_adult", "science"]
+          notification_method: "email"
+          language: "en"
+    loans:
+      - loan_id: "550e8400-e29b-41d4-a716-446655440030"
+        book_id: "550e8400-e29b-41d4-a716-446655440001"
+        member_id: "550e8400-e29b-41d4-a716-446655440020"
+        checkout_date: "2024-09-15"
+        due_date: "2024-10-15"
+        return_date: "2024-10-12"
+        renewal_count: 0
+        status: "returned"
+        late_fees:
+          amount: 0.00
+          currency: "USD"
+        notes: "Book returned in excellent condition"
+    reservations:
+      - reservation_id: "550e8400-e29b-41d4-a716-446655440040"
+        book_id: "550e8400-e29b-41d4-a716-446655440001"
+        member_id: "550e8400-e29b-41d4-a716-446655440020"
+        reservation_date: "2024-10-01"
+        expiration_date: "2024-10-08"
+        status: "active"
+        position_in_queue: 1
+        notification_sent: true
 properties:
   books:
     type: array

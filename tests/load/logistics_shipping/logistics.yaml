@@ -1,6 +1,102 @@
 $schema: "https://json-schema.org/draft/2020-12/schema"
 title: "Logistics and Shipping Schema"
 type: object
+examples:
+  - shipments:
+      - shipment_id: "550e8400-e29b-41d4-a716-446655440001"
+        tracking_number: "1Z999AA1012345675"
+        origin:
+          address:
+            street: "123 Warehouse Drive"
+            city: "Los Angeles"
+            state: "California"
+            postal_code: "90210"
+            country: "United States"
+          coordinates:
+            latitude: 34.0522
+            longitude: -118.2437
+        destination:
+          address:
+            street: "456 Customer Way"
+            city: "New York"
+            state: "New York"
+            postal_code: "10001"
+            country: "United States"
+          coordinates:
+            latitude: 40.7128
+            longitude: -74.0060
+        packages:
+          - package_id: "550e8400-e29b-41d4-a716-446655440010"
+            weight:
+              value: 5.2
+              unit: "kg"
+            dimensions:
+              length: 30.0
+              width: 20.0
+              height: 15.0
+              unit: "cm"
+            contents:
+              - item_id: "LAPTOP-001"
+                description: "Dell XPS 13 Laptop"
+                quantity: 1
+                unit_value:
+                  amount: 1200.00
+                  currency: "USD"
+            value:
+              amount: 1200.00
+              currency: "USD"
+            fragile: true
+            hazardous: false
+        carrier: "UPS"
+        service_type: "express"
+        status: "in_transit"
+        estimated_delivery: "2024-10-03T17:00:00Z"
+        cost:
+          amount: 25.99
+          currency: "USD"
+    vehicles:
+      - vehicle_id: "550e8400-e29b-41d4-a716-446655440020"
+        license_plate: "LOG-123"
+        vehicle_type: "truck"
+        capacity:
+          value: 3500.0
+          unit: "kg"
+        current_location:
+          address:
+            street: "Interstate 40"
+            city: "Amarillo"
+            state: "Texas"
+            postal_code: "79101"
+            country: "United States"
+          coordinates:
+            latitude: 35.2220
+            longitude: -101.8313
+        driver_id: "550e8400-e29b-41d4-a716-446655440030"
+        status: "in_transit"
+    warehouses:
+      - warehouse_id: "550e8400-e29b-41d4-a716-446655440040"
+        name: "West Coast Distribution Center"
+        address:
+          street: "123 Warehouse Drive"
+          city: "Los Angeles"
+          state: "California"
+          postal_code: "90210"
+          country: "United States"
+        type: "distribution"
+        capacity_cubic_meters: 10000.0
+        current_utilization: 7500.0
+        operating_hours:
+          monday: "06:00-22:00"
+          tuesday: "06:00-22:00"
+          wednesday: "06:00-22:00"
+          thursday: "06:00-22:00"
+          friday: "06:00-22:00"
+          saturday: "08:00-18:00"
+          sunday: "closed"
+        contact:
+          phone: "+13105551234"
+          email: "warehouse.la@logistics.com"
+        climate_controlled: true
 properties:
   shipments:
     type: array

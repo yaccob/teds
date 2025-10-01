@@ -1,0 +1,72 @@
+version: 1.0.0
+tests:
+  manufacturing.yaml#/$defs/Product:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  manufacturing.yaml#/$defs/ProductSpecifications:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  manufacturing.yaml#/$defs/TemperatureRange:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  manufacturing.yaml#/$defs/BOMItem:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  manufacturing.yaml#/$defs/ProductionOrder:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  manufacturing.yaml#/$defs/Machine:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  manufacturing.yaml#/$defs/MachineLocation:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  manufacturing.yaml#/$defs/MachineCapacity:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  manufacturing.yaml#/$defs/QualityCheck:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  manufacturing.yaml#/$defs/Measurement:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases

@@ -21,6 +21,21 @@ properties:
 $defs:
   Device:
     type: object
+    examples:
+      - device_id: "550e8400-e29b-41d4-a716-446655440001"
+        name: "Living Room Main Light"
+        device_type: "light"
+        manufacturer: "Philips"
+        model: "Hue Color A21"
+        room_id: "550e8400-e29b-41d4-a716-446655440010"
+        status: "online"
+        battery_level: 85
+        last_seen: "2024-03-15T18:30:00Z"
+        properties:
+          brightness: 75
+          color_temperature: 3000
+          rgb_color: "#FFAA00"
+          on: true
     properties:
       device_id:
         type: string
@@ -107,6 +122,12 @@ $defs:
     required: ["locked"]
   Room:
     type: object
+    examples:
+      - room_id: "550e8400-e29b-41d4-a716-446655440010"
+        name: "Living Room"
+        room_type: "living_room"
+        floor: 1
+        area_sqft: 320.5
     properties:
       room_id:
         type: string
@@ -126,6 +147,25 @@ $defs:
     required: ["room_id", "name", "room_type", "floor"]
   Automation:
     type: object
+    examples:
+      - automation_id: "550e8400-e29b-41d4-a716-446655440020"
+        name: "Evening Routine"
+        description: "Automatically dim lights and lock doors at 10 PM"
+        enabled: true
+        triggers:
+          - trigger_type: "time"
+            time: "22:00"
+        conditions: []
+        actions:
+          - device_id: "550e8400-e29b-41d4-a716-446655440001"
+            action_type: "set_property"
+            property: "brightness"
+            value: 30
+          - device_id: "550e8400-e29b-41d4-a716-446655440030"
+            action_type: "set_property"
+            property: "locked"
+            value: true
+        last_triggered: "2024-03-14T22:00:00Z"
     properties:
       automation_id:
         type: string

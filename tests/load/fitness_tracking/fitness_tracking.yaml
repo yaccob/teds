@@ -1,6 +1,92 @@
 $schema: "https://json-schema.org/draft/2020-12/schema"
 title: "Fitness Tracking Application Schema"
 type: object
+examples:
+  - users:
+      - user_id: "550e8400-e29b-41d4-a716-446655440001"
+        name:
+          first_name: "Alex"
+          last_name: "Johnson"
+        email: "alex.johnson@email.com"
+        date_of_birth: "1990-05-15"
+        gender: "other"
+        height_cm: 175.0
+        weight_kg: 72.5
+        activity_level: "moderately_active"
+        goals: ["weight_loss", "endurance"]
+        target_weight_kg: 68.0
+        created_at: "2024-01-15T10:30:00Z"
+    workouts:
+      - workout_id: "550e8400-e29b-41d4-a716-446655440010"
+        user_id: "550e8400-e29b-41d4-a716-446655440001"
+        name: "Upper Body Strength"
+        date: "2024-10-01"
+        start_time: "2024-10-01T18:00:00Z"
+        end_time: "2024-10-01T19:15:00Z"
+        workout_type: "strength"
+        exercises:
+          - exercise_id: "550e8400-e29b-41d4-a716-446655440020"
+            sets:
+              - set_number: 1
+                reps: 12
+                weight_kg: 60.0
+                completed: true
+              - set_number: 2
+                reps: 10
+                weight_kg: 65.0
+                completed: true
+              - set_number: 3
+                reps: 8
+                weight_kg: 70.0
+                completed: true
+            rest_time_seconds: 90
+            notes: "Felt strong today"
+        total_calories_burned: 285
+        notes: "Great workout, increased weight on bench press"
+        rating: 4
+    exercises:
+      - exercise_id: "550e8400-e29b-41d4-a716-446655440020"
+        name: "Bench Press"
+        category: "chest"
+        muscle_groups: ["chest", "triceps", "shoulders"]
+        equipment: ["barbell"]
+        difficulty: "intermediate"
+        instructions: "Lie on bench, lower bar to chest, press up with control. Keep feet planted and core engaged."
+        tips: "Grip bar slightly wider than shoulders. Don't bounce the bar off your chest."
+    nutrition:
+      - entry_id: "550e8400-e29b-41d4-a716-446655440030"
+        user_id: "550e8400-e29b-41d4-a716-446655440001"
+        date: "2024-10-01"
+        meal_type: "breakfast"
+        foods:
+          - food_id: "550e8400-e29b-41d4-a716-446655440040"
+            name: "Greek Yogurt"
+            brand: "Chobani"
+            serving_size: "1 cup (227g)"
+            quantity: 1.0
+            calories_per_serving: 130
+            protein_g: 20.0
+            carbs_g: 9.0
+            fat_g: 0.0
+            fiber_g: 0.0
+            sugar_g: 6.0
+          - food_id: "550e8400-e29b-41d4-a716-446655440041"
+            name: "Blueberries"
+            brand: "Fresh"
+            serving_size: "1/2 cup (74g)"
+            quantity: 1.0
+            calories_per_serving: 42
+            protein_g: 0.5
+            carbs_g: 10.7
+            fat_g: 0.2
+            fiber_g: 1.8
+            sugar_g: 7.2
+        total_calories: 172
+        total_protein_g: 20.5
+        total_carbs_g: 19.7
+        total_fat_g: 0.2
+        total_fiber_g: 1.8
+        total_sugar_g: 13.2
 properties:
   users:
     type: array

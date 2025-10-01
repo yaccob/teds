@@ -1,0 +1,51 @@
+version: 1.0.0
+tests:
+  fleet_management.yaml#/$defs/Vehicle:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  fleet_management.yaml#/$defs/Driver:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  fleet_management.yaml#/$defs/DriversLicense:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  fleet_management.yaml#/$defs/Route:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  fleet_management.yaml#/$defs/MaintenanceRecord:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  fleet_management.yaml#/$defs/Part:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  fleet_management.yaml#/$defs/Insurance:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases

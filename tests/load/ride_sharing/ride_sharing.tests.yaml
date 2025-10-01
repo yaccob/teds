@@ -1,0 +1,37 @@
+version: 1.0.0
+tests:
+  ride_sharing.yaml#/$defs/Rider:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  ride_sharing.yaml#/$defs/RiderPreferences:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  ride_sharing.yaml#/$defs/Driver:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  ride_sharing.yaml#/$defs/DriverEarnings:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  ride_sharing.yaml#/$defs/Ride:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases

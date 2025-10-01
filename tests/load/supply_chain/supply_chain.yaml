@@ -21,6 +21,27 @@ properties:
 $defs:
   Supplier:
     type: object
+    examples:
+      - supplier_id: "550e8400-e29b-41d4-a716-446655440001"
+        name: "Global Electronics Supply Co."
+        contact_person:
+          first_name: "David"
+          last_name: "Martinez"
+        email: "david.martinez@globalsupply.com"
+        phone: "+14155551234"
+        address:
+          street: "1500 Industrial Blvd"
+          city: "San Jose"
+          state: "California"
+          postal_code: "95112"
+          country: "United States"
+        tax_id: "12-3456789"
+        payment_terms: "net_30"
+        credit_limit:
+          amount: 500000.00
+          currency: "USD"
+        rating: 4
+        products_supplied: ["550e8400-e29b-41d4-a716-446655440010"]
     properties:
       supplier_id:
         type: string
@@ -57,6 +78,38 @@ $defs:
     required: ["supplier_id", "name", "contact_person", "email", "phone", "address", "payment_terms"]
   PurchaseOrder:
     type: object
+    examples:
+      - po_id: "550e8400-e29b-41d4-a716-446655440020"
+        po_number: "PO-20240315"
+        supplier_id: "550e8400-e29b-41d4-a716-446655440001"
+        order_date: "2024-03-15"
+        expected_delivery: "2024-03-30"
+        status: "sent"
+        items:
+          - product_id: "550e8400-e29b-41d4-a716-446655440010"
+            sku: "CHIP-ARM-M1-256"
+            description: "ARM M1 Microprocessor 256GB"
+            quantity: 100
+            unit_price:
+              amount: 145.50
+              currency: "USD"
+            total_price:
+              amount: 14550.00
+              currency: "USD"
+            expected_delivery: "2024-03-30"
+        subtotal:
+          amount: 14550.00
+          currency: "USD"
+        tax_amount:
+          amount: 1164.00
+          currency: "USD"
+        shipping_cost:
+          amount: 125.00
+          currency: "USD"
+        total_amount:
+          amount: 15839.00
+          currency: "USD"
+        payment_terms: "net_30"
     properties:
       po_id:
         type: string

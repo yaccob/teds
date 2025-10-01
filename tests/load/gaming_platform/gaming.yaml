@@ -1,6 +1,106 @@
 $schema: "https://json-schema.org/draft/2020-12/schema"
 title: "Gaming Platform Schema"
 type: object
+examples:
+  - players:
+      - player_id: "550e8400-e29b-41d4-a716-446655440001"
+        username: "shadow_gamer123"
+        email: "alex.shadow@email.com"
+        profile:
+          display_name: "Shadow Gamer"
+          avatar_url: "https://cdn.gaming.com/avatars/shadow_gamer.png"
+          country: "US"
+          preferred_language: "en"
+          bio: "Competitive FPS player, always looking for new challenges!"
+          privacy_settings:
+            profile_visible: true
+            stats_visible: true
+            online_status_visible: false
+            allow_friend_requests: true
+        stats:
+          total_games_played: 1247
+          total_wins: 823
+          total_losses: 424
+          win_rate: 0.66
+          ranking: 1584
+          skill_level: "gold"
+          total_playtime_hours: 342.5
+        achievements:
+          - achievement_id: "550e8400-e29b-41d4-a716-446655440050"
+            name: "First Victory"
+            description: "Win your first match"
+            category: "milestone"
+            rarity: "common"
+            icon_url: "https://cdn.gaming.com/achievements/first_victory.png"
+            unlocked_at: "2024-01-15T14:30:00Z"
+            progress:
+              current: 1
+              required: 1
+        created_at: "2024-01-15T10:00:00Z"
+        last_active: "2024-10-01T09:45:00Z"
+    games:
+      - game_id: "550e8400-e29b-41d4-a716-446655440010"
+        title: "Tactical Strike"
+        genre: "fps"
+        max_players: 10
+        min_players: 2
+        game_modes: ["Team Deathmatch", "Capture the Flag", "Search and Destroy"]
+        maps:
+          - map_id: "550e8400-e29b-41d4-a716-446655440020"
+            name: "Industrial Complex"
+            description: "Urban warfare in an abandoned factory setting"
+            game_modes: ["Team Deathmatch", "Search and Destroy"]
+            size: "medium"
+            environment: "urban"
+        version: "2.1.3"
+        release_date: "2023-03-15"
+    matches:
+      - match_id: "550e8400-e29b-41d4-a716-446655440030"
+        game_id: "550e8400-e29b-41d4-a716-446655440010"
+        game_mode: "Team Deathmatch"
+        map_id: "550e8400-e29b-41d4-a716-446655440020"
+        players:
+          - player_id: "550e8400-e29b-41d4-a716-446655440001"
+            team_id: "550e8400-e29b-41d4-a716-446655440040"
+            character: "Assault Specialist"
+            score: 1850
+            kills: 15
+            deaths: 8
+            assists: 6
+            joined_at: "2024-10-01T20:00:00Z"
+            left_at: "2024-10-01T20:18:00Z"
+        teams:
+          - team_id: "550e8400-e29b-41d4-a716-446655440040"
+            name: "Alpha Team"
+            color: "blue"
+            score: 75
+            player_ids: ["550e8400-e29b-41d4-a716-446655440001"]
+          - team_id: "550e8400-e29b-41d4-a716-446655440041"
+            name: "Bravo Team"
+            color: "red"
+            score: 62
+            player_ids: []
+        start_time: "2024-10-01T20:00:00Z"
+        end_time: "2024-10-01T20:18:00Z"
+        duration_seconds: 1080
+        status: "completed"
+        winner: "550e8400-e29b-41d4-a716-446655440040"
+    tournaments:
+      - tournament_id: "550e8400-e29b-41d4-a716-446655440060"
+        name: "Autumn Championship 2024"
+        game_id: "550e8400-e29b-41d4-a716-446655440010"
+        format: "single_elimination"
+        max_participants: 64
+        prize_pool:
+          amount: 10000.00
+          currency: "USD"
+        registration_start: "2024-09-01T00:00:00Z"
+        registration_end: "2024-09-30T23:59:59Z"
+        start_date: "2024-10-15T18:00:00Z"
+        end_date: "2024-10-20T22:00:00Z"
+        status: "registration_open"
+        participants: ["550e8400-e29b-41d4-a716-446655440001"]
+        matches: []
 properties:
   players:
     type: array

@@ -1,0 +1,44 @@
+version: 1.0.0
+tests:
+  restaurant_pos.yaml#/$defs/MenuItem:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  restaurant_pos.yaml#/$defs/Order:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  restaurant_pos.yaml#/$defs/OrderItem:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  restaurant_pos.yaml#/$defs/Table:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  restaurant_pos.yaml#/$defs/Staff:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  restaurant_pos.yaml#/$defs/Shift:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases

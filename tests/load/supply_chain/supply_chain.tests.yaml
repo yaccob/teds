@@ -1,0 +1,23 @@
+version: 1.0.0
+tests:
+  supply_chain.yaml#/$defs/Supplier:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  supply_chain.yaml#/$defs/PurchaseOrder:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  supply_chain.yaml#/$defs/POItem:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases

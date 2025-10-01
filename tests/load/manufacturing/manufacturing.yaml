@@ -1,6 +1,105 @@
 $schema: "https://json-schema.org/draft/2020-12/schema"
 title: "Manufacturing Operations Schema"
 type: object
+examples:
+  - products:
+      - product_id: "550e8400-e29b-41d4-a716-446655440001"
+        part_number: "ENG-BLOCK-V8"
+        name: "V8 Engine Block"
+        description: "Cast iron engine block for 5.0L V8 engine with precision machined cylinder bores"
+        category: "component"
+        specifications:
+          material: "Cast Iron"
+          tolerance: "±0.05mm"
+          surface_finish: "Ra 1.6"
+          hardness: "HRC 45-50"
+          operating_temperature:
+            minimum: -40.0
+            maximum: 150.0
+        bill_of_materials:
+          - item_id: "550e8400-e29b-41d4-a716-446655440010"
+            part_number: "CI-INGOT-001"
+            description: "Cast Iron Ingot"
+            quantity: 25.0
+            unit: "kg"
+            cost_per_unit:
+              amount: 2.50
+              currency: "USD"
+        cost:
+          amount: 850.00
+          currency: "USD"
+        weight:
+          value: 85.5
+          unit: "kg"
+        dimensions:
+          length: 60.0
+          width: 45.0
+          height: 35.0
+          unit: "cm"
+    production_orders:
+      - order_id: "550e8400-e29b-41d4-a716-446655440020"
+        order_number: "PO-2024-001234"
+        product_id: "550e8400-e29b-41d4-a716-446655440001"
+        quantity: 100
+        priority: "high"
+        status: "in_progress"
+        planned_start_date: "2024-10-01"
+        planned_end_date: "2024-10-15"
+        actual_start_date: "2024-10-01"
+        assigned_line: "Line A"
+        machine_ids: ["550e8400-e29b-41d4-a716-446655440030"]
+        operator_id: "OP-001"
+        progress_percentage: 65.0
+        units_completed: 65
+        estimated_completion: "2024-10-14T16:30:00Z"
+    machines:
+      - machine_id: "550e8400-e29b-41d4-a716-446655440030"
+        machine_code: "CNC-001"
+        name: "Haas VF-4 CNC Machining Center"
+        type: "cnc_machine"
+        manufacturer: "Haas Automation"
+        model: "VF-4"
+        year_installed: 2020
+        status: "operational"
+        location:
+          building: "Manufacturing Plant A"
+          floor: "1"
+          cell: "C-03"
+        specifications:
+          max_spindle_speed: 8100
+          spindle_taper: "40-Taper"
+          table_size: "1270x510mm"
+          axis_travel: "1270x510x635mm"
+          tool_capacity: 20
+        maintenance_schedule:
+          last_service: "2024-09-01"
+          next_service: "2024-12-01"
+          service_interval_days: 90
+        operating_hours: 2450.5
+        efficiency_rating: 0.92
+    quality_checks:
+      - check_id: "550e8400-e29b-41d4-a716-446655440040"
+        product_id: "550e8400-e29b-41d4-a716-446655440001"
+        production_order_id: "550e8400-e29b-41d4-a716-446655440020"
+        check_type: "dimensional"
+        inspector_id: "QC-001"
+        check_date: "2024-10-05T14:30:00Z"
+        status: "passed"
+        measurements:
+          - parameter: "Cylinder Bore Diameter"
+            specification: "86.00mm ±0.05mm"
+            measured_value: 86.02
+            unit: "mm"
+            within_tolerance: true
+          - parameter: "Surface Roughness"
+            specification: "Ra 1.6 max"
+            measured_value: 1.4
+            unit: "Ra"
+            within_tolerance: true
+        defects_found: []
+        corrective_actions: []
+        passed: true
+        notes: "All measurements within specification. Quality approved for next production stage."
 properties:
   products:
     type: array

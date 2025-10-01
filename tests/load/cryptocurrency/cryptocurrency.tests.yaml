@@ -1,0 +1,30 @@
+version: 1.0.0
+tests:
+  cryptocurrency.yaml#/$defs/User:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  cryptocurrency.yaml#/$defs/Wallet:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  cryptocurrency.yaml#/$defs/Transaction:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  cryptocurrency.yaml#/$defs/Cryptocurrency:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases

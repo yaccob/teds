@@ -1,0 +1,65 @@
+version: 1.0.0
+tests:
+  smart_home.yaml#/$defs/Device:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  smart_home.yaml#/$defs/LightProperties:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  smart_home.yaml#/$defs/ThermostatProperties:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  smart_home.yaml#/$defs/LockProperties:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  smart_home.yaml#/$defs/Room:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  smart_home.yaml#/$defs/Automation:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  smart_home.yaml#/$defs/Trigger:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  smart_home.yaml#/$defs/Condition:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  smart_home.yaml#/$defs/Action:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases

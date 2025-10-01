@@ -1,0 +1,30 @@
+version: 1.0.0
+tests:
+  weather_data.yaml#/$defs/WeatherStation:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  weather_data.yaml#/$defs/WeatherObservation:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  weather_data.yaml#/$defs/WeatherForecast:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  weather_data.yaml#/$defs/ForecastPeriod:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases

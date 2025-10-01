@@ -1,6 +1,90 @@
 $schema: "https://json-schema.org/draft/2020-12/schema"
 title: "Music Streaming Platform Schema"
 type: object
+examples:
+  - users:
+      - user_id: "550e8400-e29b-41d4-a716-446655440001"
+        username: "music_lover2024"
+        email: "sarah.music@email.com"
+        name:
+          first_name: "Sarah"
+          last_name: "Johnson"
+        date_of_birth: "1995-06-15"
+        country: "US"
+        subscription_type: "premium"
+        subscription_start: "2024-01-15T00:00:00Z"
+        subscription_end: "2025-01-15T00:00:00Z"
+        listening_history:
+          - track_id: "550e8400-e29b-41d4-a716-446655440020"
+            played_at: "2024-10-01T14:30:00Z"
+            duration_played: 180
+            completed: true
+        preferences:
+          favorite_genres: ["pop", "rock", "indie"]
+          explicit_content: false
+          audio_quality: "high"
+          autoplay: true
+        created_at: "2024-01-15T10:00:00Z"
+        last_active: "2024-10-01T15:45:00Z"
+    artists:
+      - artist_id: "550e8400-e29b-41d4-a716-446655440010"
+        name: "Taylor Swift"
+        bio: "American singer-songwriter known for her narrative songwriting and genre versatility"
+        country: "US"
+        genres: ["pop", "country", "indie"]
+        debut_year: 2006
+        verified: true
+        monthly_listeners: 85000000
+        image_url: "https://music.example.com/artists/taylor-swift.jpg"
+        social_media:
+          instagram: "@taylorswift"
+          twitter: "@taylorswift13"
+          website: "https://taylorswift.com"
+    albums:
+      - album_id: "550e8400-e29b-41d4-a716-446655440015"
+        title: "1989 (Taylor's Version)"
+        artist_id: "550e8400-e29b-41d4-a716-446655440010"
+        release_date: "2023-10-27"
+        album_type: "studio"
+        genre: "pop"
+        total_tracks: 21
+        duration_seconds: 4680
+        cover_art_url: "https://music.example.com/covers/1989-tv.jpg"
+        label: "Taylor Swift Productions"
+        producer: "Taylor Swift, Jack Antonoff"
+        explicit: false
+    tracks:
+      - track_id: "550e8400-e29b-41d4-a716-446655440020"
+        title: "Shake It Off (Taylor's Version)"
+        artist_id: "550e8400-e29b-41d4-a716-446655440010"
+        album_id: "550e8400-e29b-41d4-a716-446655440015"
+        track_number: 6
+        duration_seconds: 219
+        genre: "pop"
+        explicit: false
+        isrc: "USCJY2359876"
+        audio_url: "https://music.example.com/audio/shake-it-off-tv.mp3"
+        preview_url: "https://music.example.com/preview/shake-it-off-tv.mp3"
+        lyrics: "I stay out too late, got nothing in my brain..."
+        play_count: 1250000000
+        popularity: 95
+        release_date: "2023-10-27"
+        available_markets: ["US", "CA", "GB", "AU"]
+    playlists:
+      - playlist_id: "550e8400-e29b-41d4-a716-446655440030"
+        name: "My Favorites 2024"
+        description: "A collection of my favorite songs discovered this year"
+        user_id: "550e8400-e29b-41d4-a716-446655440001"
+        public: true
+        collaborative: false
+        track_ids: ["550e8400-e29b-41d4-a716-446655440020"]
+        total_tracks: 1
+        total_duration_seconds: 219
+        cover_image_url: "https://music.example.com/playlists/my-favorites-2024.jpg"
+        created_at: "2024-01-20T12:00:00Z"
+        updated_at: "2024-10-01T14:30:00Z"
+        follower_count: 25
+        tags: ["favorites", "2024", "pop"]
 properties:
   users:
     type: array

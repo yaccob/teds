@@ -10,6 +10,20 @@ properties:
     type: array
     items:
       $ref: "#/$defs/Account"
+examples:
+  - transactions:
+      - transaction_id: "550e8400-e29b-41d4-a716-446655440000"
+        account_id: "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+        amount:
+          amount: 25.99
+          currency: "USD"
+        type: "debit"
+    accounts:
+      - account_id: "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+        account_number: "1234567890"
+        balance:
+          amount: 2450.75
+          currency: "USD"
 $defs:
   Transaction:
     type: object
@@ -31,6 +45,25 @@ $defs:
       merchant:
         $ref: "#/$defs/Merchant"
     required: ["transaction_id", "account_id", "amount", "type"]
+    examples:
+      - transaction_id: "550e8400-e29b-41d4-a716-446655440000"
+        account_id: "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+        amount:
+          amount: 25.99
+          currency: "USD"
+        type: "debit"
+        timestamp: "2024-01-15T14:30:00Z"
+        merchant:
+          merchant_id: "merchant_123"
+          name: "Coffee Shop Central"
+          category: "restaurant"
+      - transaction_id: "123e4567-e89b-12d3-a456-426614174000"
+        account_id: "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+        amount:
+          amount: 1500.00
+          currency: "USD"
+        type: "credit"
+        timestamp: "2024-01-15T09:00:00Z"
   Account:
     type: object
     properties:
@@ -46,6 +79,19 @@ $defs:
         type: string
         enum: ["checking", "savings", "credit", "investment"]
     required: ["account_id", "account_number", "balance"]
+    examples:
+      - account_id: "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+        account_number: "1234567890"
+        balance:
+          amount: 2450.75
+          currency: "USD"
+        account_type: "checking"
+      - account_id: "987fcdeb-51a2-43d8-b123-456789abcdef"
+        account_number: "9876543210"
+        balance:
+          amount: 15000.00
+          currency: "EUR"
+        account_type: "savings"
   Money:
     type: object
     properties:
@@ -56,6 +102,13 @@ $defs:
         type: string
         pattern: "^[A-Z]{3}$"
     required: ["amount", "currency"]
+    examples:
+      - amount: 25.99
+        currency: "USD"
+      - amount: 1000.00
+        currency: "EUR"
+      - amount: 500.75
+        currency: "GBP"
   Merchant:
     type: object
     properties:
@@ -67,3 +120,13 @@ $defs:
         type: string
         enum: ["retail", "restaurant", "gas", "grocery", "online"]
     required: ["merchant_id", "name"]
+    examples:
+      - merchant_id: "merchant_123"
+        name: "Coffee Shop Central"
+        category: "restaurant"
+      - merchant_id: "merchant_456"
+        name: "Amazon.com"
+        category: "online"
+      - merchant_id: "merchant_789"
+        name: "Shell Gas Station"
+        category: "gas"

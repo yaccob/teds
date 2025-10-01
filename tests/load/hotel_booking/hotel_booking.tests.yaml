@@ -1,0 +1,37 @@
+version: 1.0.0
+tests:
+  hotel_booking.yaml#/$defs/Hotel:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  hotel_booking.yaml#/$defs/Room:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  hotel_booking.yaml#/$defs/Booking:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  hotel_booking.yaml#/$defs/Guest:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  hotel_booking.yaml#/$defs/GuestPreferences:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases

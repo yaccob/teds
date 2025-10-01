@@ -21,6 +21,44 @@ properties:
 $defs:
   Recipe:
     type: object
+    examples:
+      - recipe_id: "550e8400-e29b-41d4-a716-446655440001"
+        title: "Classic Spaghetti Carbonara"
+        description: "Traditional Italian pasta dish with eggs, cheese, and pancetta"
+        author_id: "550e8400-e29b-41d4-a716-446655440010"
+        cuisine_type: "italian"
+        difficulty: "medium"
+        prep_time_minutes: 15
+        cook_time_minutes: 20
+        total_time_minutes: 35
+        servings: 4
+        ingredients:
+          - ingredient_id: "550e8400-e29b-41d4-a716-446655440020"
+            quantity: 400
+            unit: "gram"
+            preparation: "cooked al dente"
+          - ingredient_id: "550e8400-e29b-41d4-a716-446655440021"
+            quantity: 4
+            unit: "piece"
+            preparation: "large, room temperature"
+        instructions:
+          - step_number: 1
+            description: "Bring a large pot of salted water to boil and cook spaghetti until al dente"
+            duration_minutes: 12
+          - step_number: 2
+            description: "In a large bowl, whisk together eggs and grated cheese"
+            duration_minutes: 3
+        nutrition:
+          calories: 520
+          protein_g: 22.5
+          carbs_g: 65.0
+          fat_g: 18.5
+          fiber_g: 3.2
+          sodium_mg: 680
+        tags: ["quick", "italian"]
+        rating: 4.7
+        review_count: 156
+        created_date: "2024-01-15T10:30:00Z"
     properties:
       recipe_id:
         type: string
@@ -87,6 +125,19 @@ $defs:
     required: ["recipe_id", "title", "author_id", "prep_time_minutes", "cook_time_minutes", "servings", "ingredients", "instructions"]
   Ingredient:
     type: object
+    examples:
+      - ingredient_id: "550e8400-e29b-41d4-a716-446655440020"
+        name: "Spaghetti"
+        category: "grains"
+        default_unit: "gram"
+        nutrition_per_100g:
+          calories: 371
+          protein_g: 13.0
+          carbs_g: 74.0
+          fat_g: 1.5
+          fiber_g: 3.2
+          sodium_mg: 6
+        allergens: ["gluten"]
     properties:
       ingredient_id:
         type: string
@@ -179,6 +230,18 @@ $defs:
         minimum: 0
   User:
     type: object
+    examples:
+      - user_id: "550e8400-e29b-41d4-a716-446655440010"
+        username: "chef_maria"
+        email: "maria.rossi@email.com"
+        name:
+          first_name: "Maria"
+          last_name: "Rossi"
+        dietary_restrictions: ["vegetarian"]
+        favorite_cuisines: ["italian", "mediterranean"]
+        cooking_skill: "advanced"
+        favorite_recipes: ["550e8400-e29b-41d4-a716-446655440001"]
+        created_recipes: ["550e8400-e29b-41d4-a716-446655440001"]
     properties:
       user_id:
         type: string

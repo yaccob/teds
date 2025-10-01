@@ -1,0 +1,44 @@
+version: 1.0.0
+tests:
+  library_system.yaml#/$defs/Book:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  library_system.yaml#/$defs/Author:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  library_system.yaml#/$defs/ShelfLocation:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  library_system.yaml#/$defs/Member:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  library_system.yaml#/$defs/Loan:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  library_system.yaml#/$defs/Reservation:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases

@@ -1,0 +1,58 @@
+version: 1.0.0
+tests:
+  real_estate.yaml#/$defs/Property:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  real_estate.yaml#/$defs/Agent:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  real_estate.yaml#/$defs/Listing:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  real_estate.yaml#/$defs/OpenHouse:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  real_estate.yaml#/$defs/Transaction:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  real_estate.yaml#/$defs/PartyInfo:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  real_estate.yaml#/$defs/Financing:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases
+  real_estate.yaml#/$defs/Commission:
+    valid:
+      TODO:
+        description: define test cases
+    invalid:
+      TODO:
+        description: define test cases

@@ -1,6 +1,126 @@
 $schema: "https://json-schema.org/draft/2020-12/schema"
 title: "Insurance Claims Management Schema"
 type: object
+examples:
+  - policies:
+      - policy_id: "550e8400-e29b-41d4-a716-446655440001"
+        policy_number: "POL-12345678"
+        policyholder_id: "550e8400-e29b-41d4-a716-446655440010"
+        policy_type: "auto"
+        coverage_type: "comprehensive"
+        premium:
+          amount: 1200.00
+          currency: "USD"
+        deductible:
+          amount: 500.00
+          currency: "USD"
+        coverage_limit:
+          amount: 100000.00
+          currency: "USD"
+        effective_date: "2024-01-01"
+        expiration_date: "2024-12-31"
+        status: "active"
+        covered_items:
+          - item_id: "550e8400-e29b-41d4-a716-446655440020"
+            item_type: "vehicle"
+            description: "2022 Honda Civic Sedan"
+            value:
+              amount: 25000.00
+              currency: "USD"
+            details:
+              make: "Honda"
+              model: "Civic"
+              year: 2022
+              vin: "1HGBH41JXMN109186"
+              license_plate: "ABC-1234"
+    claims:
+      - claim_id: "550e8400-e29b-41d4-a716-446655440030"
+        claim_number: "CLM-87654321"
+        policy_id: "550e8400-e29b-41d4-a716-446655440001"
+        incident_date: "2024-09-25"
+        reported_date: "2024-09-26"
+        claim_type: "accident"
+        description: "Rear-end collision at intersection of Main St and Oak Ave. Other driver ran red light and struck insured vehicle from behind. Moderate damage to rear bumper and trunk area. No injuries reported."
+        location:
+          address: "Main St & Oak Ave"
+          city: "Springfield"
+          state: "IL"
+          postal_code: "62701"
+          country: "United States"
+          latitude: 39.7817
+          longitude: -89.6501
+        estimated_loss:
+          amount: 4500.00
+          currency: "USD"
+        claimed_amount:
+          amount: 4200.00
+          currency: "USD"
+        approved_amount:
+          amount: 3800.00
+          currency: "USD"
+        status: "approved"
+        adjuster_id: "550e8400-e29b-41d4-a716-446655440040"
+        documents:
+          - document_id: "550e8400-e29b-41d4-a716-446655440050"
+            document_type: "police_report"
+            file_name: "police_report_20240925.pdf"
+            file_url: "https://claims.insureco.com/docs/police_report_20240925.pdf"
+            uploaded_date: "2024-09-26T14:30:00Z"
+            uploaded_by: "John Smith (Policyholder)"
+          - document_id: "550e8400-e29b-41d4-a716-446655440051"
+            document_type: "photo"
+            file_name: "vehicle_damage_rear.jpg"
+            file_url: "https://claims.insureco.com/docs/vehicle_damage_rear.jpg"
+            uploaded_date: "2024-09-26T15:45:00Z"
+            uploaded_by: "John Smith (Policyholder)"
+        timeline:
+          - event_id: "550e8400-e29b-41d4-a716-446655440060"
+            event_type: "submitted"
+            date: "2024-09-26T10:15:00Z"
+            user: "John Smith"
+            notes: "Initial claim submission via mobile app"
+          - event_id: "550e8400-e29b-41d4-a716-446655440061"
+            event_type: "assigned"
+            date: "2024-09-26T11:30:00Z"
+            user: "System"
+            notes: "Automatically assigned to adjuster based on location and claim type"
+          - event_id: "550e8400-e29b-41d4-a716-446655440062"
+            event_type: "approved"
+            date: "2024-09-28T16:20:00Z"
+            user: "Jane Doe (Adjuster)"
+            notes: "Claim approved after review of documentation and inspection"
+    policyholders:
+      - policyholder_id: "550e8400-e29b-41d4-a716-446655440010"
+        name:
+          first_name: "John"
+          middle_name: "Michael"
+          last_name: "Smith"
+        email: "john.smith@email.com"
+        phone: "+15551234567"
+        address:
+          street: "123 Elm Street"
+          city: "Springfield"
+          state: "Illinois"
+          postal_code: "62701"
+          country: "United States"
+        date_of_birth: "1980-04-15"
+        ssn: "123-45-6789"
+        driver_license: "S123456789012"
+        credit_score: 742
+    adjusters:
+      - adjuster_id: "550e8400-e29b-41d4-a716-446655440040"
+        name:
+          first_name: "Jane"
+          last_name: "Doe"
+        email: "jane.doe@insureco.com"
+        phone: "+15559876543"
+        license_number: "ADJ-IL-123456"
+        specialties: ["auto", "property"]
+        hire_date: "2020-03-01"
+        active_caseload: 23
+        max_authority:
+          amount: 25000.00
+          currency: "USD"
 properties:
   policies:
     type: array
