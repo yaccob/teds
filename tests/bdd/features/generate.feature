@@ -1089,7 +1089,7 @@ Feature: Generate Command Tests
       """
     And I have a configuration file "config.yaml" with content:
       """yaml
-      api.yaml:
+      schemas/api.yaml:
         paths: ["$.['$defs'].User"]
         target: "schemas/api_tests.yaml"
       """
@@ -1131,7 +1131,7 @@ Feature: Generate Command Tests
       """
     And I have a configuration file "config.yaml" with content:
       """yaml
-      ../api.yaml:
+      api.yaml:
         paths: ["$.['$defs'].User"]
         target: "tests/api_tests.yaml"
       """
@@ -1175,3 +1175,65 @@ Feature: Generate Command Tests
     When I run the generate command: `teds generate models/simple.yaml#`
     Then the command should succeed
     And the error output should match "^Generating models/simple.tests.yaml\n$"
+
+  # ==========================================================================
+  # Template Path Resolution Relative to CWD Tests
+  # ==========================================================================
+
+  Scenario: Template path should resolve relative to current working directory, not schema directory
+    Given I have a subdirectory "agriculture"
+    And I have a schema file "agriculture/agriculture.yaml" with content:
+      """yaml
+      $defs:
+        Crop:
+          type: object
+          properties:
+            name:
+              type: string
+            season:
+              type: string
+      """
+    And I have a subdirectory "teds"
+    When I run the generate command from cwd: `teds generate agriculture/agriculture.yaml#/$defs=teds/{base}.yaml`
+    Then a test file "teds/agriculture.yaml" should be created in cwd
+    And the test file should contain "agriculture/agriculture.yaml#/$defs/Crop"
+
+  Scenario: Template path with nested directories should resolve relative to cwd
+    Given I have a subdirectory "models/user"
+    And I have a schema file "models/user/profile.yaml" with content:
+      """yaml
+      $defs:
+        UserProfile:
+          type: object
+          properties:
+            name:
+              type: string
+      """
+    And I have a subdirectory "tests/specs"
+    When I run the generate command from cwd: `teds generate models/user/profile.yaml#/$defs=tests/specs/{base}_spec.yaml`
+    Then a test file "tests/specs/profile_spec.yaml" should be created in cwd
+    And the test file should contain "models/user/profile.yaml#/$defs/UserProfile"
+
+  Scenario: Template path without subdirectory should work in cwd
+    Given I have a schema file "simple.yaml" with content:
+      """yaml
+      $defs:
+        SimpleType:
+          type: string
+      """
+    When I run the generate command from cwd: `teds generate simple.yaml#/$defs={base}_output.yaml`
+    Then a test file "simple_output.yaml" should be created in cwd
+    And the test file should contain "simple.yaml#/$defs/SimpleType"
+
+  Scenario: Template path with absolute target path should work
+    Given I have a subdirectory "source"
+    And I have a schema file "source/data.yaml" with content:
+      """yaml
+      $defs:
+        DataModel:
+          type: object
+      """
+    And I have a subdirectory "output"
+    When I run the generate command from cwd: `teds generate source/data.yaml#/$defs=output/{base}.test.yaml`
+    Then a test file "output/data.test.yaml" should be created in cwd
+    And the test file should contain "source/data.yaml#/$defs/DataModel"
