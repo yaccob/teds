@@ -1,0 +1,332 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Job Board Platform Schema"
+type: object
+properties:
+  jobs:
+    type: array
+    items:
+      $ref: "#/$defs/Job"
+  companies:
+    type: array
+    items:
+      $ref: "#/$defs/Company"
+  candidates:
+    type: array
+    items:
+      $ref: "#/$defs/Candidate"
+  applications:
+    type: array
+    items:
+      $ref: "#/$defs/Application"
+$defs:
+  Job:
+    type: object
+    properties:
+      job_id:
+        type: string
+        format: uuid
+      title:
+        type: string
+        maxLength: 100
+      description:
+        type: string
+        maxLength: 5000
+      company_id:
+        type: string
+        format: uuid
+      department:
+        type: string
+        maxLength: 50
+      location:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Address"
+      remote_work:
+        type: string
+        enum: ["on_site", "remote", "hybrid"]
+      employment_type:
+        type: string
+        enum: ["full_time", "part_time", "contract", "internship", "temporary"]
+      experience_level:
+        type: string
+        enum: ["entry", "mid", "senior", "executive"]
+      salary_range:
+        $ref: "#/$defs/SalaryRange"
+      required_skills:
+        type: array
+        items:
+          type: string
+        minItems: 1
+      preferred_skills:
+        type: array
+        items:
+          type: string
+      education_requirements:
+        type: string
+        enum: ["high_school", "associates", "bachelors", "masters", "phd", "none"]
+      benefits:
+        type: array
+        items:
+          type: string
+          enum: ["health_insurance", "dental", "vision", "401k", "pto", "flexible_hours", "remote_work", "gym_membership", "lunch_provided"]
+      posted_date:
+        type: string
+        format: date-time
+      application_deadline:
+        type: string
+        format: date
+      status:
+        type: string
+        enum: ["open", "closed", "paused", "filled"]
+      application_count:
+        type: integer
+        minimum: 0
+    required: ["job_id", "title", "description", "company_id", "location", "employment_type", "experience_level", "required_skills", "posted_date", "status"]
+  Company:
+    type: object
+    properties:
+      company_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 100
+      description:
+        type: string
+        maxLength: 2000
+      industry:
+        type: string
+        enum: ["technology", "healthcare", "finance", "education", "retail", "manufacturing", "consulting", "media", "nonprofit", "government"]
+      size:
+        type: string
+        enum: ["startup", "small", "medium", "large", "enterprise"]
+      founded_year:
+        type: integer
+        minimum: 1800
+        maximum: 2030
+      headquarters:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Address"
+      website:
+        type: string
+        format: uri
+      logo_url:
+        type: string
+        format: uri
+      social_media:
+        type: object
+        properties:
+          linkedin:
+            type: string
+          twitter:
+            type: string
+          facebook:
+            type: string
+      benefits:
+        type: array
+        items:
+          type: string
+      culture:
+        type: array
+        items:
+          type: string
+      diversity_commitment:
+        type: string
+        maxLength: 1000
+    required: ["company_id", "name", "description", "industry", "size", "headquarters"]
+  Candidate:
+    type: object
+    properties:
+      candidate_id:
+        type: string
+        format: uuid
+      name:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/PersonName"
+      email:
+        type: string
+        format: email
+      phone:
+        type: string
+        pattern: "^\\+?[1-9]\\d{1,14}$"
+      address:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Address"
+      summary:
+        type: string
+        maxLength: 1000
+      experience:
+        type: array
+        items:
+          $ref: "#/$defs/WorkExperience"
+      education:
+        type: array
+        items:
+          $ref: "#/$defs/Education"
+      skills:
+        type: array
+        items:
+          type: string
+      certifications:
+        type: array
+        items:
+          $ref: "#/$defs/Certification"
+      desired_salary:
+        $ref: "#/$defs/SalaryRange"
+      preferred_locations:
+        type: array
+        items:
+          type: string
+      remote_preference:
+        type: string
+        enum: ["on_site", "remote", "hybrid", "no_preference"]
+      availability_date:
+        type: string
+        format: date
+      linkedin_url:
+        type: string
+        format: uri
+      portfolio_url:
+        type: string
+        format: uri
+      resume_url:
+        type: string
+        format: uri
+    required: ["candidate_id", "name", "email", "summary", "skills"]
+  WorkExperience:
+    type: object
+    properties:
+      company:
+        type: string
+        maxLength: 100
+      position:
+        type: string
+        maxLength: 100
+      start_date:
+        type: string
+        format: date
+      end_date:
+        type: string
+        format: date
+      current:
+        type: boolean
+        default: false
+      description:
+        type: string
+        maxLength: 1000
+      achievements:
+        type: array
+        items:
+          type: string
+    required: ["company", "position", "start_date", "description"]
+  Education:
+    type: object
+    properties:
+      institution:
+        type: string
+        maxLength: 100
+      degree:
+        type: string
+        maxLength: 100
+      field_of_study:
+        type: string
+        maxLength: 100
+      graduation_date:
+        type: string
+        format: date
+      gpa:
+        type: number
+        minimum: 0
+        maximum: 4
+      honors:
+        type: array
+        items:
+          type: string
+    required: ["institution", "degree", "field_of_study", "graduation_date"]
+  Certification:
+    type: object
+    properties:
+      name:
+        type: string
+        maxLength: 100
+      issuing_organization:
+        type: string
+        maxLength: 100
+      issue_date:
+        type: string
+        format: date
+      expiration_date:
+        type: string
+        format: date
+      credential_id:
+        type: string
+    required: ["name", "issuing_organization", "issue_date"]
+  Application:
+    type: object
+    properties:
+      application_id:
+        type: string
+        format: uuid
+      job_id:
+        type: string
+        format: uuid
+      candidate_id:
+        type: string
+        format: uuid
+      application_date:
+        type: string
+        format: date-time
+      status:
+        type: string
+        enum: ["submitted", "under_review", "interview_scheduled", "interviewed", "offered", "rejected", "withdrawn"]
+      cover_letter:
+        type: string
+        maxLength: 2000
+      custom_responses:
+        type: array
+        items:
+          $ref: "#/$defs/CustomResponse"
+      interview_notes:
+        type: string
+        maxLength: 2000
+      rejection_reason:
+        type: string
+        maxLength: 500
+      offer_details:
+        $ref: "#/$defs/JobOffer"
+    required: ["application_id", "job_id", "candidate_id", "application_date", "status"]
+  CustomResponse:
+    type: object
+    properties:
+      question:
+        type: string
+        maxLength: 500
+      answer:
+        type: string
+        maxLength: 1000
+    required: ["question", "answer"]
+  SalaryRange:
+    type: object
+    properties:
+      min_amount:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      max_amount:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      period:
+        type: string
+        enum: ["hourly", "monthly", "yearly"]
+    required: ["min_amount", "max_amount", "period"]
+  JobOffer:
+    type: object
+    properties:
+      salary:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      start_date:
+        type: string
+        format: date
+      benefits_package:
+        type: array
+        items:
+          type: string
+      offer_expiration:
+        type: string
+        format: date
+      negotiable:
+        type: boolean
+        default: true
+    required: ["salary", "start_date", "offer_expiration"]

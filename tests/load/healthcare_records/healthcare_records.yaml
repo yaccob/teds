@@ -1,0 +1,126 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Healthcare Records Schema"
+type: object
+properties:
+  patients:
+    type: array
+    items:
+      $ref: "#/$defs/Patient"
+  medical_records:
+    type: array
+    items:
+      $ref: "#/$defs/MedicalRecord"
+$defs:
+  Patient:
+    type: object
+    properties:
+      patient_id:
+        type: string
+        format: uuid
+      name:
+        $ref: "../../ecommerce_platform/ecommerce.yaml#/$defs/PersonName"
+      date_of_birth:
+        type: string
+        format: date
+      gender:
+        type: string
+        enum: ["male", "female", "other", "unknown"]
+      blood_type:
+        type: string
+        enum: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
+      allergies:
+        type: array
+        items:
+          type: string
+      emergency_contact:
+        $ref: "#/$defs/EmergencyContact"
+    required: ["patient_id", "name", "date_of_birth"]
+  MedicalRecord:
+    type: object
+    properties:
+      record_id:
+        type: string
+        format: uuid
+      patient_id:
+        type: string
+        format: uuid
+      visit_date:
+        type: string
+        format: date
+      diagnosis:
+        type: array
+        items:
+          $ref: "#/$defs/Diagnosis"
+      medications:
+        type: array
+        items:
+          $ref: "#/$defs/Medication"
+      vitals:
+        $ref: "#/$defs/VitalSigns"
+    required: ["record_id", "patient_id", "visit_date"]
+  EmergencyContact:
+    type: object
+    properties:
+      name:
+        type: string
+      relationship:
+        type: string
+      phone:
+        type: string
+        pattern: "^\\+?[1-9]\\d{1,14}$"
+    required: ["name", "relationship", "phone"]
+  Diagnosis:
+    type: object
+    properties:
+      code:
+        type: string
+        pattern: "^[A-Z][0-9]{2}\\.[0-9]$"
+      description:
+        type: string
+      severity:
+        type: string
+        enum: ["mild", "moderate", "severe", "critical"]
+    required: ["code", "description"]
+  Medication:
+    type: object
+    properties:
+      name:
+        type: string
+      dosage:
+        type: string
+      frequency:
+        type: string
+      start_date:
+        type: string
+        format: date
+      end_date:
+        type: string
+        format: date
+    required: ["name", "dosage", "frequency"]
+  VitalSigns:
+    type: object
+    properties:
+      temperature:
+        type: number
+        minimum: 35
+        maximum: 42
+      blood_pressure:
+        type: object
+        properties:
+          systolic:
+            type: integer
+            minimum: 70
+            maximum: 200
+          diastolic:
+            type: integer
+            minimum: 40
+            maximum: 130
+        required: ["systolic", "diastolic"]
+      heart_rate:
+        type: integer
+        minimum: 40
+        maximum: 200
+      weight:
+        type: number
+        minimum: 0
+        maximum: 300

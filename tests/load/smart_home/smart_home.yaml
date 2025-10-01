@@ -1,0 +1,222 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Smart Home Automation Schema"
+type: object
+properties:
+  devices:
+    type: array
+    items:
+      $ref: "#/$defs/Device"
+  rooms:
+    type: array
+    items:
+      $ref: "#/$defs/Room"
+  automations:
+    type: array
+    items:
+      $ref: "#/$defs/Automation"
+  sensor_readings:
+    type: array
+    items:
+      $ref: "../iot_sensors/iot_sensors.yaml#/$defs/SensorReading"
+$defs:
+  Device:
+    type: object
+    properties:
+      device_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 50
+      device_type:
+        type: string
+        enum: ["light", "thermostat", "camera", "lock", "speaker", "sensor", "switch", "outlet", "garage_door", "doorbell"]
+      manufacturer:
+        type: string
+      model:
+        type: string
+      room_id:
+        type: string
+        format: uuid
+      status:
+        type: string
+        enum: ["online", "offline", "error"]
+      battery_level:
+        type: integer
+        minimum: 0
+        maximum: 100
+      last_seen:
+        type: string
+        format: date-time
+      properties:
+        oneOf:
+          - $ref: "#/$defs/LightProperties"
+          - $ref: "#/$defs/ThermostatProperties"
+          - $ref: "#/$defs/LockProperties"
+    required: ["device_id", "name", "device_type", "manufacturer", "room_id", "status"]
+  LightProperties:
+    type: object
+    properties:
+      brightness:
+        type: integer
+        minimum: 0
+        maximum: 100
+      color_temperature:
+        type: integer
+        minimum: 2000
+        maximum: 6500
+      rgb_color:
+        type: string
+        pattern: "^#[0-9A-Fa-f]{6}$"
+      on:
+        type: boolean
+    required: ["brightness", "on"]
+  ThermostatProperties:
+    type: object
+    properties:
+      current_temperature:
+        type: number
+        minimum: -40
+        maximum: 50
+      target_temperature:
+        type: number
+        minimum: -40
+        maximum: 50
+      mode:
+        type: string
+        enum: ["off", "heat", "cool", "auto"]
+      fan_mode:
+        type: string
+        enum: ["auto", "on", "circulate"]
+      humidity:
+        type: integer
+        minimum: 0
+        maximum: 100
+    required: ["current_temperature", "target_temperature", "mode"]
+  LockProperties:
+    type: object
+    properties:
+      locked:
+        type: boolean
+      battery_low:
+        type: boolean
+      tamper_detected:
+        type: boolean
+      last_user:
+        type: string
+    required: ["locked"]
+  Room:
+    type: object
+    properties:
+      room_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 50
+      room_type:
+        type: string
+        enum: ["living_room", "bedroom", "kitchen", "bathroom", "office", "garage", "basement", "attic", "hallway", "dining_room"]
+      floor:
+        type: integer
+        minimum: 0
+      area_sqft:
+        type: number
+        minimum: 1
+    required: ["room_id", "name", "room_type", "floor"]
+  Automation:
+    type: object
+    properties:
+      automation_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 100
+      description:
+        type: string
+        maxLength: 500
+      enabled:
+        type: boolean
+        default: true
+      triggers:
+        type: array
+        items:
+          $ref: "#/$defs/Trigger"
+        minItems: 1
+      conditions:
+        type: array
+        items:
+          $ref: "#/$defs/Condition"
+      actions:
+        type: array
+        items:
+          $ref: "#/$defs/Action"
+        minItems: 1
+      last_triggered:
+        type: string
+        format: date-time
+    required: ["automation_id", "name", "enabled", "triggers", "actions"]
+  Trigger:
+    type: object
+    properties:
+      trigger_type:
+        type: string
+        enum: ["time", "device_state", "sensor_value", "location", "sunrise", "sunset"]
+      device_id:
+        type: string
+        format: uuid
+      property:
+        type: string
+      value:
+        oneOf:
+          - type: string
+          - type: number
+          - type: boolean
+      operator:
+        type: string
+        enum: ["equals", "greater_than", "less_than", "changes_to", "changes_from"]
+      time:
+        type: string
+        pattern: "^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
+    required: ["trigger_type"]
+  Condition:
+    type: object
+    properties:
+      device_id:
+        type: string
+        format: uuid
+      property:
+        type: string
+      value:
+        oneOf:
+          - type: string
+          - type: number
+          - type: boolean
+      operator:
+        type: string
+        enum: ["equals", "greater_than", "less_than"]
+    required: ["device_id", "property", "value", "operator"]
+  Action:
+    type: object
+    properties:
+      device_id:
+        type: string
+        format: uuid
+      action_type:
+        type: string
+        enum: ["set_property", "toggle", "notify", "delay"]
+      property:
+        type: string
+      value:
+        oneOf:
+          - type: string
+          - type: number
+          - type: boolean
+      delay_seconds:
+        type: integer
+        minimum: 0
+      message:
+        type: string
+        maxLength: 200
+    required: ["action_type"]

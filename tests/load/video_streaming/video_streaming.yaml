@@ -1,0 +1,210 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Video Streaming Platform Schema"
+type: object
+properties:
+  videos:
+    type: array
+    items:
+      $ref: "#/$defs/Video"
+  users:
+    type: array
+    items:
+      $ref: "../social_media/social_media.yaml#/$defs/User"
+  channels:
+    type: array
+    items:
+      $ref: "#/$defs/Channel"
+  playlists:
+    type: array
+    items:
+      $ref: "#/$defs/Playlist"
+$defs:
+  Video:
+    type: object
+    properties:
+      video_id:
+        type: string
+        format: uuid
+      title:
+        type: string
+        maxLength: 200
+      description:
+        type: string
+        maxLength: 5000
+      channel_id:
+        type: string
+        format: uuid
+      duration_seconds:
+        type: integer
+        minimum: 1
+      file_url:
+        type: string
+        format: uri
+      thumbnail_url:
+        type: string
+        format: uri
+      upload_date:
+        type: string
+        format: date-time
+      visibility:
+        type: string
+        enum: ["public", "unlisted", "private"]
+      category:
+        type: string
+        enum: ["entertainment", "education", "music", "gaming", "news", "sports", "technology", "travel", "lifestyle"]
+      tags:
+        type: array
+        items:
+          type: string
+          maxLength: 30
+        maxItems: 20
+      view_count:
+        type: integer
+        minimum: 0
+      like_count:
+        type: integer
+        minimum: 0
+      dislike_count:
+        type: integer
+        minimum: 0
+      comment_count:
+        type: integer
+        minimum: 0
+      quality_options:
+        type: array
+        items:
+          type: string
+          enum: ["144p", "240p", "360p", "480p", "720p", "1080p", "1440p", "2160p"]
+      subtitles:
+        type: array
+        items:
+          $ref: "#/$defs/Subtitle"
+      monetization:
+        $ref: "#/$defs/Monetization"
+    required: ["video_id", "title", "channel_id", "duration_seconds", "file_url", "upload_date", "visibility", "category"]
+  Channel:
+    type: object
+    properties:
+      channel_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 100
+      description:
+        type: string
+        maxLength: 2000
+      owner_id:
+        type: string
+        format: uuid
+      creation_date:
+        type: string
+        format: date-time
+      subscriber_count:
+        type: integer
+        minimum: 0
+      total_views:
+        type: integer
+        minimum: 0
+      video_count:
+        type: integer
+        minimum: 0
+      avatar_url:
+        type: string
+        format: uri
+      banner_url:
+        type: string
+        format: uri
+      verified:
+        type: boolean
+        default: false
+      category:
+        type: string
+        enum: ["entertainment", "education", "music", "gaming", "news", "sports", "technology", "travel", "lifestyle"]
+      social_links:
+        type: object
+        properties:
+          website:
+            type: string
+            format: uri
+          twitter:
+            type: string
+          instagram:
+            type: string
+          facebook:
+            type: string
+    required: ["channel_id", "name", "owner_id", "creation_date", "category"]
+  Playlist:
+    type: object
+    properties:
+      playlist_id:
+        type: string
+        format: uuid
+      title:
+        type: string
+        maxLength: 150
+      description:
+        type: string
+        maxLength: 1000
+      channel_id:
+        type: string
+        format: uuid
+      visibility:
+        type: string
+        enum: ["public", "unlisted", "private"]
+      creation_date:
+        type: string
+        format: date-time
+      videos:
+        type: array
+        items:
+          $ref: "#/$defs/PlaylistVideo"
+      view_count:
+        type: integer
+        minimum: 0
+      thumbnail_url:
+        type: string
+        format: uri
+    required: ["playlist_id", "title", "channel_id", "visibility", "creation_date", "videos"]
+  PlaylistVideo:
+    type: object
+    properties:
+      video_id:
+        type: string
+        format: uuid
+      position:
+        type: integer
+        minimum: 1
+      added_date:
+        type: string
+        format: date-time
+    required: ["video_id", "position", "added_date"]
+  Subtitle:
+    type: object
+    properties:
+      language:
+        type: string
+        pattern: "^[a-z]{2}(-[A-Z]{2})?$"
+      auto_generated:
+        type: boolean
+        default: false
+      file_url:
+        type: string
+        format: uri
+    required: ["language", "file_url"]
+  Monetization:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        default: false
+      ad_revenue:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      sponsorship_revenue:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      merchandise_revenue:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      super_chat_revenue:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      membership_revenue:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"

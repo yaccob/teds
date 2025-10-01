@@ -1,0 +1,386 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Space Exploration Mission Schema"
+type: object
+properties:
+  missions:
+    type: array
+    items:
+      $ref: "#/$defs/Mission"
+  spacecraft:
+    type: array
+    items:
+      $ref: "#/$defs/Spacecraft"
+  astronauts:
+    type: array
+    items:
+      $ref: "#/$defs/Astronaut"
+  celestial_bodies:
+    type: array
+    items:
+      $ref: "#/$defs/CelestialBody"
+  telemetry:
+    type: array
+    items:
+      $ref: "#/$defs/TelemetryData"
+$defs:
+  Mission:
+    type: object
+    properties:
+      mission_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 100
+      mission_type:
+        type: string
+        enum: ["exploration", "research", "supply", "crew_transport", "satellite_deployment", "space_station", "planetary"]
+      agency:
+        type: string
+        enum: ["NASA", "ESA", "ROSCOSMOS", "CNSA", "ISRO", "JAXA", "SpaceX", "Blue_Origin"]
+      launch_date:
+        type: string
+        format: date-time
+      planned_duration_days:
+        type: integer
+        minimum: 1
+      actual_duration_days:
+        type: integer
+        minimum: 0
+      status:
+        type: string
+        enum: ["planned", "active", "completed", "aborted", "failed"]
+      destination:
+        type: string
+        format: uuid
+      objectives:
+        type: array
+        items:
+          type: string
+        minItems: 1
+      budget:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      crew:
+        type: array
+        items:
+          type: string
+          format: uuid
+      spacecraft_id:
+        type: string
+        format: uuid
+      launch_site:
+        type: string
+      mission_control:
+        type: string
+    required: ["mission_id", "name", "mission_type", "agency", "launch_date", "status", "objectives", "spacecraft_id"]
+  Spacecraft:
+    type: object
+    properties:
+      spacecraft_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 50
+      spacecraft_type:
+        type: string
+        enum: ["capsule", "shuttle", "probe", "satellite", "rover", "lander", "space_station"]
+      manufacturer:
+        type: string
+      launch_mass_kg:
+        type: number
+        minimum: 1
+      dimensions:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Dimensions"
+      power_source:
+        type: string
+        enum: ["solar", "nuclear", "battery", "fuel_cell", "hybrid"]
+      power_output_watts:
+        type: number
+        minimum: 1
+      propulsion_system:
+        $ref: "#/$defs/PropulsionSystem"
+      life_support:
+        $ref: "#/$defs/LifeSupport"
+      communication_systems:
+        type: array
+        items:
+          $ref: "#/$defs/CommunicationSystem"
+      scientific_instruments:
+        type: array
+        items:
+          $ref: "#/$defs/ScientificInstrument"
+      crew_capacity:
+        type: integer
+        minimum: 0
+      operational_status:
+        type: string
+        enum: ["active", "inactive", "maintenance", "decommissioned", "lost"]
+      launch_date:
+        type: string
+        format: date-time
+      mission_end_date:
+        type: string
+        format: date-time
+    required: ["spacecraft_id", "name", "spacecraft_type", "manufacturer", "launch_mass_kg", "power_source", "operational_status"]
+  PropulsionSystem:
+    type: object
+    properties:
+      type:
+        type: string
+        enum: ["chemical", "ion", "nuclear", "solar_sail", "hybrid"]
+      fuel_type:
+        type: string
+      thrust_newtons:
+        type: number
+        minimum: 0
+      specific_impulse_seconds:
+        type: number
+        minimum: 0
+      fuel_capacity_kg:
+        type: number
+        minimum: 0
+    required: ["type", "thrust_newtons"]
+  LifeSupport:
+    type: object
+    properties:
+      oxygen_recycling:
+        type: boolean
+      water_recycling:
+        type: boolean
+      co2_scrubbing:
+        type: boolean
+      temperature_control:
+        $ref: "../manufacturing/manufacturing.yaml#/$defs/TemperatureRange"
+      food_storage_days:
+        type: integer
+        minimum: 0
+      waste_management:
+        type: boolean
+    required: ["oxygen_recycling", "water_recycling", "co2_scrubbing", "food_storage_days"]
+  CommunicationSystem:
+    type: object
+    properties:
+      system_id:
+        type: string
+        format: uuid
+      type:
+        type: string
+        enum: ["radio", "laser", "satellite_relay"]
+      frequency_band:
+        type: string
+        enum: ["VHF", "UHF", "S_band", "X_band", "Ku_band", "Ka_band"]
+      power_watts:
+        type: number
+        minimum: 0.1
+      range_km:
+        type: number
+        minimum: 1
+      data_rate_mbps:
+        type: number
+        minimum: 0.001
+    required: ["system_id", "type", "frequency_band", "power_watts", "range_km"]
+  ScientificInstrument:
+    type: object
+    properties:
+      instrument_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 100
+      type:
+        type: string
+        enum: ["camera", "spectrometer", "magnetometer", "seismometer", "radar", "lidar", "particle_detector", "telescope"]
+      purpose:
+        type: string
+        maxLength: 200
+      mass_kg:
+        type: number
+        minimum: 0.01
+      power_consumption_watts:
+        type: number
+        minimum: 0.1
+      resolution:
+        type: string
+      operating_temperature_c:
+        $ref: "../manufacturing/manufacturing.yaml#/$defs/TemperatureRange"
+      calibration_date:
+        type: string
+        format: date
+    required: ["instrument_id", "name", "type", "purpose", "mass_kg", "power_consumption_watts"]
+  Astronaut:
+    type: object
+    properties:
+      astronaut_id:
+        type: string
+        format: uuid
+      name:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/PersonName"
+      call_sign:
+        type: string
+        maxLength: 20
+      nationality:
+        type: string
+        pattern: "^[A-Z]{2}$"
+      date_of_birth:
+        type: string
+        format: date
+      agency:
+        type: string
+      astronaut_class:
+        type: string
+      selection_date:
+        type: string
+        format: date
+      total_space_time_hours:
+        type: number
+        minimum: 0
+      total_eva_time_hours:
+        type: number
+        minimum: 0
+      missions_flown:
+        type: array
+        items:
+          type: string
+          format: uuid
+      specializations:
+        type: array
+        items:
+          type: string
+          enum: ["pilot", "mission_specialist", "commander", "flight_engineer", "scientist", "doctor"]
+      medical_clearance:
+        type: object
+        properties:
+          status:
+            type: string
+            enum: ["active", "grounded", "retired"]
+          last_exam_date:
+            type: string
+            format: date
+          next_exam_date:
+            type: string
+            format: date
+      emergency_contact:
+        $ref: "../healthcare_records/healthcare_records.yaml#/$defs/EmergencyContact"
+    required: ["astronaut_id", "name", "nationality", "date_of_birth", "agency", "specializations"]
+  CelestialBody:
+    type: object
+    properties:
+      body_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 50
+      type:
+        type: string
+        enum: ["planet", "moon", "asteroid", "comet", "star", "space_station"]
+      parent_body_id:
+        type: string
+        format: uuid
+      mass_kg:
+        type: number
+        minimum: 1
+      radius_km:
+        type: number
+        minimum: 0.1
+      orbital_period_days:
+        type: number
+        minimum: 0
+      distance_from_earth_km:
+        type: number
+        minimum: 0
+      atmospheric_composition:
+        type: array
+        items:
+          type: object
+          properties:
+            gas:
+              type: string
+            percentage:
+              type: number
+              minimum: 0
+              maximum: 100
+          required: ["gas", "percentage"]
+      surface_temperature_c:
+        $ref: "../manufacturing/manufacturing.yaml#/$defs/TemperatureRange"
+      gravity_ms2:
+        type: number
+        minimum: 0
+      has_atmosphere:
+        type: boolean
+      has_magnetic_field:
+        type: boolean
+    required: ["body_id", "name", "type", "mass_kg", "radius_km", "distance_from_earth_km", "gravity_ms2"]
+  TelemetryData:
+    type: object
+    properties:
+      telemetry_id:
+        type: string
+        format: uuid
+      spacecraft_id:
+        type: string
+        format: uuid
+      timestamp:
+        type: string
+        format: date-time
+      position:
+        type: object
+        properties:
+          x_km:
+            type: number
+          y_km:
+            type: number
+          z_km:
+            type: number
+        required: ["x_km", "y_km", "z_km"]
+      velocity:
+        type: object
+        properties:
+          x_ms:
+            type: number
+          y_ms:
+            type: number
+          z_ms:
+            type: number
+        required: ["x_ms", "y_ms", "z_ms"]
+      orientation:
+        type: object
+        properties:
+          roll_degrees:
+            type: number
+            minimum: -180
+            maximum: 180
+          pitch_degrees:
+            type: number
+            minimum: -90
+            maximum: 90
+          yaw_degrees:
+            type: number
+            minimum: -180
+            maximum: 180
+        required: ["roll_degrees", "pitch_degrees", "yaw_degrees"]
+      system_status:
+        type: object
+        properties:
+          power_level_percent:
+            type: number
+            minimum: 0
+            maximum: 100
+          fuel_remaining_percent:
+            type: number
+            minimum: 0
+            maximum: 100
+          communication_signal_strength:
+            type: number
+            minimum: 0
+            maximum: 100
+          temperature_c:
+            type: number
+        required: ["power_level_percent", "fuel_remaining_percent", "communication_signal_strength", "temperature_c"]
+      sensor_readings:
+        type: array
+        items:
+          $ref: "../iot_sensors/iot_sensors.yaml#/$defs/SensorReading"
+    required: ["telemetry_id", "spacecraft_id", "timestamp", "position", "velocity", "system_status"]

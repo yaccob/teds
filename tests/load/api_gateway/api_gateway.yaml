@@ -1,0 +1,865 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "https://example.com/schemas/api_gateway.yaml"
+title: "API Gateway Configuration Schema"
+description: "Configuration schema for API Gateway with routes, middleware, authentication, and monitoring"
+
+type: object
+additionalProperties: false
+
+properties:
+  gateway_config:
+    $ref: "#/$defs/GatewayConfig"
+
+  routes:
+    type: array
+    items:
+      $ref: "#/$defs/Route"
+    description: "API route definitions"
+
+  middleware:
+    type: array
+    items:
+      $ref: "#/$defs/Middleware"
+    description: "Middleware pipeline configuration"
+
+  authentication:
+    $ref: "#/$defs/Authentication"
+
+  rate_limiting:
+    $ref: "#/$defs/RateLimiting"
+
+  monitoring:
+    $ref: "#/$defs/Monitoring"
+
+  backends:
+    type: array
+    items:
+      $ref: "#/$defs/Backend"
+
+required:
+  - gateway_config
+  - routes
+  - authentication
+
+$defs:
+  GatewayConfig:
+    type: object
+    properties:
+      name:
+        type: string
+        minLength: 1
+        maxLength: 100
+      version:
+        type: string
+        pattern: "^\\d+\\.\\d+\\.\\d+$"
+      listen_address:
+        type: string
+        format: ipv4
+        default: "0.0.0.0"
+      listen_port:
+        type: integer
+        minimum: 1
+        maximum: 65535
+        default: 8080
+      tls:
+        $ref: "#/$defs/TLSConfig"
+      cors:
+        $ref: "#/$defs/CORSConfig"
+      timeouts:
+        $ref: "#/$defs/TimeoutConfig"
+      security:
+        $ref: "#/$defs/SecurityConfig"
+    required: ["name", "version", "listen_port"]
+
+  TLSConfig:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        default: false
+      cert_file:
+        type: string
+        description: "Path to TLS certificate file"
+      key_file:
+        type: string
+        description: "Path to TLS private key file"
+      ca_file:
+        type: string
+        description: "Path to CA certificate file"
+      min_version:
+        type: string
+        enum: ["1.0", "1.1", "1.2", "1.3"]
+        default: "1.2"
+      cipher_suites:
+        type: array
+        items:
+          type: string
+        description: "Allowed cipher suites"
+    required: ["enabled"]
+
+  CORSConfig:
+    type: object
+    properties:
+      allowed_origins:
+        type: array
+        items:
+          type: string
+          format: uri
+        description: "Allowed CORS origins"
+      allowed_methods:
+        type: array
+        items:
+          type: string
+          enum: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"]
+        default: ["GET", "POST", "PUT", "DELETE"]
+      allowed_headers:
+        type: array
+        items:
+          type: string
+        default: ["Content-Type", "Authorization"]
+      expose_headers:
+        type: array
+        items:
+          type: string
+      allow_credentials:
+        type: boolean
+        default: false
+      max_age:
+        type: integer
+        minimum: 0
+        default: 3600
+
+  TimeoutConfig:
+    type: object
+    properties:
+      read_timeout:
+        type: string
+        pattern: "^\\d+[smh]$"
+        default: "30s"
+      write_timeout:
+        type: string
+        pattern: "^\\d+[smh]$"
+        default: "30s"
+      idle_timeout:
+        type: string
+        pattern: "^\\d+[smh]$"
+        default: "120s"
+      request_timeout:
+        type: string
+        pattern: "^\\d+[smh]$"
+        default: "60s"
+
+  SecurityConfig:
+    type: object
+    properties:
+      request_size_limit:
+        type: integer
+        minimum: 1024
+        default: 1048576
+        description: "Maximum request size in bytes"
+      header_size_limit:
+        type: integer
+        minimum: 1024
+        default: 8192
+        description: "Maximum header size in bytes"
+      rate_limit_global:
+        type: integer
+        minimum: 1
+        description: "Global rate limit per second"
+      blocked_ips:
+        type: array
+        items:
+          type: string
+          oneOf:
+            - format: ipv4
+            - format: ipv6
+      trusted_proxies:
+        type: array
+        items:
+          type: string
+          format: ipv4
+
+  Route:
+    type: object
+    properties:
+      route_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        minLength: 1
+        maxLength: 100
+      path:
+        type: string
+        pattern: "^/.*"
+        description: "Route path pattern"
+      methods:
+        type: array
+        items:
+          type: string
+          enum: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"]
+        minItems: 1
+      backend:
+        $ref: "#/$defs/RouteBackend"
+      middleware:
+        type: array
+        items:
+          type: string
+        description: "Middleware names to apply"
+      authentication:
+        $ref: "#/$defs/RouteAuthentication"
+      rate_limiting:
+        $ref: "#/$defs/RouteRateLimit"
+      caching:
+        $ref: "#/$defs/CacheConfig"
+      request_transformation:
+        $ref: "#/$defs/RequestTransformation"
+      response_transformation:
+        $ref: "#/$defs/ResponseTransformation"
+      health_check:
+        $ref: "#/$defs/HealthCheck"
+      enabled:
+        type: boolean
+        default: true
+      tags:
+        type: array
+        items:
+          type: string
+        uniqueItems: true
+    required:
+      - route_id
+      - name
+      - path
+      - methods
+      - backend
+
+  RouteBackend:
+    type: object
+    properties:
+      backend_id:
+        type: string
+        description: "Reference to backend definition"
+      upstream_url:
+        type: string
+        format: uri
+        description: "Direct upstream URL (alternative to backend_id)"
+      timeout:
+        type: string
+        pattern: "^\\d+[smh]$"
+        default: "30s"
+      retry_policy:
+        $ref: "#/$defs/RetryPolicy"
+      load_balancing:
+        $ref: "#/$defs/LoadBalancing"
+      circuit_breaker:
+        $ref: "#/$defs/CircuitBreaker"
+    oneOf:
+      - required: ["backend_id"]
+      - required: ["upstream_url"]
+
+  RetryPolicy:
+    type: object
+    properties:
+      max_retries:
+        type: integer
+        minimum: 0
+        maximum: 10
+        default: 3
+      backoff_strategy:
+        type: string
+        enum: ["fixed", "exponential", "linear"]
+        default: "exponential"
+      base_delay:
+        type: string
+        pattern: "^\\d+[smh]$"
+        default: "100ms"
+      max_delay:
+        type: string
+        pattern: "^\\d+[smh]$"
+        default: "5s"
+      retry_on:
+        type: array
+        items:
+          type: string
+          enum: ["5xx", "timeout", "connection_error", "gateway_error"]
+        default: ["5xx", "timeout", "connection_error"]
+
+  LoadBalancing:
+    type: object
+    properties:
+      strategy:
+        type: string
+        enum: ["round_robin", "least_connections", "weighted_round_robin", "ip_hash"]
+        default: "round_robin"
+      health_check_interval:
+        type: string
+        pattern: "^\\d+[smh]$"
+        default: "30s"
+      unhealthy_threshold:
+        type: integer
+        minimum: 1
+        default: 3
+      healthy_threshold:
+        type: integer
+        minimum: 1
+        default: 2
+
+  CircuitBreaker:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        default: false
+      failure_threshold:
+        type: integer
+        minimum: 1
+        default: 5
+      success_threshold:
+        type: integer
+        minimum: 1
+        default: 3
+      timeout:
+        type: string
+        pattern: "^\\d+[smh]$"
+        default: "60s"
+      half_open_max_calls:
+        type: integer
+        minimum: 1
+        default: 10
+
+  RouteAuthentication:
+    type: object
+    properties:
+      required:
+        type: boolean
+        default: true
+      methods:
+        type: array
+        items:
+          type: string
+          enum: ["jwt", "api_key", "oauth2", "basic_auth"]
+        minItems: 1
+      jwt:
+        $ref: "#/$defs/JWTConfig"
+      api_key:
+        $ref: "#/$defs/APIKeyConfig"
+      oauth2:
+        $ref: "#/$defs/OAuth2Config"
+      scopes:
+        type: array
+        items:
+          type: string
+        description: "Required OAuth2 scopes"
+
+  JWTConfig:
+    type: object
+    properties:
+      issuer:
+        type: string
+        format: uri
+      audience:
+        type: array
+        items:
+          type: string
+      algorithm:
+        type: string
+        enum: ["HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512"]
+        default: "RS256"
+      secret:
+        type: string
+        description: "HMAC secret (for HS algorithms)"
+      public_key:
+        type: string
+        description: "RSA/ECDSA public key (for RS/ES algorithms)"
+      claims_mapping:
+        type: object
+        additionalProperties:
+          type: string
+        description: "Map JWT claims to request headers"
+    required: ["issuer"]
+
+  APIKeyConfig:
+    type: object
+    properties:
+      header_name:
+        type: string
+        default: "X-API-Key"
+      query_param:
+        type: string
+        default: "api_key"
+      validation_endpoint:
+        type: string
+        format: uri
+        description: "External API key validation endpoint"
+
+  OAuth2Config:
+    type: object
+    properties:
+      authorization_endpoint:
+        type: string
+        format: uri
+      token_endpoint:
+        type: string
+        format: uri
+      introspection_endpoint:
+        type: string
+        format: uri
+      client_id:
+        type: string
+      client_secret:
+        type: string
+      scopes:
+        type: array
+        items:
+          type: string
+    required: ["authorization_endpoint", "token_endpoint", "client_id"]
+
+  RouteRateLimit:
+    type: object
+    properties:
+      requests_per_second:
+        type: integer
+        minimum: 1
+      burst_size:
+        type: integer
+        minimum: 1
+      key_generator:
+        type: string
+        enum: ["ip", "user_id", "api_key", "custom"]
+        default: "ip"
+      custom_key_header:
+        type: string
+        description: "Header name for custom key generation"
+
+  CacheConfig:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        default: false
+      ttl:
+        type: string
+        pattern: "^\\d+[smh]$"
+        default: "300s"
+      cache_key_generator:
+        type: string
+        enum: ["url", "url_and_headers", "custom"]
+        default: "url"
+      cache_headers:
+        type: array
+        items:
+          type: string
+        description: "Headers to include in cache key"
+      vary_headers:
+        type: array
+        items:
+          type: string
+        description: "Headers that affect response variation"
+
+  RequestTransformation:
+    type: object
+    properties:
+      add_headers:
+        type: object
+        additionalProperties:
+          type: string
+      remove_headers:
+        type: array
+        items:
+          type: string
+      rewrite_path:
+        type: string
+        description: "Path rewrite pattern"
+      add_query_params:
+        type: object
+        additionalProperties:
+          type: string
+
+  ResponseTransformation:
+    type: object
+    properties:
+      add_headers:
+        type: object
+        additionalProperties:
+          type: string
+      remove_headers:
+        type: array
+        items:
+          type: string
+      status_code_mapping:
+        type: object
+        additionalProperties:
+          type: integer
+          minimum: 100
+          maximum: 599
+
+  HealthCheck:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        default: true
+      path:
+        type: string
+        default: "/health"
+      method:
+        type: string
+        enum: ["GET", "POST", "HEAD"]
+        default: "GET"
+      interval:
+        type: string
+        pattern: "^\\d+[smh]$"
+        default: "30s"
+      timeout:
+        type: string
+        pattern: "^\\d+[smh]$"
+        default: "5s"
+      healthy_status_codes:
+        type: array
+        items:
+          type: integer
+          minimum: 100
+          maximum: 599
+        default: [200, 201, 204]
+
+  Middleware:
+    type: object
+    properties:
+      middleware_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        minLength: 1
+        maxLength: 100
+      type:
+        type: string
+        enum: ["cors", "auth", "rate_limit", "logging", "metrics", "transform", "custom"]
+      config:
+        type: object
+        description: "Middleware-specific configuration"
+      order:
+        type: integer
+        minimum: 0
+        description: "Execution order (lower = earlier)"
+      enabled:
+        type: boolean
+        default: true
+    required: ["middleware_id", "name", "type", "order"]
+
+  Authentication:
+    type: object
+    properties:
+      default_method:
+        type: string
+        enum: ["jwt", "api_key", "oauth2", "basic_auth", "none"]
+        default: "jwt"
+      jwt:
+        $ref: "#/$defs/JWTConfig"
+      api_key:
+        $ref: "#/$defs/APIKeyConfig"
+      oauth2:
+        $ref: "#/$defs/OAuth2Config"
+      session:
+        $ref: "#/$defs/SessionConfig"
+
+  SessionConfig:
+    type: object
+    properties:
+      cookie_name:
+        type: string
+        default: "session"
+      secure:
+        type: boolean
+        default: true
+      http_only:
+        type: boolean
+        default: true
+      same_site:
+        type: string
+        enum: ["strict", "lax", "none"]
+        default: "lax"
+      max_age:
+        type: integer
+        minimum: 300
+        default: 3600
+
+  RateLimiting:
+    type: object
+    properties:
+      global:
+        $ref: "#/$defs/RateLimitRule"
+      per_route:
+        type: object
+        additionalProperties:
+          $ref: "#/$defs/RateLimitRule"
+      storage:
+        $ref: "#/$defs/RateLimitStorage"
+
+  RateLimitRule:
+    type: object
+    properties:
+      requests_per_minute:
+        type: integer
+        minimum: 1
+      requests_per_hour:
+        type: integer
+        minimum: 1
+      requests_per_day:
+        type: integer
+        minimum: 1
+      burst_size:
+        type: integer
+        minimum: 1
+      key_generator:
+        type: string
+        enum: ["ip", "user_id", "api_key"]
+        default: "ip"
+
+  RateLimitStorage:
+    type: object
+    properties:
+      type:
+        type: string
+        enum: ["memory", "redis", "database"]
+        default: "memory"
+      redis:
+        $ref: "#/$defs/RedisConfig"
+      cleanup_interval:
+        type: string
+        pattern: "^\\d+[smh]$"
+        default: "60s"
+
+  RedisConfig:
+    type: object
+    properties:
+      host:
+        type: string
+        format: hostname
+      port:
+        type: integer
+        minimum: 1
+        maximum: 65535
+        default: 6379
+      database:
+        type: integer
+        minimum: 0
+        default: 0
+      password:
+        type: string
+      max_connections:
+        type: integer
+        minimum: 1
+        default: 10
+    required: ["host"]
+
+  Monitoring:
+    type: object
+    properties:
+      metrics:
+        $ref: "#/$defs/MetricsConfig"
+      logging:
+        $ref: "#/$defs/LoggingConfig"
+      tracing:
+        $ref: "#/$defs/TracingConfig"
+      health_checks:
+        $ref: "#/$defs/MonitoringHealthChecks"
+
+  MetricsConfig:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        default: true
+      endpoint:
+        type: string
+        default: "/metrics"
+      format:
+        type: string
+        enum: ["prometheus", "json", "statsd"]
+        default: "prometheus"
+      include_labels:
+        type: array
+        items:
+          type: string
+        default: ["method", "status", "route"]
+
+  LoggingConfig:
+    type: object
+    properties:
+      level:
+        type: string
+        enum: ["debug", "info", "warn", "error"]
+        default: "info"
+      format:
+        type: string
+        enum: ["json", "text"]
+        default: "json"
+      output:
+        type: array
+        items:
+          type: string
+          enum: ["stdout", "stderr", "file", "syslog"]
+        default: ["stdout"]
+      file_path:
+        type: string
+      max_size:
+        type: integer
+        minimum: 1
+        default: 100
+        description: "Max log file size in MB"
+      max_backups:
+        type: integer
+        minimum: 1
+        default: 3
+
+  TracingConfig:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        default: false
+      service_name:
+        type: string
+        default: "api-gateway"
+      jaeger:
+        $ref: "#/$defs/JaegerConfig"
+      zipkin:
+        $ref: "#/$defs/ZipkinConfig"
+      sampling_rate:
+        type: number
+        minimum: 0
+        maximum: 1
+        default: 0.1
+
+  JaegerConfig:
+    type: object
+    properties:
+      endpoint:
+        type: string
+        format: uri
+      agent_host:
+        type: string
+        format: hostname
+      agent_port:
+        type: integer
+        minimum: 1
+        maximum: 65535
+        default: 6832
+
+  ZipkinConfig:
+    type: object
+    properties:
+      endpoint:
+        type: string
+        format: uri
+    required: ["endpoint"]
+
+  MonitoringHealthChecks:
+    type: object
+    properties:
+      endpoint:
+        type: string
+        default: "/health"
+      detailed_endpoint:
+        type: string
+        default: "/health/detailed"
+      checks:
+        type: array
+        items:
+          $ref: "#/$defs/HealthCheckDefinition"
+
+  HealthCheckDefinition:
+    type: object
+    properties:
+      name:
+        type: string
+        minLength: 1
+      type:
+        type: string
+        enum: ["http", "tcp", "database", "custom"]
+      config:
+        type: object
+      timeout:
+        type: string
+        pattern: "^\\d+[smh]$"
+        default: "5s"
+      interval:
+        type: string
+        pattern: "^\\d+[smh]$"
+        default: "30s"
+    required: ["name", "type"]
+
+  Backend:
+    type: object
+    properties:
+      backend_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        minLength: 1
+        maxLength: 100
+      servers:
+        type: array
+        items:
+          $ref: "#/$defs/BackendServer"
+        minItems: 1
+      load_balancing:
+        $ref: "#/$defs/LoadBalancing"
+      health_checks:
+        $ref: "#/$defs/HealthCheck"
+      circuit_breaker:
+        $ref: "#/$defs/CircuitBreaker"
+    required: ["backend_id", "name", "servers"]
+
+  BackendServer:
+    type: object
+    properties:
+      server_id:
+        type: string
+        format: uuid
+      host:
+        type: string
+        format: hostname
+      port:
+        type: integer
+        minimum: 1
+        maximum: 65535
+      weight:
+        type: integer
+        minimum: 1
+        default: 1
+      enabled:
+        type: boolean
+        default: true
+      tags:
+        type: array
+        items:
+          type: string
+    required: ["server_id", "host", "port"]
+
+examples:
+  - gateway_config:
+      name: "production-gateway"
+      version: "1.0.0"
+      listen_port: 8080
+      tls:
+        enabled: true
+        cert_file: "/etc/ssl/certs/gateway.crt"
+        key_file: "/etc/ssl/private/gateway.key"
+    routes:
+      - route_id: "550e8400-e29b-41d4-a716-446655440000"
+        name: "user-service"
+        path: "/api/v1/users"
+        methods: ["GET", "POST"]
+        backend:
+          backend_id: "backend-users"
+        authentication:
+          required: true
+          methods: ["jwt"]
+    authentication:
+      default_method: "jwt"
+      jwt:
+        issuer: "https://auth.example.com"
+        algorithm: "RS256"

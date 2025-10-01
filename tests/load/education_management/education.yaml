@@ -1,0 +1,192 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Education Management System Schema"
+type: object
+properties:
+  students:
+    type: array
+    items:
+      $ref: "#/$defs/Student"
+  courses:
+    type: array
+    items:
+      $ref: "#/$defs/Course"
+  enrollments:
+    type: array
+    items:
+      $ref: "#/$defs/Enrollment"
+  grades:
+    type: array
+    items:
+      $ref: "#/$defs/Grade"
+$defs:
+  Student:
+    type: object
+    properties:
+      student_id:
+        type: string
+        format: uuid
+      student_number:
+        type: string
+        pattern: "^[0-9]{8}$"
+      name:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/PersonName"
+      email:
+        type: string
+        format: email
+      date_of_birth:
+        type: string
+        format: date
+      address:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Address"
+      emergency_contact:
+        $ref: "../healthcare_records/healthcare_records.yaml#/$defs/EmergencyContact"
+      enrollment_date:
+        type: string
+        format: date
+      graduation_date:
+        type: string
+        format: date
+      status:
+        type: string
+        enum: ["active", "graduated", "withdrawn", "suspended"]
+      gpa:
+        type: number
+        minimum: 0.0
+        maximum: 4.0
+    required: ["student_id", "student_number", "name", "email", "enrollment_date", "status"]
+  Course:
+    type: object
+    properties:
+      course_id:
+        type: string
+        format: uuid
+      course_code:
+        type: string
+        pattern: "^[A-Z]{3}[0-9]{3}$"
+      title:
+        type: string
+        maxLength: 100
+      description:
+        type: string
+        maxLength: 1000
+      credits:
+        type: integer
+        minimum: 1
+        maximum: 6
+      department:
+        type: string
+        maxLength: 50
+      prerequisites:
+        type: array
+        items:
+          type: string
+          format: uuid
+      instructor:
+        $ref: "#/$defs/Instructor"
+      schedule:
+        $ref: "#/$defs/Schedule"
+      max_enrollment:
+        type: integer
+        minimum: 1
+      semester:
+        type: string
+        enum: ["fall", "spring", "summer"]
+      year:
+        type: integer
+        minimum: 2020
+    required: ["course_id", "course_code", "title", "credits", "department", "instructor", "semester", "year"]
+  Instructor:
+    type: object
+    properties:
+      instructor_id:
+        type: string
+        format: uuid
+      name:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/PersonName"
+      email:
+        type: string
+        format: email
+      department:
+        type: string
+      office_location:
+        type: string
+      phone:
+        type: string
+        pattern: "^\\+?[1-9]\\d{1,14}$"
+    required: ["instructor_id", "name", "email", "department"]
+  Schedule:
+    type: object
+    properties:
+      days:
+        type: array
+        items:
+          type: string
+          enum: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+        uniqueItems: true
+      start_time:
+        type: string
+        pattern: "^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
+      end_time:
+        type: string
+        pattern: "^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
+      room:
+        type: string
+      building:
+        type: string
+    required: ["days", "start_time", "end_time", "room"]
+  Enrollment:
+    type: object
+    properties:
+      enrollment_id:
+        type: string
+        format: uuid
+      student_id:
+        type: string
+        format: uuid
+      course_id:
+        type: string
+        format: uuid
+      enrollment_date:
+        type: string
+        format: date
+      status:
+        type: string
+        enum: ["enrolled", "dropped", "completed", "incomplete"]
+      final_grade:
+        type: string
+        enum: ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "F", "I", "W"]
+    required: ["enrollment_id", "student_id", "course_id", "enrollment_date", "status"]
+  Grade:
+    type: object
+    properties:
+      grade_id:
+        type: string
+        format: uuid
+      enrollment_id:
+        type: string
+        format: uuid
+      assignment_name:
+        type: string
+      assignment_type:
+        type: string
+        enum: ["exam", "quiz", "homework", "project", "participation"]
+      points_earned:
+        type: number
+        minimum: 0
+      points_possible:
+        type: number
+        minimum: 1
+      percentage:
+        type: number
+        minimum: 0
+        maximum: 100
+      letter_grade:
+        type: string
+        enum: ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "F"]
+      graded_date:
+        type: string
+        format: date
+      comments:
+        type: string
+        maxLength: 500
+    required: ["grade_id", "enrollment_id", "assignment_name", "assignment_type", "points_earned", "points_possible", "graded_date"]

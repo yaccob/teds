@@ -1,0 +1,125 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Social Media Platform Schema"
+type: object
+properties:
+  users:
+    type: array
+    items:
+      $ref: "#/$defs/User"
+  posts:
+    type: array
+    items:
+      $ref: "#/$defs/Post"
+  comments:
+    type: array
+    items:
+      $ref: "#/$defs/Comment"
+$defs:
+  User:
+    type: object
+    properties:
+      user_id:
+        type: string
+        format: uuid
+      username:
+        type: string
+        pattern: "^[a-zA-Z0-9_]{3,20}$"
+      email:
+        type: string
+        format: email
+      profile:
+        $ref: "#/$defs/UserProfile"
+      followers_count:
+        type: integer
+        minimum: 0
+      following_count:
+        type: integer
+        minimum: 0
+      verified:
+        type: boolean
+        default: false
+    required: ["user_id", "username", "email"]
+  UserProfile:
+    type: object
+    properties:
+      display_name:
+        type: string
+        maxLength: 50
+      bio:
+        type: string
+        maxLength: 160
+      avatar_url:
+        type: string
+        format: uri
+      location:
+        type: string
+        maxLength: 30
+      website:
+        type: string
+        format: uri
+      birth_date:
+        type: string
+        format: date
+  Post:
+    type: object
+    properties:
+      post_id:
+        type: string
+        format: uuid
+      user_id:
+        type: string
+        format: uuid
+      content:
+        type: string
+        maxLength: 280
+      media_urls:
+        type: array
+        items:
+          type: string
+          format: uri
+        maxItems: 4
+      hashtags:
+        type: array
+        items:
+          type: string
+          pattern: "^#[a-zA-Z0-9_]+$"
+      mentions:
+        type: array
+        items:
+          type: string
+          pattern: "^@[a-zA-Z0-9_]+$"
+      likes_count:
+        type: integer
+        minimum: 0
+      shares_count:
+        type: integer
+        minimum: 0
+      created_at:
+        type: string
+        format: date-time
+    required: ["post_id", "user_id", "content", "created_at"]
+  Comment:
+    type: object
+    properties:
+      comment_id:
+        type: string
+        format: uuid
+      post_id:
+        type: string
+        format: uuid
+      user_id:
+        type: string
+        format: uuid
+      content:
+        type: string
+        maxLength: 280
+      parent_comment_id:
+        type: string
+        format: uuid
+      likes_count:
+        type: integer
+        minimum: 0
+      created_at:
+        type: string
+        format: date-time
+    required: ["comment_id", "post_id", "user_id", "content", "created_at"]

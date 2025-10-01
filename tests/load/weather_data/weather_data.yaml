@@ -1,0 +1,144 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Weather Data Collection Schema"
+type: object
+properties:
+  stations:
+    type: array
+    items:
+      $ref: "#/$defs/WeatherStation"
+  observations:
+    type: array
+    items:
+      $ref: "#/$defs/WeatherObservation"
+  forecasts:
+    type: array
+    items:
+      $ref: "#/$defs/WeatherForecast"
+$defs:
+  WeatherStation:
+    type: object
+    properties:
+      station_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 100
+      location:
+        $ref: "../iot_sensors/iot_sensors.yaml#/$defs/Device/properties/location"
+      elevation_meters:
+        type: number
+      station_type:
+        type: string
+        enum: ["automatic", "manual", "cooperative", "buoy", "aircraft"]
+      operator:
+        type: string
+      installation_date:
+        type: string
+        format: date
+      sensors:
+        type: array
+        items:
+          $ref: "../iot_sensors/iot_sensors.yaml#/$defs/Device"
+    required: ["station_id", "name", "location", "elevation_meters", "station_type"]
+  WeatherObservation:
+    type: object
+    properties:
+      observation_id:
+        type: string
+        format: uuid
+      station_id:
+        type: string
+        format: uuid
+      timestamp:
+        type: string
+        format: date-time
+      temperature_celsius:
+        type: number
+        minimum: -80
+        maximum: 60
+      humidity_percent:
+        type: number
+        minimum: 0
+        maximum: 100
+      pressure_hpa:
+        type: number
+        minimum: 850
+        maximum: 1085
+      wind_speed_kmh:
+        type: number
+        minimum: 0
+        maximum: 500
+      wind_direction_degrees:
+        type: number
+        minimum: 0
+        maximum: 360
+      precipitation_mm:
+        type: number
+        minimum: 0
+      visibility_km:
+        type: number
+        minimum: 0
+        maximum: 50
+      cloud_cover_percent:
+        type: number
+        minimum: 0
+        maximum: 100
+      weather_conditions:
+        type: array
+        items:
+          type: string
+          enum: ["clear", "partly_cloudy", "cloudy", "rain", "snow", "fog", "thunderstorm", "hail"]
+    required: ["observation_id", "station_id", "timestamp", "temperature_celsius", "humidity_percent", "pressure_hpa"]
+  WeatherForecast:
+    type: object
+    properties:
+      forecast_id:
+        type: string
+        format: uuid
+      location:
+        $ref: "../iot_sensors/iot_sensors.yaml#/$defs/Device/properties/location"
+      forecast_date:
+        type: string
+        format: date
+      issued_time:
+        type: string
+        format: date-time
+      forecast_periods:
+        type: array
+        items:
+          $ref: "#/$defs/ForecastPeriod"
+        minItems: 1
+    required: ["forecast_id", "location", "forecast_date", "issued_time", "forecast_periods"]
+  ForecastPeriod:
+    type: object
+    properties:
+      period_start:
+        type: string
+        format: date-time
+      period_end:
+        type: string
+        format: date-time
+      temperature_high_celsius:
+        type: number
+        minimum: -80
+        maximum: 60
+      temperature_low_celsius:
+        type: number
+        minimum: -80
+        maximum: 60
+      precipitation_probability:
+        type: number
+        minimum: 0
+        maximum: 100
+      precipitation_amount_mm:
+        type: number
+        minimum: 0
+      wind_speed_kmh:
+        type: number
+        minimum: 0
+        maximum: 500
+      conditions:
+        type: string
+        enum: ["sunny", "partly_cloudy", "cloudy", "rain", "snow", "thunderstorms", "fog"]
+    required: ["period_start", "period_end", "temperature_high_celsius", "temperature_low_celsius", "conditions"]

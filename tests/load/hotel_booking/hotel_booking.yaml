@@ -1,0 +1,147 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Hotel Booking Management Schema"
+type: object
+properties:
+  hotels:
+    type: array
+    items:
+      $ref: "#/$defs/Hotel"
+  bookings:
+    type: array
+    items:
+      $ref: "#/$defs/Booking"
+  guests:
+    type: array
+    items:
+      $ref: "#/$defs/Guest"
+$defs:
+  Hotel:
+    type: object
+    properties:
+      hotel_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 100
+      address:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Address"
+      star_rating:
+        type: integer
+        minimum: 1
+        maximum: 5
+      amenities:
+        type: array
+        items:
+          type: string
+          enum: ["wifi", "pool", "gym", "spa", "restaurant", "bar", "parking", "pet_friendly", "business_center", "concierge"]
+      rooms:
+        type: array
+        items:
+          $ref: "#/$defs/Room"
+      contact:
+        $ref: "../healthcare_records/healthcare_records.yaml#/$defs/EmergencyContact"
+    required: ["hotel_id", "name", "address", "star_rating", "rooms"]
+  Room:
+    type: object
+    properties:
+      room_id:
+        type: string
+        format: uuid
+      room_number:
+        type: string
+      room_type:
+        type: string
+        enum: ["standard", "deluxe", "suite", "presidential", "family", "accessible"]
+      capacity:
+        type: integer
+        minimum: 1
+        maximum: 8
+      price_per_night:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      amenities:
+        type: array
+        items:
+          type: string
+      available:
+        type: boolean
+        default: true
+    required: ["room_id", "room_number", "room_type", "capacity", "price_per_night"]
+  Booking:
+    type: object
+    properties:
+      booking_id:
+        type: string
+        format: uuid
+      confirmation_number:
+        type: string
+        pattern: "^[A-Z0-9]{6}$"
+      hotel_id:
+        type: string
+        format: uuid
+      room_id:
+        type: string
+        format: uuid
+      guest_id:
+        type: string
+        format: uuid
+      check_in_date:
+        type: string
+        format: date
+      check_out_date:
+        type: string
+        format: date
+      nights:
+        type: integer
+        minimum: 1
+      total_amount:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      payment:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Payment"
+      status:
+        type: string
+        enum: ["confirmed", "checked_in", "checked_out", "cancelled", "no_show"]
+      special_requests:
+        type: string
+        maxLength: 500
+    required: ["booking_id", "confirmation_number", "hotel_id", "room_id", "guest_id", "check_in_date", "check_out_date", "total_amount", "status"]
+  Guest:
+    type: object
+    properties:
+      guest_id:
+        type: string
+        format: uuid
+      name:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/PersonName"
+      email:
+        type: string
+        format: email
+      phone:
+        type: string
+        pattern: "^\\+?[1-9]\\d{1,14}$"
+      address:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Address"
+      loyalty_number:
+        type: string
+      preferences:
+        $ref: "#/$defs/GuestPreferences"
+    required: ["guest_id", "name", "email", "phone"]
+  GuestPreferences:
+    type: object
+    properties:
+      room_type:
+        type: string
+        enum: ["standard", "deluxe", "suite"]
+      floor_preference:
+        type: string
+        enum: ["low", "high", "no_preference"]
+      bed_type:
+        type: string
+        enum: ["single", "double", "queen", "king"]
+      smoking:
+        type: boolean
+        default: false
+      dietary_restrictions:
+        type: array
+        items:
+          type: string

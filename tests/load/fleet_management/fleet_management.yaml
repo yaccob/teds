@@ -1,0 +1,231 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Fleet Management System Schema"
+type: object
+properties:
+  vehicles:
+    type: array
+    items:
+      $ref: "#/$defs/Vehicle"
+  drivers:
+    type: array
+    items:
+      $ref: "#/$defs/Driver"
+  routes:
+    type: array
+    items:
+      $ref: "#/$defs/Route"
+  maintenance:
+    type: array
+    items:
+      $ref: "#/$defs/MaintenanceRecord"
+$defs:
+  Vehicle:
+    type: object
+    properties:
+      vehicle_id:
+        type: string
+        format: uuid
+      license_plate:
+        type: string
+      vin:
+        type: string
+        pattern: "^[A-HJ-NPR-Z0-9]{17}$"
+      make:
+        type: string
+      model:
+        type: string
+      year:
+        type: integer
+        minimum: 1990
+        maximum: 2030
+      vehicle_type:
+        type: string
+        enum: ["sedan", "suv", "truck", "van", "motorcycle", "bus"]
+      fuel_type:
+        type: string
+        enum: ["gasoline", "diesel", "electric", "hybrid", "natural_gas"]
+      mileage:
+        type: integer
+        minimum: 0
+      location:
+        $ref: "../logistics_shipping/logistics.yaml#/$defs/Location"
+      status:
+        type: string
+        enum: ["available", "in_use", "maintenance", "out_of_service"]
+      assigned_driver_id:
+        type: string
+        format: uuid
+      insurance:
+        $ref: "#/$defs/Insurance"
+    required: ["vehicle_id", "license_plate", "vin", "make", "model", "year", "vehicle_type", "fuel_type", "status"]
+  Driver:
+    type: object
+    properties:
+      driver_id:
+        type: string
+        format: uuid
+      employee_id:
+        type: string
+      name:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/PersonName"
+      email:
+        type: string
+        format: email
+      phone:
+        type: string
+        pattern: "^\\+?[1-9]\\d{1,14}$"
+      address:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Address"
+      license:
+        $ref: "#/$defs/DriversLicense"
+      hire_date:
+        type: string
+        format: date
+      status:
+        type: string
+        enum: ["active", "suspended", "terminated", "on_leave"]
+      certifications:
+        type: array
+        items:
+          type: string
+    required: ["driver_id", "employee_id", "name", "email", "phone", "license", "hire_date", "status"]
+  DriversLicense:
+    type: object
+    properties:
+      license_number:
+        type: string
+      license_class:
+        type: string
+        enum: ["A", "B", "C", "CDL-A", "CDL-B", "CDL-C", "motorcycle"]
+      issue_date:
+        type: string
+        format: date
+      expiration_date:
+        type: string
+        format: date
+      issuing_state:
+        type: string
+        pattern: "^[A-Z]{2}$"
+      restrictions:
+        type: array
+        items:
+          type: string
+    required: ["license_number", "license_class", "issue_date", "expiration_date", "issuing_state"]
+  Route:
+    type: object
+    properties:
+      route_id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        maxLength: 100
+      vehicle_id:
+        type: string
+        format: uuid
+      driver_id:
+        type: string
+        format: uuid
+      start_location:
+        $ref: "../logistics_shipping/logistics.yaml#/$defs/Location"
+      end_location:
+        $ref: "../logistics_shipping/logistics.yaml#/$defs/Location"
+      waypoints:
+        type: array
+        items:
+          $ref: "../logistics_shipping/logistics.yaml#/$defs/Location"
+      estimated_duration_minutes:
+        type: integer
+        minimum: 1
+      estimated_distance_miles:
+        type: number
+        minimum: 0.1
+      scheduled_start:
+        type: string
+        format: date-time
+      actual_start:
+        type: string
+        format: date-time
+      actual_end:
+        type: string
+        format: date-time
+      status:
+        type: string
+        enum: ["scheduled", "in_progress", "completed", "cancelled", "delayed"]
+    required: ["route_id", "name", "start_location", "end_location", "estimated_duration_minutes", "scheduled_start", "status"]
+  MaintenanceRecord:
+    type: object
+    properties:
+      maintenance_id:
+        type: string
+        format: uuid
+      vehicle_id:
+        type: string
+        format: uuid
+      maintenance_type:
+        type: string
+        enum: ["routine", "repair", "inspection", "recall", "emergency"]
+      description:
+        type: string
+        maxLength: 1000
+      scheduled_date:
+        type: string
+        format: date
+      completed_date:
+        type: string
+        format: date
+      cost:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      service_provider:
+        type: string
+        maxLength: 100
+      mileage_at_service:
+        type: integer
+        minimum: 0
+      next_service_due:
+        type: string
+        format: date
+      status:
+        type: string
+        enum: ["scheduled", "in_progress", "completed", "cancelled"]
+      parts_replaced:
+        type: array
+        items:
+          $ref: "#/$defs/Part"
+    required: ["maintenance_id", "vehicle_id", "maintenance_type", "description", "scheduled_date", "status"]
+  Part:
+    type: object
+    properties:
+      part_number:
+        type: string
+      description:
+        type: string
+      quantity:
+        type: integer
+        minimum: 1
+      cost_per_unit:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      supplier:
+        type: string
+    required: ["part_number", "description", "quantity", "cost_per_unit"]
+  Insurance:
+    type: object
+    properties:
+      policy_number:
+        type: string
+      provider:
+        type: string
+      coverage_type:
+        type: string
+        enum: ["liability", "comprehensive", "collision", "full"]
+      premium:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      deductible:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      effective_date:
+        type: string
+        format: date
+      expiration_date:
+        type: string
+        format: date
+    required: ["policy_number", "provider", "coverage_type", "effective_date", "expiration_date"]

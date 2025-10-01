@@ -1,0 +1,129 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Logistics and Shipping Schema"
+type: object
+properties:
+  shipments:
+    type: array
+    items:
+      $ref: "#/$defs/Shipment"
+  vehicles:
+    type: array
+    items:
+      $ref: "#/$defs/Vehicle"
+  warehouses:
+    type: array
+    items:
+      $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/WarehouseLocation"
+$defs:
+  Shipment:
+    type: object
+    properties:
+      shipment_id:
+        type: string
+        format: uuid
+      tracking_number:
+        type: string
+        pattern: "^[A-Z0-9]{10,15}$"
+      origin:
+        $ref: "#/$defs/Location"
+      destination:
+        $ref: "#/$defs/Location"
+      packages:
+        type: array
+        items:
+          $ref: "#/$defs/Package"
+        minItems: 1
+      carrier:
+        type: string
+        enum: ["UPS", "FedEx", "DHL", "USPS"]
+      service_type:
+        type: string
+        enum: ["standard", "express", "overnight", "same_day"]
+      status:
+        type: string
+        enum: ["pending", "picked_up", "in_transit", "out_for_delivery", "delivered", "exception"]
+      estimated_delivery:
+        type: string
+        format: date-time
+      actual_delivery:
+        type: string
+        format: date-time
+      cost:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+    required: ["shipment_id", "tracking_number", "origin", "destination", "packages", "carrier"]
+  Package:
+    type: object
+    properties:
+      package_id:
+        type: string
+        format: uuid
+      weight:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Weight"
+      dimensions:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Dimensions"
+      contents:
+        type: array
+        items:
+          $ref: "#/$defs/PackageItem"
+      value:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+      fragile:
+        type: boolean
+        default: false
+      hazardous:
+        type: boolean
+        default: false
+    required: ["package_id", "weight", "dimensions", "contents"]
+  PackageItem:
+    type: object
+    properties:
+      item_id:
+        type: string
+      description:
+        type: string
+      quantity:
+        type: integer
+        minimum: 1
+      unit_value:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Money"
+    required: ["item_id", "description", "quantity"]
+  Vehicle:
+    type: object
+    properties:
+      vehicle_id:
+        type: string
+        format: uuid
+      license_plate:
+        type: string
+      vehicle_type:
+        type: string
+        enum: ["van", "truck", "semi", "cargo_plane", "ship"]
+      capacity:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Weight"
+      current_location:
+        $ref: "#/$defs/Location"
+      driver_id:
+        type: string
+        format: uuid
+      status:
+        type: string
+        enum: ["available", "in_transit", "loading", "maintenance"]
+    required: ["vehicle_id", "license_plate", "vehicle_type", "capacity"]
+  Location:
+    type: object
+    properties:
+      address:
+        $ref: "../ecommerce_platform/ecommerce.yaml#/$defs/Address"
+      coordinates:
+        type: object
+        properties:
+          latitude:
+            type: number
+            minimum: -90
+            maximum: 90
+          longitude:
+            type: number
+            minimum: -180
+            maximum: 180
+        required: ["latitude", "longitude"]
+    required: ["address"]
