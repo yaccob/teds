@@ -18,3 +18,8 @@ reviews/
 .DS_Store
 .idea/
 .vscode/
+
+# Claude Code configuration
+# Allow agents directory (contains project-specific workflows)
+!.claude/
+!.claude/agents/

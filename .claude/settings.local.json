@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pytest:*)",
+      "Bash(python -m pytest:*)",
+      "Bash(git log:*)",
+      "Bash(git checkout:*)",
+      "Bash(git filter-branch:*)",
+      "Bash(git show:*)",
+      "Bash(cat:*)",
+      "Bash(. .venv/bin/activate)",
+      "WebSearch",
+      "Bash(git tag:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh pr create:*)",
+      "Bash(git commit:*)",
+      "Bash(gh pr merge:*)",
+      "Bash(python teds.py verify:*)",
+      "Bash(python teds.py generate:*)"
+    ],
+    "deny": [],
+    "ask": []
+  },
+  "outputStyle": "default"
+}
