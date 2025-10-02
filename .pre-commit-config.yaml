@@ -43,31 +43,38 @@ repos:
   # Local hooks for project-specific validation
   - repo: local
     hooks:
-      # Fast unit tests with coverage (critical quality gate)
-      # Coverage config and fail_under threshold read from pyproject.toml
-      - id: unit-tests
-        name: Run unit tests with coverage
-        entry: bash -c 'source .venv/bin/activate && pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing -q'
+      # Bypass protection (must run first)
+      - id: bypass-protection
+        name: Prevent hook circumvention
+        entry: bash
+        args:
+          - "-c"
+          - |
+            if [ -n "$PRE_COMMIT_ALLOW_NO_CONFIG" ]; then
+              echo "🚫 ERROR: PRE_COMMIT_ALLOW_NO_CONFIG bypass detected!"
+              echo "💡 Hooks exist for code quality. Remove the bypass and fix issues properly."
+              exit 1
+            fi
+            if [ -n "$SKIP" ] && [ "$SKIP" != "" ]; then
+              echo "🚫 ERROR: SKIP environment variable detected: $SKIP"
+              echo "💡 Skipping hooks compromises code quality. Fix issues instead."
+              exit 1
+            fi
+            if [ -n "$GIT_HOOKS_BYPASSED" ]; then
+              echo "🚫 ERROR: Git hooks bypass detected!"
+              echo "💡 Hooks are essential for maintaining code quality."
+              exit 1
+            fi
         language: system
-        types: [python]
+        always_run: true
         pass_filenames: false
-        stages: [pre-commit]
-
+        stages: [pre-commit, pre-push]
       # Schema validation (critical for TeDS functionality)
       - id: schema-validation
         name: Validate spec_schema.yaml
         entry: bash -c 'source .venv/bin/activate && python -m teds_core.cli verify spec_schema.tests.yaml --output-level error'
         language: system
         files: ^(spec_schema\.(yaml|tests\.yaml)|teds_core/validate\.py|teds_core/refs\.py)$
-        pass_filenames: false
-        stages: [pre-commit]
-
-      # BDD integration tests (critical for TeDS CLI functionality)
-      - id: bdd-tests
-        name: Run BDD integration tests
-        entry: bash -c 'source .venv/bin/activate && pytest tests/bdd --tb=short -q'
-        language: system
-        types: [python]
         pass_filenames: false
         stages: [pre-commit]
 
@@ -80,6 +87,24 @@ repos:
         types: [python]
         pass_filenames: false
         stages: [pre-commit]
+
+      # Unit tests with coverage (run on pre-push)
+      - id: unit-tests-push
+        name: Run unit tests with coverage
+        entry: bash -c 'source .venv/bin/activate && pytest tests/unit --cov=teds_core --cov=teds --cov-branch --cov-report=term-missing -q'
+        language: system
+        types: [python]
+        pass_filenames: false
+        stages: [pre-push]
+
+      # BDD integration tests (run on pre-push)
+      - id: bdd-tests-push
+        name: Run BDD integration tests
+        entry: bash -c 'source .venv/bin/activate && pytest tests/bdd --tb=short -q'
+        language: system
+        types: [python]
+        pass_filenames: false
+        stages: [pre-push]
 
       # CRITICAL: Prevent commits to master/main branches
       - id: prevent-master-commits
@@ -95,3 +120,6 @@ repos:
 default_stages: [pre-commit]
 fail_fast: false
 minimum_pre_commit_version: '3.0.0'
+
+# Note: To enable pre-push hooks, run:
+# pre-commit install --hook-type pre-push
