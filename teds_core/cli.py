@@ -312,6 +312,56 @@ class CacheCommand(Command):
         return 0
 
 
+class ServeCommand(Command):
+    """Command for starting HTTP API server."""
+
+    def execute(self, args: argparse.Namespace) -> int:
+        """Start the HTTP API server."""
+        try:
+            import uvicorn
+
+            from .http_api import create_teds_app
+
+            # Create FastAPI app
+            root_dir = getattr(args, "root", os.getcwd())
+            app = create_teds_app(root_directory=root_dir)
+
+            # Set port in app state for status endpoint
+            port = getattr(args, "port", 8000)
+            app.state.port = port
+
+            # Configure uvicorn
+            config = uvicorn.Config(
+                app=app,
+                host=getattr(args, "host", "localhost"),
+                port=port,
+                log_level="info",
+            )
+
+            print(
+                f"Starting TeDS HTTP API server on http://{config.host}:{config.port}"
+            )
+            print(f"Root directory: {root_dir}")
+            print("Press Ctrl+C to stop")
+
+            # Start server
+            server = uvicorn.Server(config)
+            server.run()
+
+        except KeyboardInterrupt:
+            print("\nServer stopped")
+            return 0
+        except ImportError as e:
+            print(f"Error: Missing dependencies for HTTP server: {e}", file=sys.stderr)
+            print("Install with: pip install fastapi uvicorn", file=sys.stderr)
+            return 2
+        except Exception as e:
+            print(f"Error starting server: {e}", file=sys.stderr)
+            return 2
+
+        return 0
+
+
 class CommandRegistry:
     """Registry for CLI commands."""
 
@@ -322,6 +372,7 @@ class CommandRegistry:
             "verify": VerifyCommand(),
             "generate": GenerateCommand(),
             "cache": CacheCommand(),
+            "serve": ServeCommand(),
         }
 
     def get_command(self, name: str) -> Command | None:
@@ -450,6 +501,30 @@ def _build_parser() -> argparse.ArgumentParser:
         ),
     )
 
+    # HTTP API server subcommand
+    p_serve = sub.add_parser(
+        "serve",
+        help="Start HTTP API server",
+        description="Start a local HTTP API server for TeDS operations.",
+        formatter_class=argparse.RawTextHelpFormatter,
+    )
+    p_serve.add_argument(
+        "--port",
+        type=int,
+        default=8000,
+        help="Port to bind the server to (default: 8000)",
+    )
+    p_serve.add_argument(
+        "--host",
+        default="localhost",
+        help="Host to bind the server to (default: localhost)",
+    )
+    p_serve.add_argument(
+        "--root",
+        default=os.getcwd(),
+        help="Root directory for file operations (default: current working directory)",
+    )
+
     # No explicit report/templates subcommands; reporting is handled via verify --report and templates listing via top-level --list-templates.
 
     return ap
@@ -469,7 +544,7 @@ def main() -> None:
     # Parse arguments for regular commands
     ap = _build_parser()
 
-    if not argv or argv[0] not in {"verify", "generate", "cache"}:
+    if not argv or argv[0] not in {"verify", "generate", "cache", "serve"}:
         ap.print_help(sys.stderr)
         sys.exit(2)
 
