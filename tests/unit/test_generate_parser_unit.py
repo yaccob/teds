@@ -49,11 +49,27 @@ class TestGenerateConfigurationParser:
         assert result == expected
 
     def test_parse_json_pointer_root_reference(self):
-        """Test JSON Pointer root reference normalization."""
+        """Test JSON Pointer root reference normalization (RFC 6901: empty fragment)."""
+        from teds_core.generate import parse_generate_config
+
+        result = parse_generate_config("schema.yaml#")
+        expected = {"schema.yaml": {"paths": ["$.*"], "target": None}}
+        assert result == expected
+
+    def test_parse_json_pointer_empty_key_property(self):
+        """Test JSON Pointer empty-key property reference (RFC 6901: single slash)."""
         from teds_core.generate import parse_generate_config
 
         result = parse_generate_config("schema.yaml#/")
-        expected = {"schema.yaml": {"paths": ["$.*"], "target": None}}
+        expected = {"schema.yaml": {"paths": ['$[""].*'], "target": None}}
+        assert result == expected
+
+    def test_parse_json_pointer_trailing_slash(self):
+        """Test JSON Pointer with trailing slash references nested empty-key property (RFC 6901)."""
+        from teds_core.generate import parse_generate_config
+
+        result = parse_generate_config("schema.yaml#/abc/")
+        expected = {"schema.yaml": {"paths": ['$["abc"][""].*'], "target": None}}
         assert result == expected
 
     def test_parse_json_pointer_nested_path(self):

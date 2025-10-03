@@ -281,15 +281,19 @@ def parse_generate_config(config_str: str) -> dict[str, dict[str, Any]] | str:
                 raise TedsError(f"Missing schema file path: {ref_part}")
 
             # Convert JSON Pointer to JSON-Path with mandatory wildcard for children
-            fragment = fragment.lstrip("/")
-            if fragment:
-                # Convert /path/to/property to $["path"]["to"]["property"].*
-                parts = fragment.split("/")
+            # RFC 6901: "" = root, "/" = empty-key property
+            if fragment == "":
+                # Empty fragment: root children
+                jsonpath = "$.*"
+            elif fragment == "/":
+                # Single slash: children of empty-key property
+                jsonpath = '$[""].*'
+            else:
+                # Regular path: strip leading / and convert
+                fragment_stripped = fragment.lstrip("/")
+                parts = fragment_stripped.split("/")
                 quoted_parts = [f'["{part}"]' for part in parts]
                 jsonpath = "$" + "".join(quoted_parts) + ".*"
-            else:
-                # Root reference becomes $.*
-                jsonpath = "$.*"
 
             # Expand template variables in target if present
             expanded_target = None
