@@ -353,6 +353,66 @@ Feature: Generate Command Tests
       - "root.yaml#/properties/name"
       """
 
+  Scenario: Root pointer (RFC 6901) - empty fragment references root children
+    Given I have a schema file "empty_key.yaml" with content:
+      """yaml
+      foo:
+        type: string
+      "":
+        type: number
+        const: 0
+      """
+    When I run the CLI command: `./teds.py generate empty_key.yaml#`
+    Then a test file "empty_key.tests.yaml" should be created with content:
+      """yaml
+      version: "1.0.0"
+      tests:
+        empty_key.yaml#/foo:
+          valid: null
+          invalid: null
+        empty_key.yaml#/:
+          valid: null
+          invalid: null
+      """
+
+  Scenario: Empty-key property pointer (RFC 6901) - "/" references empty-key property children
+    Given I have a schema file "empty_key.yaml" with content:
+      """yaml
+      "":
+        foo:
+          type: number
+          const: 0
+      """
+    When I run the CLI command: `./teds.py generate empty_key.yaml#/`
+    Then a test file "empty_key.tests.yaml" should be created with content:
+      """yaml
+      version: "1.0.0"
+      tests:
+        empty_key.yaml#//foo:
+          valid: null
+          invalid: null
+      """
+
+  Scenario: Trailing slash references nested empty-key property (RFC 6901)
+    Given I have a schema file "nested_empty.yaml" with content:
+      """yaml
+      abc:
+        "":
+          xyz:
+            type: string
+        def:
+          type: number
+      """
+    When I run the CLI command: `./teds.py generate nested_empty.yaml#/abc/`
+    Then a test file "nested_empty.tests.yaml" should be created with content:
+      """yaml
+      version: "1.0.0"
+      tests:
+        nested_empty.yaml#/abc//xyz:
+          valid: null
+          invalid: null
+      """
+
   Scenario: Relative path with JSON Pointer
     Given I have a subdirectory "models"
     And I have a schema file "models/user.yaml" with content:
