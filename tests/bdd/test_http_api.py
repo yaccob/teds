@@ -330,7 +330,8 @@ def verify_file_content(http_responses):
 def verify_content_type(http_responses, content_type):
     """Verify response content type."""
     headers = http_responses["last"]["headers"]
-    actual_content_type = headers.get("Content-Type", "")
+    # Header keys might be lowercase or PascalCase
+    actual_content_type = headers.get("Content-Type") or headers.get("content-type", "")
     assert (
         content_type in actual_content_type
     ), f"Expected content-type '{content_type}', got '{actual_content_type}'"
@@ -420,108 +421,3 @@ def verify_response_mentions(http_responses, text):
 def verify_schema_content(http_responses):
     """Verify response contains schema content."""
     verify_file_content(http_responses)
-
-
-# Placeholder steps for unimplemented features
-
-
-@then("the response should include proper CORS headers")
-@then("the response should allow common HTTP methods")
-@then("the response should contain a generic error message")
-@then("the error details should be logged but not exposed")
-@then("subsequent requests should have status code 429")
-@then("the response should include retry-after header")
-@then("the server should start on port 9000")
-@then('the server should use "/custom/root" as root directory')
-@then("the server should use the configuration from the file")
-@then("the server should start on port 8888")
-@then("file watching should be enabled")
-@then("the response should contain server status information")
-@then("the response should contain runtime information")
-@then("the response should include uptime and memory usage")
-@then("the response should have cache-control headers")
-@then("the response headers should indicate development mode caching")
-def placeholder_step():
-    """Placeholder for unimplemented features."""
-    pytest.skip("Feature not yet implemented")
-
-
-# Skipped scenarios requiring special setup
-
-
-@given("the HTTP API server is running with rate limiting enabled")
-def skip_rate_limiting():
-    """Skip rate limiting setup."""
-    pytest.skip("Rate limiting not yet implemented")
-
-
-@given(parsers.parse('I set environment variable "{var}" to "{value}"'))
-def skip_env_var(var, value):
-    """Skip environment variable setup."""
-    pytest.skip("Environment variable configuration not yet implemented")
-
-
-@given("I start the HTTP API server")
-def skip_server_start():
-    """Skip server start."""
-    pytest.skip("Server start not yet implemented")
-
-
-@given(parsers.parse('I have a config file "{filename}" with content:'))
-def skip_config_file(filename, docstring):
-    """Skip config file setup."""
-    pytest.skip("Config file not yet implemented")
-
-
-@given(parsers.parse('I start the HTTP API server with config file "{filename}"'))
-def skip_server_with_config(filename):
-    """Skip server with config."""
-    pytest.skip("Server config not yet implemented")
-
-
-@given("I have files:")
-def skip_files():
-    """Skip files setup."""
-    pytest.skip("Files setup not yet implemented")
-
-
-@given(parsers.parse('I have a schema file "{filename}"'))
-def skip_schema_file(filename):
-    """Skip schema file."""
-    pytest.skip("Schema file not yet implemented")
-
-
-@when('I make a CORS preflight request to "/api/files"')
-def skip_cors():
-    """Skip CORS test."""
-    pytest.skip("CORS not yet implemented")
-
-
-@when("an internal server error occurs during file operations")
-def skip_server_error():
-    """Skip server error."""
-    pytest.skip("Server error simulation not yet implemented")
-
-
-@when('I send a request with malformed JSON to "/api/validate"')
-def skip_malformed_json():
-    """Skip malformed JSON."""
-    pytest.skip("Malformed JSON test not yet implemented")
-
-
-@when('I make more than 100 requests per minute to "/api/validate"')
-def skip_many_requests():
-    """Skip many requests."""
-    pytest.skip("Rate limiting test not yet implemented")
-
-
-@when("I start the HTTP API server")
-def skip_when_start_server():
-    """Skip server start in when."""
-    pytest.skip("Server start not yet implemented")
-
-
-@when(parsers.parse('I start the HTTP API server with config file "{filename}"'))
-def skip_when_server_with_config(filename):
-    """Skip server with config in when."""
-    pytest.skip("Server config not yet implemented")

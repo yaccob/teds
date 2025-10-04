@@ -1,5 +1,6 @@
 """HTTP API server for TeDS - FastAPI implementation."""
 
+import mimetypes
 import os
 from contextlib import suppress
 from pathlib import Path
@@ -11,6 +12,10 @@ from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
+
+# Register YAML MIME types
+mimetypes.add_type("application/x-yaml", ".yaml")
+mimetypes.add_type("application/x-yaml", ".yml")
 
 
 def create_teds_app(root_directory: str | None = None) -> FastAPI:
@@ -76,7 +81,14 @@ def create_teds_app(root_directory: str | None = None) -> FastAPI:
             if not full_path.exists() or not full_path.is_file():
                 raise HTTPException(status_code=404, detail="File not found")
 
-            return FileResponse(full_path)
+            # Determine media type based on file extension
+            media_type = None
+            if file_path.endswith((".yaml", ".yml")):
+                media_type = "application/x-yaml"
+            elif file_path.endswith(".json"):
+                media_type = "application/json"
+
+            return FileResponse(full_path, media_type=media_type)
 
     @app.put("/api/files/{file_path:path}")
     async def update_file(file_path: str, request: Request):
