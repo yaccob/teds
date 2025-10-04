@@ -100,7 +100,7 @@ repos:
       # BDD integration tests (run on pre-push)
       - id: bdd-tests-push
         name: Run BDD integration tests
-        entry: bash -c 'source .venv/bin/activate && pytest tests/bdd --tb=short -q'
+        entry: bash -c 'source .venv/bin/activate && pytest $(git ls-files "tests/bdd/test_*.py") --tb=short -q'
         language: system
         types: [python]
         pass_filenames: false

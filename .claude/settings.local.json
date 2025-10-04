@@ -8,7 +8,7 @@
       "Bash(git filter-branch:*)",
       "Bash(git show:*)",
       "Bash(cat:*)",
-      "Bash(. .venv/bin/activate)",
+      "Bash(. .venv/bin/activate:*)",
       "WebSearch",
       "Bash(git tag:*)",
       "Bash(gh run list:*)",
